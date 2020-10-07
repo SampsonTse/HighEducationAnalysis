@@ -26,6 +26,9 @@ class ProvinceReport(object):
         lk_ks_ids, wk_ks_ids = pr.judge_ks_wenli(self.__cursor,self.__ks_ids)
         lk_km_ids,wk_km_ids = pr.judge_km_wenli(self.__km_ids)
 
+        if not os.path.exists("省级报告"):
+            os.makedirs("省级报告")
+
         output_file = "省级报告/成绩概括.xlsx"
         writer = pd.ExcelWriter(output_file)
 
@@ -39,6 +42,7 @@ class ProvinceReport(object):
 
         # 生成文科类考生各科目原始分概括
         df = pd.DataFrame(data=None,columns=["科目","样品数","平均数","标准差","难度","信度"])
+        print(wk_km_ids)
         for kmid in wk_km_ids:
             result = pr.single_km_situation(self.__cursor,wk_ks_ids,kmid)
             if len(result):
@@ -149,6 +153,9 @@ class ProvinceReport(object):
     """
     def get_enrolled_city_like(self):
         lk_ks_ids, wk_ks_ids = pr.judge_ks_wenli(self.__cursor,self.__ks_ids)
+
+        if not os.path.exists("省级报告"):
+            os.makedirs("省级报告")
 
         output_file = "省级报告/录取概括_各市概括_理科.xlsx"
         writer = pd.ExcelWriter(output_file)

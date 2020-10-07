@@ -113,10 +113,10 @@ def get_wenli_reliability(cursor,studentids,km_id):
     total_grades = []    # 学生单科总分
 
     for id in studentids:
-        sql = "SELECT * FROM kmf_test WHERE 科目号 = " + km_id + " AND 考生号 = " + id
+        sql = "SELECT (主观分+客观分) as 总分 FROM kmf_test WHERE 科目号 = " + km_id + " AND 考生号 = " + id
         cursor.execute(sql)
         result = cursor.fetchone()
-        total_grades.append(result[3] + result[4])
+        total_grades.append(result[0])
     
     total_grades = np.array(total_grades)
     # 试卷总体方差
@@ -142,17 +142,16 @@ def get_wenli_reliability(cursor,studentids,km_id):
             sql = "SELECT 分数 FROM stf_test WHERE 科目号 = " + str(km_id) + " AND 考生号 = " + str(id) + " AND 小题号 = " + str(st)
             cursor.execute(sql)
             a = cursor.fetchone()
-            if a == None:
-                continue
-            else:
+            if a != None:
                 st_grade.append(a[0])
-            
+            else:
+                continue
+
         st_grade = np.array(st_grade)
         st_var.append(np.var(st_grade))
-        
-        
-    r = ( n/(n-1)) * ( (total_var - np.sum(st_var))  /total_var )
-    
+
+
+    r = ( n/(n-1)) * ( (total_var - np.nansum(st_var))  /total_var )
     return r
      
 # 成绩概括->原始分概括
@@ -186,7 +185,7 @@ def single_km_situation(cursor,studentids,km_id):
 
         return [km_name,len(km_grades),round(average,2),round(std,2),round(difficulty,2),round(reliability,2)]
 
-    except TypeError:
+    except TypeError as e:
 
         return []
 
