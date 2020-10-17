@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import pymysql
 
+np.set_printoptions(precision=2)
 
 # 考生答题水平分析
 class YW_KSDTSPFX:
@@ -17,7 +18,6 @@ class YW_KSDTSPFX:
     def ZTKG_CITY_YW(self,dsh):
 
         writer = pd.ExcelWriter("广州市考生答题分析总体概括(语文).xlsx")
-        np.set_printoptions(precision=2)
 
         sql = ""
 
@@ -476,27 +476,127 @@ class YW_KSDTSPFX:
 
 
         # 各区县考生成绩比较
-
         sql = r"select xq_h,mc from c_xq where like '"+dsh+r"%'"
-        result = list(self.cursor.fetchall())
-        result.pop(0)
+        xqhs = list(self.cursor.fetchall())
+        xqhs.pop(0)
+        xqhs.pop(0)
 
-        df = pd.DataFrame(data=None,columns=['区县','人数','标准差','差异系数','得分率'])
+        df = pd.DataFrame(data=None,columns=['区县','人数','平均分','标准差','差异系数','得分率'])
 
-        for item in result:
-            pass
+        sql = "select count(YW),AVG(A.YW) as mean,STDDEV_SAMP(A.YW) as std FROM kscj as A "
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append(float(result[2]) / float(result[1]))  # 差异系数
+        result.append(result[1] / 150)
+        result.insert(0,'全省')
+        df.loc[len(df)] = result
+
+        sql = r"select count(YW),AVG(A.YW) as mean,STDDEV_SAMP(A.YW) as std FROM kscj as A " \
+              r"where KSH LIKE '"+dsh+r"%'"
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append(float(result[2]) / float(result[1]))  # 差异系数
+        result.append(result[1] / 150)
+        result.insert(0, '全市')
+        df.loc[len(df)] = result
+
+        for xqh in xqhs:
+            result = []
+            sql = "select count(YW),AVG(A.YW) as mean,STDDEV_SAMP(A.YW) as std FROM kscj as A " \
+                  "RIGHT JOIN JBXX AS B ON A.KSH = B.KSH WHERE B.XQ_H = " + xqh[0]
+            self.cursor.execute(sql)
+            result = self.cursor.fetchone()
+            result = list(result)
+            result.append(float(result[2])/float(result[1])) # 差异系数
+            result.append(result[1]/150)
+            result.insert(0,xqh[1])
+            df.loc[len(df)] = result
+
+        df.to_excel(writer="各县区考生成绩比较(语文)")
 
 
+
+        # 各区县理考生成绩比较
+
+        df = pd.DataFrame(data=None, columns=['区县', '人数', '平均分', '标准差', '差异系数', '得分率'])
+
+        sql = "select count(YW),AVG(A.YW) as mean,STDDEV_SAMP(A.YW) as std FROM kscj as A where A.kl = 1"
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append(float(result[2]) / float(result[1]))  # 差异系数
+        result.append(result[1] / 150)
+        result.insert(0, '全省')
+        df.loc[len(df)] = result
+
+        sql = r"select count(YW),AVG(A.YW) as mean,STDDEV_SAMP(A.YW) as std FROM kscj as A " \
+              r"where A.kl = 1 and A.KSH LIKE '" + dsh + r"%'"
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append(float(result[2]) / float(result[1]))  # 差异系数
+        result.append(result[1] / 150)
+        result.insert(0, '全市')
+        df.loc[len(df)] = result
+
+        for xqh in xqhs:
+            result = []
+            sql = "select count(YW),AVG(A.YW) as mean,STDDEV_SAMP(A.YW) as std FROM kscj as A " \
+                  "RIGHT JOIN JBXX AS B ON A.KSH = B.KSH WHERE A.kl = 1 and B.XQ_H = " + xqh[0]
+            self.cursor.execute(sql)
+            result = self.cursor.fetchone()
+            result = list(result)
+            result.append(float(result[2]) / float(result[1]))  # 差异系数
+            result.append(result[1] / 150)
+            result.insert(0, xqh[1])
+            df.loc[len(df)] = result
+
+        df.to_excel(writer="各县区理科考生成绩比较(语文)")
+
+        # 各区县文科考生成绩比较
+        sql = r"select xq_h,mc from c_xq where like '" + dsh + r"%'"
+        xqhs = list(self.cursor.fetchall())
+        xqhs.pop(0)
+
+        df = pd.DataFrame(data=None, columns=['区县', '人数', '平均分', '标准差', '差异系数', '得分率'])
+
+        sql = "select count(YW),AVG(A.YW) as mean,STDDEV_SAMP(A.YW) as std FROM kscj as A where A.kl = 2"
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append(float(result[2]) / float(result[1]))  # 差异系数
+        result.append(result[1] / 150)
+        result.insert(0, '全省')
+        df.loc[len(df)] = result
+
+        sql = r"select count(YW),AVG(A.YW) as mean,STDDEV_SAMP(A.YW) as std FROM kscj as A " \
+              r"where A.kl = 2 and A.KSH LIKE '" + dsh + r"%'"
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append(float(result[2]) / float(result[1]))  # 差异系数
+        result.append(result[1] / 150)
+        result.insert(0, '全市')
+        df.loc[len(df)] = result
+
+        for xqh in xqhs:
+            result = []
+            sql = "select count(YW),AVG(A.YW) as mean,STDDEV_SAMP(A.YW) as std FROM kscj as A " \
+                  "RIGHT JOIN JBXX AS B ON A.KSH = B.KSH WHERE A.kl = 2 and B.XQ_H = " + xqh[0]
+            self.cursor.execute(sql)
+            result = self.cursor.fetchone()
+            result = list(result)
+            result.append(float(result[2]) / float(result[1]))  # 差异系数
+            result.append(result[1] / 150)
+            result.insert(0, xqh[1])
+            df.loc[len(df)] = result
+
+        df.to_excel(writer="各县区文科考生成绩比较(语文)")
 
         writer.save()
 
-    def test(self,dsh):
-        sql = r"select xq_h,mc from c_xq where xq_h like '" + dsh + r"%'"
-        print(sql)
-        self.cursor.execute(sql)
-        result = list(self.cursor.fetchall())
-        result.pop(0)
-        print(result)
 
 
 
