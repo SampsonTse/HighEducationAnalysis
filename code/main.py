@@ -1,8 +1,7 @@
-
-import getData_YW
+import getYwData
 import numpy as np
+import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
-    YW = getData_YW.YW_KSDTSPFX()
-    # YW.ZTKG_CITY_YW('01')
-    YW.test('01')
+    gz = getYwData.KSDTSPFX()
+    gz.ZTJG_CITY_IMG('01')

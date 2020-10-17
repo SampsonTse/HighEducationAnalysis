@@ -1,11 +1,15 @@
 import numpy as np
 import pandas as pd
 import pymysql
+import os
+import matplotlib.pyplot as plt
+import openpyxl
 
+plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']
 np.set_printoptions(precision=2)
 
-# 考生答题水平分析
-class YW_KSDTSPFX:
+# 语文考生答题水平分析
+class KSDTSPFX:
     def __init__(self):
         self.db = pymysql.connect('localhost','root','1234','gk2020')
         self.cursor = self.db.cursor()
@@ -15,11 +19,25 @@ class YW_KSDTSPFX:
         self.db.close()
 
 
-    def ZTKG_CITY_YW(self,dsh):
-
-        writer = pd.ExcelWriter("广州市考生答题分析总体概括(语文).xlsx")
+    def ZTKG_CITY_TABLE(self,dsh):
 
         sql = ""
+        sql = "select mc from c_ds where DS_H" + dsh
+        self.cursor.execute(sql)
+        ds_mc = self.cursor.fetchone()[0]
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + ds_mc
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析总体概括(语文).xlsx")
+
 
         df = pd.DataFrame(data=None,columns=['维度','人数','比率','平均分','标准差','差异系数','平均分(全省)'])
 
@@ -43,7 +61,7 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1,result[0]/num)
+        result.insert(1,(result[0]/num)*100)
         result.insert(0,'男')
 
         result = np.array(result)
@@ -63,7 +81,7 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '女')
 
         result = np.array(result)
@@ -83,7 +101,7 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '城镇')
 
         result = np.array(result)
@@ -104,7 +122,7 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '农村')
 
         result = np.array(result)
@@ -124,7 +142,7 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '应届')
 
         result = np.array(result)
@@ -144,7 +162,7 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '往届')
 
         result = np.array(result)
@@ -164,13 +182,13 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '总计')
 
         result = np.array(result)
         df.loc[len(df)] = result
 
-        df.to_excel(sheet_name="各类别考生成绩比较(语文)",excel_writer=writer)
+        df.to_excel(sheet_name="各类别考生成绩比较(语文)",excel_writer=writer,index=None)
 
 
 
@@ -196,7 +214,7 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '男')
 
         result = np.array(result)
@@ -216,7 +234,7 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '女')
 
         result = np.array(result)
@@ -236,7 +254,7 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '城镇')
 
         result = np.array(result)
@@ -256,7 +274,7 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '农村')
 
         result = np.array(result)
@@ -276,7 +294,7 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '应届')
 
         result = np.array(result)
@@ -296,7 +314,7 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '往届')
 
         result = np.array(result)
@@ -316,13 +334,13 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '总计')
 
         result = np.array(result)
         df.loc[len(df)] = result
 
-        df.to_excel(sheet_name="各类别文科考生成绩比较(语文)", excel_writer=writer)
+        df.to_excel(sheet_name="各类别文科考生成绩比较(语文)", excel_writer=writer,index=None)
 
         # 理科
         df = pd.DataFrame(data=None, columns=['维度', '人数', '比率', '平均分', '标准差', '差异系数', '平均分(全省)'])
@@ -346,7 +364,7 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '男')
 
         result = np.array(result)
@@ -366,7 +384,7 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '女')
 
         result = np.array(result)
@@ -386,7 +404,7 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '城镇')
 
         result = np.array(result)
@@ -406,7 +424,7 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '农村')
 
         result = np.array(result)
@@ -426,7 +444,7 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '应届')
 
         result = np.array(result)
@@ -446,7 +464,7 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '往届')
 
         result = np.array(result)
@@ -466,22 +484,23 @@ class YW_KSDTSPFX:
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, result[0] / num)
+        result.insert(1, (result[0] / num)*100)
         result.insert(0, '总计')
 
         result = np.array(result)
         df.loc[len(df)] = result
 
-        df.to_excel(sheet_name="各类别文科考生成绩比较(理科)", excel_writer=writer)
-
+        df.to_excel(sheet_name="各类别文科考生成绩比较(理科)", excel_writer=writer,index=None)
 
         # 各区县考生成绩比较
-        sql = r"select xq_h,mc from c_xq where like '"+dsh+r"%'"
+        sql = r"select xq_h,mc from c_xq where xq_h like '" + dsh + r"%'"
+        print(sql)
+        self.cursor.execute(sql)
         xqhs = list(self.cursor.fetchall())
         xqhs.pop(0)
         xqhs.pop(0)
 
-        df = pd.DataFrame(data=None,columns=['区县','人数','平均分','标准差','差异系数','得分率'])
+        df = pd.DataFrame(data=None, columns=['区县', '人数', '平均分', '标准差', '差异系数', '得分率'])
 
         sql = "select count(YW),AVG(A.YW) as mean,STDDEV_SAMP(A.YW) as std FROM kscj as A "
         self.cursor.execute(sql)
@@ -489,11 +508,11 @@ class YW_KSDTSPFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
         result.append(result[1] / 150)
-        result.insert(0,'全省')
+        result.insert(0, '全省')
         df.loc[len(df)] = result
 
         sql = r"select count(YW),AVG(A.YW) as mean,STDDEV_SAMP(A.YW) as std FROM kscj as A " \
-              r"where KSH LIKE '"+dsh+r"%'"
+              r"where KSH LIKE '" + dsh + r"%'"
         self.cursor.execute(sql)
         result = self.cursor.fetchone()
         result = list(result)
@@ -509,14 +528,12 @@ class YW_KSDTSPFX:
             self.cursor.execute(sql)
             result = self.cursor.fetchone()
             result = list(result)
-            result.append(float(result[2])/float(result[1])) # 差异系数
-            result.append(result[1]/150)
-            result.insert(0,xqh[1])
+            result.append(float(result[2]) / float(result[1]))  # 差异系数
+            result.append(result[1] / 150)
+            result.insert(0, xqh[1])
             df.loc[len(df)] = result
 
-        df.to_excel(writer="各县区考生成绩比较(语文)")
-
-
+        df.to_excel(excel_writer=writer, sheet_name="各县区考生成绩比较(语文)",index=None)
 
         # 各区县理考生成绩比较
 
@@ -553,12 +570,9 @@ class YW_KSDTSPFX:
             result.insert(0, xqh[1])
             df.loc[len(df)] = result
 
-        df.to_excel(writer="各县区理科考生成绩比较(语文)")
+        df.to_excel(excel_writer=writer, sheet_name="各县区理科考生成绩比较(语文)",index=None)
 
         # 各区县文科考生成绩比较
-        sql = r"select xq_h,mc from c_xq where like '" + dsh + r"%'"
-        xqhs = list(self.cursor.fetchall())
-        xqhs.pop(0)
 
         df = pd.DataFrame(data=None, columns=['区县', '人数', '平均分', '标准差', '差异系数', '得分率'])
 
@@ -593,9 +607,71 @@ class YW_KSDTSPFX:
             result.insert(0, xqh[1])
             df.loc[len(df)] = result
 
-        df.to_excel(writer="各县区文科考生成绩比较(语文)")
+        df.to_excel(excel_writer=writer, sheet_name="各县区文科考生成绩比较(语文)",index=None)
 
         writer.save()
+
+
+    def ZTJG_CITY_IMG(self,dsh):
+
+        sql = ""
+        sql = "select mc from c_ds where DS_H=" + dsh
+        self.cursor.execute(sql)
+        ds_mc = self.cursor.fetchone()[0]
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + ds_mc
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        
+
+        # 全省
+
+        sql = "SELECT COUNT(YW) FROM kscj"
+        self.cursor.execute(sql)
+        num = self.cursor.fetchone()[0] # 全省人数
+
+        sql = "SELECT YW,COUNT(YW) FROM kscj WHERE YW != 0 GROUP BY  YW;"
+        self.cursor.execute(sql)
+        items = list(self.cursor.fetchall())
+        province = [0] * 151
+
+        for item in items:
+            province[item[0]] = round(item[1]/num * 100,2)
+        x = list(range(151))
+
+        plt.plot(x,province,color='green',marker='.',label='全省')
+
+        # 全市
+        sql = "SELECT COUNT(YW) FROM kscj where KSH LIKE '"+dsh+r"%'"
+        self.cursor.execute(sql)
+        num = self.cursor.fetchone()[0]  # 全省人数
+
+
+        sql = r"SELECT YW,COUNT(YW) FROM kscj WHERE YW != 0 and KSH LIKE '"+dsh+r"%' GROUP BY  YW"
+        print(sql)
+        self.cursor.execute(sql)
+        items = list(self.cursor.fetchall())
+        city = [0] * 151
+
+        for item in items:
+            city[item[0]] = round(item[1] / num * 100, 2)
+
+        x = list(range(151))
+
+        plt.plot(x, city, color='red', marker='.', label='全市')
+        plt.xlabel('得分')
+        plt.ylabel('人数百分比（%）')
+        plt.legend(loc='upper center')
+        plt.show()
+
+
 
 
 
