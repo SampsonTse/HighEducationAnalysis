@@ -3,6 +3,7 @@ import pandas as pd
 import pymysql
 import os
 import matplotlib.pyplot as plt
+import decimal
 import openpyxl
 
 plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']
@@ -21,7 +22,7 @@ class KSDTSPFX:
 
     def set_list_precision(self,L):
         for i in range(len(L)):
-            if isinstance(L[i], float):
+            if isinstance(L[i], float) or isinstance(L[i],decimal.Decimal):
                 L[i] = format(L[i],'.2f')
 
 
