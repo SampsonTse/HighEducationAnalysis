@@ -4,4 +4,6 @@ import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     gz = getYwData.KSDTSPFX()
+    gz.ZTKG_CITY_TABLE('01')
     gz.ZTJG_CITY_IMG('01')
+
