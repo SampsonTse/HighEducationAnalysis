@@ -29,7 +29,7 @@ class KSDTSPFX:
     def ZTKG_CITY_TABLE(self,dsh):
 
         sql = ""
-        sql = "select mc from c_ds where DS_H" + dsh
+        sql = "select mc from c_ds where DS_H = " + dsh
         self.cursor.execute(sql)
         ds_mc = self.cursor.fetchone()[0]
 
