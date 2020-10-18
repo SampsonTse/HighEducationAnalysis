@@ -19,6 +19,13 @@ class KSDTSPFX:
         self.db.close()
 
 
+    def set_list_precision(self,L):
+        for i in range(len(L)):
+            if isinstance(L[i], float):
+                L[i] = format(L[i],'.2f')
+
+
+    # 制表
     def ZTKG_CITY_TABLE(self,dsh):
 
         sql = ""
@@ -85,6 +92,7 @@ class KSDTSPFX:
         result.insert(0, '女')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         # 计算维度为城镇
@@ -105,6 +113,7 @@ class KSDTSPFX:
         result.insert(0, '城镇')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
 
@@ -126,6 +135,7 @@ class KSDTSPFX:
         result.insert(0, '农村')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         # 计算维度为应届
@@ -146,6 +156,7 @@ class KSDTSPFX:
         result.insert(0, '应届')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         # 计算维度为往届
@@ -166,6 +177,7 @@ class KSDTSPFX:
         result.insert(0, '往届')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         # 计算维度为总计
@@ -186,6 +198,7 @@ class KSDTSPFX:
         result.insert(0, '总计')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         df.to_excel(sheet_name="各类别考生成绩比较(语文)",excel_writer=writer,index=None)
@@ -218,6 +231,7 @@ class KSDTSPFX:
         result.insert(0, '男')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         # 计算维度为女
@@ -238,6 +252,7 @@ class KSDTSPFX:
         result.insert(0, '女')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         # 计算维度为城镇
@@ -258,6 +273,7 @@ class KSDTSPFX:
         result.insert(0, '城镇')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         # 计算维度为农村
@@ -278,6 +294,7 @@ class KSDTSPFX:
         result.insert(0, '农村')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         # 计算维度为应届
@@ -298,6 +315,7 @@ class KSDTSPFX:
         result.insert(0, '应届')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         # 计算维度为往届
@@ -318,6 +336,7 @@ class KSDTSPFX:
         result.insert(0, '往届')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         # 计算维度为总计
@@ -338,6 +357,7 @@ class KSDTSPFX:
         result.insert(0, '总计')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         df.to_excel(sheet_name="各类别文科考生成绩比较(语文)", excel_writer=writer,index=None)
@@ -368,6 +388,7 @@ class KSDTSPFX:
         result.insert(0, '男')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         # 计算维度为女
@@ -388,6 +409,7 @@ class KSDTSPFX:
         result.insert(0, '女')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         # 计算维度为城镇
@@ -408,6 +430,7 @@ class KSDTSPFX:
         result.insert(0, '城镇')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         # 计算维度为农村
@@ -428,6 +451,7 @@ class KSDTSPFX:
         result.insert(0, '农村')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         # 计算维度为应届
@@ -448,6 +472,7 @@ class KSDTSPFX:
         result.insert(0, '应届')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         # 计算维度为往届
@@ -468,6 +493,7 @@ class KSDTSPFX:
         result.insert(0, '往届')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         # 计算维度为总计
@@ -488,6 +514,7 @@ class KSDTSPFX:
         result.insert(0, '总计')
 
         result = np.array(result)
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         df.to_excel(sheet_name="各类别文科考生成绩比较(理科)", excel_writer=writer,index=None)
@@ -509,6 +536,7 @@ class KSDTSPFX:
         result.append(float(result[2]) / float(result[1]))  # 差异系数
         result.append(result[1] / 150)
         result.insert(0, '全省')
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         sql = r"select count(YW),AVG(A.YW) as mean,STDDEV_SAMP(A.YW) as std FROM kscj as A " \
@@ -519,6 +547,7 @@ class KSDTSPFX:
         result.append(float(result[2]) / float(result[1]))  # 差异系数
         result.append(result[1] / 150)
         result.insert(0, '全市')
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         for xqh in xqhs:
@@ -531,6 +560,7 @@ class KSDTSPFX:
             result.append(float(result[2]) / float(result[1]))  # 差异系数
             result.append(result[1] / 150)
             result.insert(0, xqh[1])
+            self.set_list_precision(result)
             df.loc[len(df)] = result
 
         df.to_excel(excel_writer=writer, sheet_name="各县区考生成绩比较(语文)",index=None)
@@ -546,6 +576,7 @@ class KSDTSPFX:
         result.append(float(result[2]) / float(result[1]))  # 差异系数
         result.append(result[1] / 150)
         result.insert(0, '全省')
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         sql = r"select count(YW),AVG(A.YW) as mean,STDDEV_SAMP(A.YW) as std FROM kscj as A " \
@@ -556,6 +587,7 @@ class KSDTSPFX:
         result.append(float(result[2]) / float(result[1]))  # 差异系数
         result.append(result[1] / 150)
         result.insert(0, '全市')
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         for xqh in xqhs:
@@ -568,6 +600,7 @@ class KSDTSPFX:
             result.append(float(result[2]) / float(result[1]))  # 差异系数
             result.append(result[1] / 150)
             result.insert(0, xqh[1])
+            self.set_list_precision(result)
             df.loc[len(df)] = result
 
         df.to_excel(excel_writer=writer, sheet_name="各县区理科考生成绩比较(语文)",index=None)
@@ -583,6 +616,7 @@ class KSDTSPFX:
         result.append(float(result[2]) / float(result[1]))  # 差异系数
         result.append(result[1] / 150)
         result.insert(0, '全省')
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         sql = r"select count(YW),AVG(A.YW) as mean,STDDEV_SAMP(A.YW) as std FROM kscj as A " \
@@ -593,6 +627,7 @@ class KSDTSPFX:
         result.append(float(result[2]) / float(result[1]))  # 差异系数
         result.append(result[1] / 150)
         result.insert(0, '全市')
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         for xqh in xqhs:
@@ -605,13 +640,14 @@ class KSDTSPFX:
             result.append(float(result[2]) / float(result[1]))  # 差异系数
             result.append(result[1] / 150)
             result.insert(0, xqh[1])
+            self.set_list_precision(result)
             df.loc[len(df)] = result
 
         df.to_excel(excel_writer=writer, sheet_name="各县区文科考生成绩比较(语文)",index=None)
 
         writer.save()
 
-
+    # 画图
     def ZTJG_CITY_IMG(self,dsh):
 
         sql = ""
@@ -632,6 +668,10 @@ class KSDTSPFX:
         
 
         # 全省
+        plt.figure()
+        ax = plt.gca()
+        ax.spines['right'].set_color('none')
+        ax.spines['top'].set_color('none')
 
         sql = "SELECT COUNT(YW) FROM kscj"
         self.cursor.execute(sql)
@@ -646,7 +686,7 @@ class KSDTSPFX:
             province[item[0]] = round(item[1]/num * 100,2)
         x = list(range(151))
 
-        plt.plot(x,province,color='green',marker='.',label='全省')
+        plt.plot(x,province,color='springgreen',marker='.',label='全省')
 
         # 全市
         sql = "SELECT COUNT(YW) FROM kscj where KSH LIKE '"+dsh+r"%'"
@@ -655,7 +695,6 @@ class KSDTSPFX:
 
 
         sql = r"SELECT YW,COUNT(YW) FROM kscj WHERE YW != 0 and KSH LIKE '"+dsh+r"%' GROUP BY  YW"
-        print(sql)
         self.cursor.execute(sql)
         items = list(self.cursor.fetchall())
         city = [0] * 151
@@ -665,11 +704,101 @@ class KSDTSPFX:
 
         x = list(range(151))
 
-        plt.plot(x, city, color='red', marker='.', label='全市')
+        plt.plot(x, city, color='orange', marker='.', label='全市')
         plt.xlabel('得分')
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center')
+        plt.savefig(path + '\\地市及全省考生单科成绩分布(语文).png', dpi=600)
         plt.show()
+
+        # 全省文科
+        plt.figure()
+        ax = plt.gca()
+        ax.spines['right'].set_color('none')
+        ax.spines['top'].set_color('none')
+
+        sql = "SELECT COUNT(YW) FROM kscj where kl=2"
+        self.cursor.execute(sql)
+        num = self.cursor.fetchone()[0]  # 全省人数
+
+        sql = "SELECT YW,COUNT(YW) FROM kscj WHERE YW != 0 and kl = 2 GROUP BY  YW "
+        self.cursor.execute(sql)
+        items = list(self.cursor.fetchall())
+        province = [0] * 151
+
+        for item in items:
+            province[item[0]] = round(item[1] / num * 100, 2)
+        x = list(range(151))
+
+        plt.plot(x, province, color='springgreen', marker='.', label='全省')
+
+        # 全市文科
+        sql = "SELECT COUNT(YW) FROM kscj where kl = 2 and KSH LIKE '" + dsh + r"%'"
+        self.cursor.execute(sql)
+        num = self.cursor.fetchone()[0]  # 全市人数
+
+        sql = r"SELECT YW,COUNT(YW) FROM kscj WHERE YW != 0 and kl = 2 and KSH LIKE '" + dsh + r"%' GROUP BY  YW"
+        self.cursor.execute(sql)
+        items = list(self.cursor.fetchall())
+        city = [0] * 151
+
+        for item in items:
+            city[item[0]] = round(item[1] / num * 100, 2)
+
+        x = list(range(151))
+
+        plt.plot(x, city, color='orange', marker='.', label='全市')
+        plt.xlabel('得分')
+        plt.ylabel('人数百分比（%）')
+        plt.legend(loc='upper center')
+        plt.savefig(path + '\\地市及全省文科考生单科成绩分布(语文).png', dpi=600)
+        plt.show()
+
+
+        # 全省理科
+        plt.figure()
+        ax = plt.gca()
+        ax.spines['right'].set_color('none')
+        ax.spines['top'].set_color('none')
+
+        sql = "SELECT COUNT(YW) FROM kscj where kl=1"
+        self.cursor.execute(sql)
+        num = self.cursor.fetchone()[0]  # 全省人数
+
+        sql = "SELECT YW,COUNT(YW) FROM kscj WHERE YW != 0 and kl = 1 GROUP BY  YW "
+        self.cursor.execute(sql)
+        items = list(self.cursor.fetchall())
+        province = [0] * 151
+
+        for item in items:
+            province[item[0]] = round(item[1] / num * 100, 2)
+        x = list(range(151))
+
+        plt.plot(x, province, color='springgreen', marker='.', label='全省')
+
+        # 全市理科
+        sql = "SELECT COUNT(YW) FROM kscj where kl = 1 and KSH LIKE '" + dsh + r"%'"
+        self.cursor.execute(sql)
+        num = self.cursor.fetchone()[0]  # 全市人数
+
+        sql = r"SELECT YW,COUNT(YW) FROM kscj WHERE YW != 0 and kl = 1 and KSH LIKE '" + dsh + r"%' GROUP BY  YW"
+        self.cursor.execute(sql)
+        items = list(self.cursor.fetchall())
+        city = [0] * 151
+
+        for item in items:
+            city[item[0]] = round(item[1] / num * 100, 2)
+
+        x = list(range(151))
+
+        plt.plot(x, city, color='orange', marker='.', label='全市')
+        plt.xlabel('得分')
+        plt.ylabel('人数百分比（%）')
+        plt.legend(loc='upper center')
+        plt.savefig(path + '\\地市及全省理科考生单科成绩分布(语文).png', dpi=600)
+        plt.show()
+
+
 
 
 
