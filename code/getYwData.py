@@ -71,7 +71,8 @@ class KSDTSPFX:
         result.insert(1,(result[0]/num)*100)
         result.insert(0,'男')
 
-        result = np.array(result)
+
+        self.set_list_precision(result)
         df.loc[len(df)] = result
 
         # 计算维度为女
@@ -91,7 +92,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '女')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -112,7 +113,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '城镇')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -134,7 +135,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '农村')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -155,7 +156,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '应届')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -176,7 +177,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '往届')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -197,7 +198,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '总计')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -230,7 +231,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '男')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -251,7 +252,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '女')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -272,7 +273,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '城镇')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -293,7 +294,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '农村')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -314,7 +315,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '应届')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -335,7 +336,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '往届')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -356,7 +357,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '总计')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -387,7 +388,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '男')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -408,7 +409,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '女')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -429,7 +430,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '城镇')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -450,7 +451,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '农村')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -471,7 +472,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '应届')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -492,7 +493,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '往届')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
@@ -513,7 +514,7 @@ class KSDTSPFX:
         result.insert(1, (result[0] / num)*100)
         result.insert(0, '总计')
 
-        result = np.array(result)
+
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
