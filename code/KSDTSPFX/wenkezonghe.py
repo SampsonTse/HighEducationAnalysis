@@ -10,10 +10,10 @@ plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']
 np.set_printoptions(precision=2)
 
 
-# 理科综合考生答题水平分析
+# 文科综合考生答题水平分析
 class DTFX:
     def __init__(self):
-        self.db = pymysql.connect('localhost', 'root', '1234', 'gk2020')
+        self.db = pymysql.connect('localhost', 'root', '123456', 'ksy')
         self.cursor = self.db.cursor()
 
     def __del__(self):
@@ -43,9 +43,9 @@ class DTFX:
         if not os.path.exists(path):
             os.makedirs(path)
 
-        writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析总体概括(理科综合).xlsx")
+        writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析总体概括(文科综合).xlsx")
 
-        # 理科
+        # 文科
         df = pd.DataFrame(data=None, columns=['维度', '人数', '比率', '平均分', '标准差', '差异系数', '平均分(全省)'])
 
         sql = r'select count(a.zh) from kscj as a right join jbxx as b on a.KSH = b.KSH WHERE b.DS_H=%s and a.kl=2'
@@ -193,9 +193,9 @@ class DTFX:
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
-        df.to_excel(sheet_name="各类别考生成绩比较(理科综合)", excel_writer=writer, index=None)
+        df.to_excel(sheet_name="各类别考生成绩比较(文科综合)", excel_writer=writer, index=None)
 
-        # 各区县理科考生成绩比较
+        # 各区县文科考生成绩比较
         sql = r"select xq_h,mc from c_xq where xq_h like '" + dsh + r"%'"
         print(sql)
         self.cursor.execute(sql)
@@ -238,7 +238,7 @@ class DTFX:
             self.set_list_precision(result)
             df.loc[len(df)] = result
 
-        df.to_excel(excel_writer=writer, sheet_name="各县区考生成绩比较(理科综合)", index=None)
+        df.to_excel(excel_writer=writer, sheet_name="各县区考生成绩比较(文科综合)", index=None)
 
         writer.save()
 
@@ -260,8 +260,9 @@ class DTFX:
         if not os.path.exists(path):
             os.makedirs(path)
 
-        # 全省理科
+        # 全省文科
         plt.figure()
+        plt.rcParams['figure.figsize'] = (15.0, 6)
         ax = plt.gca()
         ax.spines['right'].set_color('none')
         ax.spines['top'].set_color('none')
@@ -273,15 +274,16 @@ class DTFX:
         sql = "SELECT zh,COUNT(zh) FROM kscj WHERE zh != 0 and kl=2 GROUP BY  zh "
         self.cursor.execute(sql)
         items = list(self.cursor.fetchall())
-        province = [0] * 151
+        province = [0] * 301
 
+        print(items)
         for item in items:
             province[item[0]] = round(item[1] / num * 100, 2)
-        x = list(range(151))
+        x = list(range(301))
 
         plt.plot(x, province, color='springgreen', marker='.', label='全省')
 
-        # 全市理科
+        # 全市文科
         sql = "SELECT COUNT(zh) FROM kscj where kl=2 and KSH LIKE '" + dsh + r"%'"
         self.cursor.execute(sql)
         num = self.cursor.fetchone()[0]  # 全市人数
@@ -289,18 +291,18 @@ class DTFX:
         sql = r"SELECT zh,COUNT(zh) FROM kscj WHERE zh != 0 and kl=2 and KSH LIKE '" + dsh + r"%' GROUP BY  zh"
         self.cursor.execute(sql)
         items = list(self.cursor.fetchall())
-        city = [0] * 151
+        city = [0] * 301
 
         for item in items:
             city[item[0]] = round(item[1] / num * 100, 2)
 
-        x = list(range(151))
+        x = list(range(301))
 
         plt.plot(x, city, color='orange', marker='.', label='全市')
         plt.xlabel('得分')
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center')
-        plt.savefig(path + '\\地市及全省理科考生单科成绩分布(理科综合).png', dpi=600)
+        plt.savefig(path + '\\地市及全省文科考生单科成绩分布(文科综合).png', dpi=600)
         plt.show()
 
 

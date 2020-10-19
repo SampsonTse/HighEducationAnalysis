@@ -13,7 +13,7 @@ np.set_printoptions(precision=2)
 # 理科数学考生答题水平分析
 class DTFX:
     def __init__(self):
-        self.db = pymysql.connect('localhost', 'root', '1234', 'gk2020')
+        self.db = pymysql.connect('localhost', 'root', '123456', 'ksy')
         self.cursor = self.db.cursor()
 
     def __del__(self):
@@ -262,6 +262,7 @@ class DTFX:
 
         # 全省理科
         plt.figure()
+        plt.rcParams['figure.figsize'] = (15.0, 6)
         ax = plt.gca()
         ax.spines['right'].set_color('none')
         ax.spines['top'].set_color('none')

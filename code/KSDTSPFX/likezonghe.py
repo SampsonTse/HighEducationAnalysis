@@ -13,7 +13,7 @@ np.set_printoptions(precision=2)
 # 理科综合考生答题水平分析
 class DTFX:
     def __init__(self):
-        self.db = pymysql.connect('localhost', 'root', '1234', 'gk2020')
+        self.db = pymysql.connect('localhost', 'root', '123456', 'ksy')
         self.cursor = self.db.cursor()
 
     def __del__(self):
@@ -262,6 +262,7 @@ class DTFX:
 
         # 全省理科
         plt.figure()
+        plt.rcParams['figure.figsize'] = (15.0, 6)
         ax = plt.gca()
         ax.spines['right'].set_color('none')
         ax.spines['top'].set_color('none')
@@ -273,11 +274,11 @@ class DTFX:
         sql = "SELECT zh,COUNT(zh) FROM kscj WHERE zh != 0 and kl = 1 GROUP BY  zh "
         self.cursor.execute(sql)
         items = list(self.cursor.fetchall())
-        province = [0] * 151
+        province = [0] * 301
 
         for item in items:
             province[item[0]] = round(item[1] / num * 100, 2)
-        x = list(range(151))
+        x = list(range(301))
 
         plt.plot(x, province, color='springgreen', marker='.', label='全省')
 
@@ -289,12 +290,12 @@ class DTFX:
         sql = r"SELECT zh,COUNT(zh) FROM kscj WHERE zh != 0 and kl = 1 and KSH LIKE '" + dsh + r"%' GROUP BY  zh"
         self.cursor.execute(sql)
         items = list(self.cursor.fetchall())
-        city = [0] * 151
+        city = [0] * 301
 
         for item in items:
             city[item[0]] = round(item[1] / num * 100, 2)
 
-        x = list(range(151))
+        x = list(range(301))
 
         plt.plot(x, city, color='orange', marker='.', label='全市')
         plt.xlabel('得分')
