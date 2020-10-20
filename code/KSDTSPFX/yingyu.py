@@ -13,7 +13,7 @@ np.set_printoptions(precision=2)
 # 英语考生答题水平分析
 class DTFX:
     def __init__(self):
-        self.db = pymysql.connect('localhost', 'root', '123456', 'ksy')
+        self.db = pymysql.connect('localhost', 'root', '1234', 'gk2020')
         self.cursor = self.db.cursor()
 
     def __del__(self):
