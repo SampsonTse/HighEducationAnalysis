@@ -13,12 +13,7 @@ def GetData(dsh):
     lkzh = likeshuxue.DTFX()
     wkzh = wenkezonghe.DTFX()
 
-    yw.ZTJG_CITY_IMG(dsh)
-    lksx.ZTKG_CITY_TABLE(dsh)
-    wksx.ZTJG_CITY_IMG(dsh)
-    yy.ZTJG_CITY_IMG(dsh)
-    lkzh.ZTJG_CITY_IMG(dsh)
-    wkzh.ZTJG_CITY_IMG(dsh)
+    yw.ZTKG_PROVINCE_TABLE()
 
 
 

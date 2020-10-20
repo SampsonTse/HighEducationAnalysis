@@ -46,7 +46,7 @@ class DTFX:
         writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析总体概括(理科综合).xlsx")
 
         # 理科
-        df = pd.DataFrame(data=None, columns=['维度', '人数', '比率', '平均分', '标准差', '差异系数', '平均分(全省)'])
+        df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数', '平均分(全省)'])
 
         sql = r'select count(a.zh) from kscj as a right join jbxx as b on a.KSH = b.KSH WHERE b.DS_H=%s and a.kl = 1'
         print(sql)
@@ -228,7 +228,7 @@ class DTFX:
         for xqh in xqhs:
             result = []
             sql = "select count(zh),AVG(a.zh) as mean,STDDEV_SAMP(a.zh) as std FROM kscj as A " \
-                  "RIGHT JOIN JBXX AS B ON A.KSH = B.KSH WHERE A.kl = 1 and B.XQ_H = " + xqh[0]
+                  "right JOIN JBXX AS B ON A.KSH = B.KSH WHERE A.kl = 1 and B.XQ_H = " + xqh[0]
             self.cursor.execute(sql)
             result = self.cursor.fetchone()
             result = list(result)
