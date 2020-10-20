@@ -47,14 +47,14 @@ class DTFX:
 
         df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数', '平均分(全省)'])
 
-        sql = r'select count(a.wy) from kscj as a right join jbxx as b on a.KSH = b.KSH WHERE b.DS_H=%s'
+        sql = r'select count(a.wy) from kscj as a right join jbxx as b on a.KSH = b.KSH WHERE b.DS_H=%s and a.wy!=0'
         print(sql)
         self.cursor.execute(sql, [dsh])
         num = self.cursor.fetchone()[0]  # 总人数
 
         # 计算维度为男
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and b.XB_H = 1"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and b.XB_H = 1 and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -62,7 +62,7 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where b.XB_H = 1"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where b.XB_H = 1 and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -74,7 +74,7 @@ class DTFX:
 
         # 计算维度为女
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and b.XB_H = 2"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and b.XB_H = 2 and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -82,7 +82,7 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where b.XB_H = 2"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where b.XB_H = 2 and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -94,7 +94,7 @@ class DTFX:
 
         # 计算维度为城镇
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and (b.KSLB_H = 1 OR b.KSLB_H = 3)"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and (b.KSLB_H = 1 OR b.KSLB_H = 3) and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -102,7 +102,8 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where (b.KSLB_H = 1 OR b.KSLB_H = 3)"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH " \
+              r"where (b.KSLB_H = 1 OR b.KSLB_H = 3) and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -114,7 +115,8 @@ class DTFX:
 
         # 计算维度为农村
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and (b.KSLB_H = 2 OR b.KSLB_H = 4)"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH " \
+              r"where b.DS_H=%s and (b.KSLB_H = 2 OR b.KSLB_H = 4) and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -122,7 +124,8 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where (b.KSLB_H = 2 OR b.KSLB_H = 4)"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH " \
+              r"where (b.KSLB_H = 2 OR b.KSLB_H = 4) and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -134,7 +137,8 @@ class DTFX:
 
         # 计算维度为应届
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and (b.KSLB_H = 1 OR b.KSLB_H = 2)"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH " \
+              r"where b.DS_H=%s and (b.KSLB_H = 1 OR b.KSLB_H = 2) and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -142,7 +146,8 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where (b.KSLB_H = 1 OR b.KSLB_H = 2)"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH " \
+              r"where (b.KSLB_H = 1 OR b.KSLB_H = 2) and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -154,7 +159,8 @@ class DTFX:
 
         # 计算维度为往届
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and (b.KSLB_H = 3 OR b.KSLB_H = 4)"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH " \
+              r"where b.DS_H=%s and (b.KSLB_H = 3 OR b.KSLB_H = 4) and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -162,7 +168,8 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where (b.KSLB_H = 3 OR b.KSLB_H = 4)"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH " \
+              r"where (b.KSLB_H = 3 OR b.KSLB_H = 4) and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -174,7 +181,7 @@ class DTFX:
 
         # 计算维度为总计
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s "
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -182,7 +189,7 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -197,14 +204,15 @@ class DTFX:
         # 文科
         df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数', '平均分(全省)'])
 
-        sql = r'select count(a.wy) from kscj as a right join jbxx as b on a.KSH = b.KSH WHERE b.DS_H=%s and a.kl=2'
+        sql = r'select count(a.wy) from kscj as a right join jbxx as b on a.KSH = b.KSH ' \
+              r'WHERE b.DS_H=%s and a.kl=2 and a.wy!=0'
         print(sql)
         self.cursor.execute(sql, [dsh])
         num = self.cursor.fetchone()[0]  # 总人数
 
         # 计算维度为男
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and b.XB_H = 1 and a.kl=2"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and b.XB_H = 1 and a.kl=2 and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -212,7 +220,8 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where b.XB_H = 1 and a.kl=2"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH " \
+              r"where b.XB_H = 1 and a.kl=2 and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -224,7 +233,8 @@ class DTFX:
 
         # 计算维度为女
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and b.XB_H = 2 and a.kl=2"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH" \
+              r" where b.DS_H=%s and b.XB_H = 2 and a.kl=2 and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -232,7 +242,8 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where b.XB_H = 2 and a.kl=2"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH " \
+              r"where b.XB_H = 2 and a.kl=2 and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -244,7 +255,8 @@ class DTFX:
 
         # 计算维度为城镇
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and (b.KSLB_H = 1 OR b.KSLB_H = 3) and a.kl=2"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH " \
+              r"where b.DS_H=%s and (b.KSLB_H = 1 OR b.KSLB_H = 3) and a.kl=2 and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -252,7 +264,8 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where (b.KSLB_H = 1 OR b.KSLB_H = 3) and a.kl=2"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH " \
+              r"where (b.KSLB_H = 1 OR b.KSLB_H = 3) and a.kl=2 and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -264,7 +277,8 @@ class DTFX:
 
         # 计算维度为农村
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and (b.KSLB_H = 2 OR b.KSLB_H = 4) and a.kl=2"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH " \
+              r"where b.DS_H=%s and (b.KSLB_H = 2 OR b.KSLB_H = 4) and a.kl=2 and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -272,7 +286,8 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where (b.KSLB_H = 2 OR b.KSLB_H = 4) and a.kl=2"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH" \
+              r" where (b.KSLB_H = 2 OR b.KSLB_H = 4) and a.kl=2 and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -284,7 +299,8 @@ class DTFX:
 
         # 计算维度为应届
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and (b.KSLB_H = 1 OR b.KSLB_H = 2) and a.kl=2"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH " \
+              r"where b.DS_H=%s and (b.KSLB_H = 1 OR b.KSLB_H = 2) and a.kl=2 and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -292,7 +308,8 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where (b.KSLB_H = 1 OR b.KSLB_H = 2) and a.kl=2"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH " \
+              r"where (b.KSLB_H = 1 OR b.KSLB_H = 2) and a.kl=2 and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -304,7 +321,8 @@ class DTFX:
 
         # 计算维度为往届
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and (b.KSLB_H = 3 OR b.KSLB_H = 4) and a.kl=2"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH " \
+              r"where b.DS_H=%s and (b.KSLB_H = 3 OR b.KSLB_H = 4) and a.kl=2 and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -312,7 +330,8 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where (b.KSLB_H = 3 OR b.KSLB_H = 4) and a.kl=2"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH " \
+              r"where (b.KSLB_H = 3 OR b.KSLB_H = 4) and a.kl=2 and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -324,7 +343,8 @@ class DTFX:
 
         # 计算维度为总计
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and a.kl=2"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH " \
+              r"where b.DS_H=%s and a.kl=2 and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -332,7 +352,7 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH and a.kl=2"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH and a.kl=2 and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -354,7 +374,8 @@ class DTFX:
 
         # 计算维度为男
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and b.XB_H = 1 and a.kl=1"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH" \
+              r" where b.DS_H=%s and b.XB_H = 1 and a.kl=1 and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -362,7 +383,8 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where b.XB_H = 1 and a.kl=1"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH" \
+              r" where b.XB_H = 1 and a.kl=1 and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -374,7 +396,8 @@ class DTFX:
 
         # 计算维度为女
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and b.XB_H = 2 and a.kl=1"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH " \
+              r"where b.DS_H=%s and b.XB_H = 2 and a.kl=1 and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -382,7 +405,8 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where b.XB_H = 2 and a.kl=1"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH " \
+              r"where b.XB_H = 2 and a.kl=1 and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -394,7 +418,8 @@ class DTFX:
 
         # 计算维度为城镇
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and (b.KSLB_H = 1 OR b.KSLB_H = 3) and a.kl=1"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH " \
+              r"where b.DS_H=%s and (b.KSLB_H = 1 OR b.KSLB_H = 3) and a.kl=1 and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -402,7 +427,8 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where (b.KSLB_H = 1 OR b.KSLB_H = 3) and a.kl=1"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH " \
+              r"where (b.KSLB_H = 1 OR b.KSLB_H = 3) and a.kl=1 and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -414,7 +440,8 @@ class DTFX:
 
         # 计算维度为农村
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and (b.KSLB_H = 2 OR b.KSLB_H = 4) and a.kl=1"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH " \
+              r"where b.DS_H=%s and (b.KSLB_H = 2 OR b.KSLB_H = 4) and a.kl=1 and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -422,7 +449,8 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where (b.KSLB_H = 2 OR b.KSLB_H = 4) and a.kl=1"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH " \
+              r"where (b.KSLB_H = 2 OR b.KSLB_H = 4) and a.kl=1 and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -434,7 +462,8 @@ class DTFX:
 
         # 计算维度为应届
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and (b.KSLB_H = 1 OR b.KSLB_H = 2) and a.kl=1"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH " \
+              r"where b.DS_H=%s and (b.KSLB_H = 1 OR b.KSLB_H = 2) and a.kl=1 and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -442,7 +471,8 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where (b.KSLB_H = 1 OR b.KSLB_H = 2) and a.kl=1"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH " \
+              r"where (b.KSLB_H = 1 OR b.KSLB_H = 2) and a.kl=1 and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -454,7 +484,8 @@ class DTFX:
 
         # 计算维度为往届
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and (b.KSLB_H = 3 OR b.KSLB_H = 4) and a.kl=1"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH " \
+              r"where b.DS_H=%s and (b.KSLB_H = 3 OR b.KSLB_H = 4) and a.kl=1 and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -462,7 +493,8 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH where (b.KSLB_H = 3 OR b.KSLB_H = 4) and a.kl=1"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH" \
+              r" where (b.KSLB_H = 3 OR b.KSLB_H = 4) and a.kl=1 and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -474,7 +506,8 @@ class DTFX:
 
         # 计算维度为总计
         sql = r"select count(A.wy) as num,AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std " \
-              r"from kscj as a right join jbxx as b on a.KSH = b.KSH where b.DS_H=%s and a.kl=1"
+              r"from kscj as a right join jbxx as b on a.KSH = b.KSH" \
+              r" where b.DS_H=%s and a.kl=1 and a.wy!=0"
 
         result = []
         self.cursor.execute(sql, [dsh])
@@ -482,7 +515,7 @@ class DTFX:
         result = list(result)
         result.append(float(result[2]) / float(result[1]))  # 差异系数
 
-        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH and a.kl=1"
+        sql = r"select AVG(A.wy) as mean from kscj as A right join jbxx as B on A.KSH = B.KSH and a.kl=1 where a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -495,7 +528,7 @@ class DTFX:
         df.to_excel(sheet_name="各类别文科考生成绩比较(理科)", excel_writer=writer, index=None)
 
         # 各区县考生成绩比较
-        sql = r"select xq_h,mc from c_xq where xq_h like '" + dsh + r"%'"
+        sql = r"select xq_h,mc from c_xq where  xq_h like '" + dsh + r"%'"
         print(sql)
         self.cursor.execute(sql)
         xqhs = list(self.cursor.fetchall())
@@ -504,7 +537,7 @@ class DTFX:
 
         df = pd.DataFrame(data=None, columns=['区县', '人数', '平均分', '标准差', '差异系数', '得分率'])
 
-        sql = "select count(wy),AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std FROM kscj as A "
+        sql = "select count(wy),AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std FROM kscj as A where  a.wy!=0 "
         self.cursor.execute(sql)
         result = self.cursor.fetchone()
         result = list(result)
@@ -515,7 +548,7 @@ class DTFX:
         df.loc[len(df)] = result
 
         sql = r"select count(wy),AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std FROM kscj as A " \
-              r"where KSH LIKE '" + dsh + r"%'"
+              r"where a.wy!=0 and KSH LIKE '" + dsh + r"%'"
         self.cursor.execute(sql)
         result = self.cursor.fetchone()
         result = list(result)
@@ -528,7 +561,7 @@ class DTFX:
         for xqh in xqhs:
             result = []
             sql = "select count(wy),AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std FROM kscj as A " \
-                  "right JOIN JBXX AS B ON A.KSH = B.KSH WHERE B.XQ_H = " + xqh[0]
+                  "right JOIN JBXX AS B ON A.KSH = B.KSH WHERE  a.wy!=0 and B.XQ_H = " + xqh[0]
             self.cursor.execute(sql)
             result = self.cursor.fetchone()
             result = list(result)
@@ -555,7 +588,7 @@ class DTFX:
         df.loc[len(df)] = result
 
         sql = r"select count(wy),AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std FROM kscj as A " \
-              r"where A.kl = 1 and A.KSH LIKE '" + dsh + r"%'"
+              r"where A.kl = 1 and a.wy!=0 and A.KSH LIKE '" + dsh + r"%'"
         self.cursor.execute(sql)
         result = self.cursor.fetchone()
         result = list(result)
@@ -568,7 +601,7 @@ class DTFX:
         for xqh in xqhs:
             result = []
             sql = "select count(wy),AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std FROM kscj as A " \
-                  "right JOIN JBXX AS B ON A.KSH = B.KSH WHERE A.kl = 1 and B.XQ_H = " + xqh[0]
+                  "right JOIN JBXX AS B ON A.KSH = B.KSH WHERE A.kl = 1 and a.wy!=0 and B.XQ_H = " + xqh[0]
             self.cursor.execute(sql)
             result = self.cursor.fetchone()
             result = list(result)
@@ -584,7 +617,7 @@ class DTFX:
 
         df = pd.DataFrame(data=None, columns=['区县', '人数', '平均分', '标准差', '差异系数', '得分率'])
 
-        sql = "select count(wy),AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std FROM kscj as A where A.kl = 2"
+        sql = "select count(wy),AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std FROM kscj as A where A.kl = 2 and a.wy!=0"
         self.cursor.execute(sql)
         result = self.cursor.fetchone()
         result = list(result)
@@ -595,7 +628,7 @@ class DTFX:
         df.loc[len(df)] = result
 
         sql = r"select count(wy),AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std FROM kscj as A " \
-              r"where A.kl = 2 and A.KSH LIKE '" + dsh + r"%'"
+              r"where A.kl = 2 and a.wy!=0 and A.KSH LIKE '" + dsh + r"%'"
         self.cursor.execute(sql)
         result = self.cursor.fetchone()
         result = list(result)
@@ -608,7 +641,7 @@ class DTFX:
         for xqh in xqhs:
             result = []
             sql = "select count(wy),AVG(A.wy) as mean,STDDEV_SAMP(A.wy) as std FROM kscj as A " \
-                  "right JOIN JBXX AS B ON A.KSH = B.KSH WHERE A.kl = 2 and B.XQ_H = " + xqh[0]
+                  "right JOIN JBXX AS B ON A.KSH = B.KSH WHERE A.kl = 2 and a.wy!=0 and B.XQ_H = " + xqh[0]
             self.cursor.execute(sql)
             result = self.cursor.fetchone()
             result = list(result)
@@ -641,7 +674,7 @@ class DTFX:
             os.makedirs(path)
 
         # 全省
-        plt.figure()
+
         plt.rcParams['figure.figsize'] = (15.0, 6)
         ax = plt.gca()
         ax.spines['right'].set_color('none')
@@ -751,6 +784,7 @@ class DTFX:
         plt.plot(x, province, color='springgreen', marker='.', label='全省')
 
         # 全市理科
+        plt.rcParams['figure.figsize'] = (15.0, 6)
         sql = "SELECT COUNT(wy) FROM kscj where kl = 1 and KSH LIKE '" + dsh + r"%'"
         self.cursor.execute(sql)
         num = self.cursor.fetchone()[0]  # 全市人数
@@ -772,8 +806,104 @@ class DTFX:
         plt.savefig(path + '\\地市及全省理科考生单科成绩分布(英语).png', dpi=600)
         plt.show()
 
-    def DTFZ(self, dsh):
-        pass
+    def ZTKG_PROVINCE_TABLE(self):
+
+        sql = ""
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + "全省"
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + "全省考生答题分析总体概括(英语).xlsx")
+
+        # 全省考生
+        df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数'])
+
+        sql = "select count(*) from kscj as a right join jbxx as b on a.ksh = b.ksh"
+        self.cursor.execute(sql)
+        num = self.cursor.fetchone()[0]
+
+        # 性别
+        xbs = [1, 2]
+        for xb in xbs:
+            sql = "select count(a.wy) as num,AVG(a.wy) as mean,STDDEV_SAMP(a.wy) as std " \
+                  "from kscj as a right join jbxx as b on a.ksh = b.ksh where b.xb_h=" + str(xb)
+            self.cursor.execute(sql)
+            results = self.cursor.fetchone()
+            results = list(results)
+            results.append(float(results[2]) / float(results[1]))  # 差异系数
+            results.insert(1, results[0] / num * 100)  # 比率
+            if xb == 1:
+                results.insert(0, '男')
+            else:
+                results.insert(0, '女')
+
+            self.set_list_precision(results)
+            df.loc[len(df)] = results
+
+        # 户籍
+        hjs = [["1", "3"], ["2", "4"]]
+        for hj in hjs:
+            sql = "select count(a.wy) as num,AVG(a.wy) as mean,STDDEV_SAMP(a.wy) as std " \
+                  "from kscj as a right join jbxx as b on a.ksh = b.ksh where b.kslb_h = %s or b.kslb_h = %s"
+
+            self.cursor.execute(sql, hj)
+            results = self.cursor.fetchone()
+            results = list(results)
+            results.append(float(results[2]) / float(results[1]))  # 差异系数
+            results.insert(1, results[0] / num * 100)  # 比率
+            if 1 in hj:
+                results.insert(0, '城镇')
+            else:
+                results.insert(0, '农村')
+
+            self.set_list_precision(results)
+            df.loc[len(df)] = results
+
+            # 应往届
+            hjs = [["1", "2"], ["3", "4"]]
+            for hj in hjs:
+                sql = "select count(a.wy) as num,AVG(a.wy) as mean,STDDEV_SAMP(a.wy) as std " \
+                      "from kscj as a right join jbxx as b on a.ksh = b.ksh where b.kslb_h = %s or b.kslb_h = %s"
+
+                self.cursor.execute(sql, hj)
+                results = self.cursor.fetchone()
+                results = list(results)
+                results.append(float(results[2]) / float(results[1]))  # 差异系数
+                results.insert(1, results[0] / num * 100)  # 比率
+                if 1 in hj:
+                    results.insert(0, '应届')
+                else:
+                    results.insert(0, '往届')
+
+                self.set_list_precision(results)
+                df.loc[len(df)] = results
+
+            sql = "select count(a.wy) as num,AVG(a.wy) as mean,STDDEV_SAMP(a.wy) as std " \
+                  "from kscj as a right join jbxx as b on a.ksh = b.ksh"
+            self.cursor.execute(sql)
+            results = self.cursor.fetchone()
+            results = list(results)
+            results.append(float(results[2]) / float(results[1]))  # 差异系数
+            results.insert(1, results[0] / num * 100)  # 比率
+            results.insert(0, '总计')
+
+            self.set_list_precision(results)
+            df.loc[len(df)] = results
+
+            df.to_excel(excel_writer=writer, sheet_name="各类别考生成绩比较(英语)", index=None)
+
+
+
+
+
+
 
 
 
