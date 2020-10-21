@@ -10,7 +10,7 @@ def GetTable_Province(dsh):
     lksx = likeshuxue.DTFX()
     wksx = wenkeshuxue.DTFX()
     yy = yingyu.DTFX()
-    lkzh = likeshuxue.DTFX()
+    lkzh = likezonghe.DTFX()
     wkzh = wenkezonghe.DTFX()
 
     yw.ZTKG_PROVINCE_TABLE()
