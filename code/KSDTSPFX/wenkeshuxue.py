@@ -320,6 +320,105 @@ class DTFX:
         plt.legend(loc='upper center')
         plt.savefig(path + '\\地市及全省文科考生单科成绩分布(文科数学).png', dpi=600)
         plt.show()
+        
+    def ZTKG_PROVINCE_TABLE(self):
+
+        sql = ""
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + "全省"
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        xbs = [1, 2]
+        hjs = [["1", "3"], ["2", "4"]]
+        hjs = [["1", "2"], ["3", "4"]]
+
+        writer = pd.ExcelWriter(path + '\\' + "全省考生答题分析总体概括(文科数学).xlsx")
+
+        # 全省文科考生
+        df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数'])
+
+        sql = "select count(*) from kscj as a right join jbxx as b on a.ksh = b.ksh where a.kl = 2"
+        self.cursor.execute(sql)
+        num = self.cursor.fetchone()[0]
+
+        # 性别
+        for xb in xbs:
+            sql = "select count(a.sx) as num,AVG(a.sx) as mean,STDDEV_SAMP(a.sx) as std " \
+                  "from kscj as a right join jbxx as b on a.ksh = b.ksh " \
+                  "where a.kl = 2 and b.xb_h=" + str(xb)
+            self.cursor.execute(sql)
+            results = self.cursor.fetchone()
+            results = list(results)
+            results.append(float(results[2]) / float(results[1]))  # 差异系数
+            results.insert(1, results[0] / num * 100)  # 比率
+            if xb == 1:
+                results.insert(0, '男')
+            else:
+                results.insert(0, '女')
+
+            self.set_list_precision(results)
+            df.loc[len(df)] = results
+
+        # 户籍
+        for hj in hjs:
+            sql = "select count(a.sx) as num,AVG(a.sx) as mean,STDDEV_SAMP(a.sx) as std " \
+                  "from kscj as a right join jbxx as b on a.ksh = b.ksh " \
+                  "where a.kl = 2 and  (b.kslb_h = %s or b.kslb_h = %s)"
+
+            self.cursor.execute(sql, hj)
+            results = self.cursor.fetchone()
+            results = list(results)
+            results.append(float(results[2]) / float(results[1]))  # 差异系数
+            results.insert(1, results[0] / num * 100)  # 比率
+            if 1 in hj:
+                results.insert(0, '城镇')
+            else:
+                results.insert(0, '农村')
+
+            self.set_list_precision(results)
+            df.loc[len(df)] = results
+
+            # 应往届
+            for hj in hjs:
+                sql = "select count(a.sx) as num,AVG(a.sx) as mean,STDDEV_SAMP(a.sx) as std " \
+                      "from kscj as a right join jbxx as b on a.ksh = b.ksh " \
+                      "where a.kl = 2 and (b.kslb_h = %s or b.kslb_h = %s)"
+
+                self.cursor.execute(sql, hj)
+                results = self.cursor.fetchone()
+                results = list(results)
+                results.append(float(results[2]) / float(results[1]))  # 差异系数
+                results.insert(1, results[0] / num * 100)  # 比率
+                if 1 in hj:
+                    results.insert(0, '应届')
+                else:
+                    results.insert(0, '往届')
+
+                self.set_list_precision(results)
+                df.loc[len(df)] = results
+
+            sql = "select count(a.sx) as num,AVG(a.sx) as mean,STDDEV_SAMP(a.sx) as std " \
+                  "from kscj as a right join jbxx as b on a.ksh = b.ksh where a.kl = 2"
+            self.cursor.execute(sql)
+            results = self.cursor.fetchone()
+            results = list(results)
+            results.append(float(results[2]) / float(results[1]))  # 差异系数
+            results.insert(1, results[0] / num * 100)  # 比率
+            results.insert(0, '总计')
+
+            self.set_list_precision(results)
+            df.loc[len(df)] = results
+
+            df.to_excel(excel_writer=writer, sheet_name="各类别考生成绩比较(文科数学)", index=None)
+
+            writer.save()
 
 
 

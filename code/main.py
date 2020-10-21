@@ -5,7 +5,7 @@ from KSDTSPFX import yingyu
 from KSDTSPFX import likezonghe
 from KSDTSPFX import wenkezonghe
 
-def GetData(dsh):
+def GetTable_Province(dsh):
     yw = yuwen.DTFX()
     lksx = likeshuxue.DTFX()
     wksx = wenkeshuxue.DTFX()
@@ -14,10 +14,12 @@ def GetData(dsh):
     wkzh = wenkezonghe.DTFX()
 
     yw.ZTKG_PROVINCE_TABLE()
-
-
-
+    lksx.ZTKG_PROVINCE_TABLE()
+    wksx.ZTKG_PROVINCE_TABLE()
+    yy.ZTKG_PROVINCE_TABLE()
+    lkzh.ZTKG_PROVINCE_TABLE()
+    wkzh.ZTKG_PROVINCE_TABLE()
 
 if __name__ == '__main__':
     dsh = '01'
-    GetData(dsh=dsh)
+    GetTable_Province(dsh=dsh)
