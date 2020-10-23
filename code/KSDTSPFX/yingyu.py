@@ -687,7 +687,7 @@ class DTFX:
             os.makedirs(path)
 
         # 全省
-
+        plt.figure()
         plt.rcParams['figure.figsize'] = (15.0, 6)
         ax = plt.gca()
         ax.spines['right'].set_color('none')
@@ -729,6 +729,8 @@ class DTFX:
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center')
         plt.savefig(path + '\\地市及全省考生单科成绩分布(英语).png', dpi=600)
+        plt.close()
+        
 
         # 全省文科
         plt.figure()
@@ -772,6 +774,8 @@ class DTFX:
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center')
         plt.savefig(path + '\\地市及全省文科考生单科成绩分布(英语).png', dpi=600)
+        plt.close()
+        
 
         # 全省理科
         plt.figure()
@@ -816,6 +820,8 @@ class DTFX:
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center')
         plt.savefig(path + '\\地市及全省理科考生单科成绩分布(英语).png', dpi=600)
+        plt.close()
+        
 
     def ZTKG_PROVINCE_TABLE(self):
 
@@ -1069,3 +1075,7 @@ class DTFX:
         df.to_excel(excel_writer=writer, sheet_name="各类别理科考生成绩比较(英语)", index=None)
 
         writer.save()
+
+
+
+

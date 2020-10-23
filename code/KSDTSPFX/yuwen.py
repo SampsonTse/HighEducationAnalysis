@@ -716,7 +716,7 @@ class DTFX:
 
 
         # 全省
-
+        # plt.figure()
         plt.rcParams['figure.figsize'] = (15.0,6)
         ax = plt.gca()
         ax.spines['right'].set_color('none')
@@ -759,6 +759,8 @@ class DTFX:
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center')
         plt.savefig(path + '\\地市及全省考生单科成绩分布(语文).png', dpi=600)
+        plt.close()
+        
         
 
         # 全省文科
@@ -803,6 +805,8 @@ class DTFX:
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center')
         plt.savefig(path + '\\地市及全省文科考生单科成绩分布(语文).png', dpi=600)
+        plt.close()
+        
         
 
 
@@ -849,6 +853,8 @@ class DTFX:
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center')
         plt.savefig(path + '\\地市及全省理科考生单科成绩分布(语文).png', dpi=600)
+        plt.close()
+        
         
 
 

@@ -47,7 +47,7 @@ class DTFX:
         writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析总体概括(文科数学).xlsx")
 
 
-        # 理科
+        # 文科
         df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数', '平均分(全省)'])
 
         sql = r'select count(a.sx) from kscj  a right join JBXX  b on a.KSH = b.KSH WHERE b.DS_H=' + dsh + r' and a.kl=2'
@@ -208,7 +208,7 @@ class DTFX:
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
-        df.to_excel(sheet_name="各类别理科考生成绩比较(文科数学)", excel_writer=writer, index=None)
+        df.to_excel(sheet_name="各类别考生成绩比较(文科数学)", excel_writer=writer, index=None)
 
         sql = r"select xq_h,mc from c_xq where  xq_h like '" + dsh + r"%'"
         print(sql)
@@ -255,7 +255,7 @@ class DTFX:
             self.set_list_precision(result)
             df.loc[len(df)] = result
 
-        df.to_excel(excel_writer=writer, sheet_name="各县区理科考生成绩比较(文科数学)", index=None)
+        df.to_excel(excel_writer=writer, sheet_name="各县区考生成绩比较(文科数学)", index=None)
 
 
         writer.save()
@@ -278,51 +278,7 @@ class DTFX:
         if not os.path.exists(path):
             os.makedirs(path)
 
-        # 全省
-
-        plt.rcParams['figure.figsize'] = (15.0, 6)
-        ax = plt.gca()
-        ax.spines['right'].set_color('none')
-        ax.spines['top'].set_color('none')
-
-        sql = "SELECT COUNT(sx) FROM kscj where sx!=0"
-        self.cursor.execute(sql)
-        num = self.cursor.fetchone()[0]  # 全省人数
-
-        sql = r"SELECT sx,COUNT(sx) FROM kscj WHERE sx !=0 GROUP BY sx"
-        print(sql)
-        self.cursor.execute(sql)
-        items = list(self.cursor.fetchall())
-        province = [0] * 301
-
-        for item in items:
-            province[item[0]] = round(item[1] / num * 100, 2)
-        x = list(range(301))
-
-        plt.plot(x, province, color='springgreen', marker='.', label='全省')
-
-        # 全市
-        sql = "SELECT COUNT(sx) FROM kscj where KSH LIKE '" + dsh + r"%'"
-        self.cursor.execute(sql)
-        num = self.cursor.fetchone()[0]  # 全省人数
-
-        sql = r"SELECT sx,COUNT(sx) FROM kscj WHERE sx != 0 and KSH LIKE '" + dsh + r"%' GROUP BY  sx"
-        self.cursor.execute(sql)
-        items = list(self.cursor.fetchall())
-        city = [0] * 301
-
-        for item in items:
-            city[item[0]] = round(item[1] / num * 100, 2)
-
-        x = list(range(301))
-
-        plt.plot(x, city, color='orange', marker='.', label='全市')
-        plt.xlabel('得分')
-        plt.ylabel('人数百分比（%）')
-        plt.legend(loc='upper center')
-        plt.savefig(path + '\\地市及全省考生单科成绩分布(文科数学).png', dpi=600)
-
-        # 全省理科
+        # 全省文科
         plt.figure()
         plt.rcParams['figure.figsize'] = (15.0, 6)
         ax = plt.gca()
@@ -336,15 +292,15 @@ class DTFX:
         sql = "SELECT sx,COUNT(sx) FROM kscj WHERE sx != 0 and kl=2 GROUP BY  sx "
         self.cursor.execute(sql)
         items = list(self.cursor.fetchall())
-        province = [0] * 301
+        province = [0] * 151
 
         for item in items:
             province[item[0]] = round(item[1] / num * 100, 2)
-        x = list(range(301))
+        x = list(range(151))
 
         plt.plot(x, province, color='springgreen', marker='.', label='全省')
 
-        # 全市理科
+        # 全市文科
         sql = "SELECT COUNT(sx) FROM kscj where kl=2 and KSH LIKE '" + dsh + r"%'"
         self.cursor.execute(sql)
         num = self.cursor.fetchone()[0]  # 全市人数
@@ -352,62 +308,20 @@ class DTFX:
         sql = r"SELECT sx,COUNT(sx) FROM kscj WHERE sx != 0 and kl=2 and KSH LIKE '" + dsh + r"%' GROUP BY  sx"
         self.cursor.execute(sql)
         items = list(self.cursor.fetchall())
-        city = [0] * 301
+        city = [0] * 151
 
         for item in items:
             city[item[0]] = round(item[1] / num * 100, 2)
 
-        x = list(range(301))
+        x = list(range(151))
 
         plt.plot(x, city, color='orange', marker='.', label='全市')
         plt.xlabel('得分')
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center')
-        plt.savefig(path + '\\地市及全省理科考生单科成绩分布(文科数学).png', dpi=600)
+        plt.savefig(path + '\\地市及全省文科考生单科成绩分布(文科数学).png', dpi=600)
+        plt.close()
 
-        # 全省理科
-        plt.figure()
-        plt.rcParams['figure.figsize'] = (15.0, 6)
-        ax = plt.gca()
-        ax.spines['right'].set_color('none')
-        ax.spines['top'].set_color('none')
-
-        sql = "SELECT COUNT(sx) FROM kscj where kl=2"
-        self.cursor.execute(sql)
-        num = self.cursor.fetchone()[0]  # 全省人数
-
-        sql = "SELECT sx,COUNT(sx) FROM kscj WHERE sx != 0 and kl=2 GROUP BY  sx "
-        self.cursor.execute(sql)
-        items = list(self.cursor.fetchall())
-        province = [0] * 301
-
-        for item in items:
-            province[item[0]] = round(item[1] / num * 100, 2)
-        x = list(range(301))
-
-        plt.plot(x, province, color='springgreen', marker='.', label='全省')
-
-        # 全市理科
-        plt.rcParams['figure.figsize'] = (15.0, 6)
-        sql = "SELECT COUNT(sx) FROM kscj where kl=2 and KSH LIKE '" + dsh + r"%'"
-        self.cursor.execute(sql)
-        num = self.cursor.fetchone()[0]  # 全市人数
-
-        sql = r"SELECT sx,COUNT(sx) FROM kscj WHERE sx != 0 and kl=2 and KSH LIKE '" + dsh + r"%' GROUP BY  sx"
-        self.cursor.execute(sql)
-        items = list(self.cursor.fetchall())
-        city = [0] * 301
-
-        for item in items:
-            city[item[0]] = round(item[1] / num * 100, 2)
-
-        x = list(range(301))
-
-        plt.plot(x, city, color='orange', marker='.', label='全市')
-        plt.xlabel('得分')
-        plt.ylabel('人数百分比（%）')
-        plt.legend(loc='upper center')
-        plt.savefig(path + '\\地市及全省理科考生单科成绩分布(文科数学).png', dpi=600)
 
     def ZTKG_PROVINCE_TABLE(self):
 
@@ -505,7 +419,7 @@ class DTFX:
 
         df.to_excel(excel_writer=writer, sheet_name="各类别考生成绩比较(文科数学)", index=None)
 
-        # 全省理科考生
+        # 全省考生
         df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数'])
 
         sql = "select count(a.sx)  num " \
@@ -581,9 +495,9 @@ class DTFX:
         self.set_list_precision(results)
         df.loc[len(df)] = results
 
-        df.to_excel(excel_writer=writer, sheet_name="各类别理科考生成绩比较(文科数学)", index=None)
+        df.to_excel(excel_writer=writer, sheet_name="各类别考生成绩比较(文科数学)", index=None)
 
-        # 全省理科考生
+        # 全省考生
         df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数'])
 
         sql = "select count(*) from kscj   a right join JBXX   b on a.ksh = b.ksh where a.kl=2"
@@ -658,7 +572,7 @@ class DTFX:
         self.set_list_precision(results)
         df.loc[len(df)] = results
 
-        df.to_excel(excel_writer=writer, sheet_name="各类别理科考生成绩比较(文科数学)", index=None)
+        df.to_excel(excel_writer=writer, sheet_name="各类别考生成绩比较(文科数学)", index=None)
 
         writer.save()
 
