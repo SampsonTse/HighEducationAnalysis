@@ -23,13 +23,6 @@ def ztgk_city_img(dsh):
     lkzh.ZTJG_CITY_IMG(dsh)
     wkzh.ZTJG_CITY_IMG(dsh)
 
-    # yw.ZTKG_CITY_TABLE(dsh)
-    # lksx.ZTKG_CITY_TABLE(dsh)
-    # wksx.ZTKG_CITY_TABLE(dsh)
-    # yy.ZTKG_CITY_TABLE(dsh)
-    # lkzh.ZTKG_CITY_TABLE(dsh)
-    # wkzh.ZTKG_CITY_TABLE(dsh)
-
 def ztgk_city_table(dsh):
     yw = yuwen.DTFX()
     lksx = likeshuxue.DTFX()
@@ -45,9 +38,6 @@ def ztgk_city_table(dsh):
     yy.ZTKG_CITY_TABLE(dsh)
     lkzh.ZTKG_CITY_TABLE(dsh)
     wkzh.ZTKG_CITY_TABLE(dsh)
-
-
-
 
 def getProvince():
     yw = yuwen.DTFX()
@@ -66,8 +56,8 @@ def getProvince():
 
 
 
-
 if __name__ == '__main__':
+
 
     conn = cx_Oracle.connect('gkeva2020/ksy#2020#reta@10.0.200.103/ksydb01std')
     cursor = conn.cursor()
@@ -75,5 +65,9 @@ if __name__ == '__main__':
     dshs = cursor.execute(sql)
     dshs = np.array(cursor.fetchall()).flatten()
 
-    for dsh in dshs:
-        ztgk_city_img(dsh)
+
+    lksx = likeshuxue.DTFX()
+    lksx.DTFX_CITY_TABLE('01')
+    # for dsh in dshs:
+    #     ztgk_city_img(dsh)
+    #     ztgk_city_table(dsh)
