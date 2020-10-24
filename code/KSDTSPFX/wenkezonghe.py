@@ -320,7 +320,7 @@ class DTFX:
         plt.xlabel('得分')
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center')
-        plt.savefig(path + '\\地市及全省文科考生单科成绩分布(文科综合).png', dpi=600)
+        plt.savefig(path + '\\地市及全省考生单科成绩分布(文科综合).png', dpi=600)
         plt.close()
 
 

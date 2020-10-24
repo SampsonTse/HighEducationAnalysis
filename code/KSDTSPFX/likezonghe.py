@@ -208,7 +208,7 @@ class DTFX:
         self.set_list_precision(result)
         df.loc[len(df)] = result
 
-        df.to_excel(sheet_name="各类别理科考生成绩比较(理科综合)", excel_writer=writer, index=None)
+        df.to_excel(sheet_name="各类别考生成绩比较(理科综合)", excel_writer=writer, index=None)
 
         sql = r"select xq_h,mc from c_xq where  xq_h like '" + dsh + r"%'"
         print(sql)
@@ -255,7 +255,7 @@ class DTFX:
             self.set_list_precision(result)
             df.loc[len(df)] = result
 
-        df.to_excel(excel_writer=writer, sheet_name="各县区理科考生成绩比较(理科综合)", index=None)
+        df.to_excel(excel_writer=writer, sheet_name="各县区考生成绩比较(理科综合)", index=None)
 
 
         writer.save()
@@ -319,7 +319,7 @@ class DTFX:
         plt.xlabel('得分')
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center')
-        plt.savefig(path + '\\地市及全省理科考生单科成绩分布(理科综合).png', dpi=600)
+        plt.savefig(path + '\\地市及全省考生单科成绩分布(理科综合).png', dpi=600)
         plt.close()
         
 
@@ -419,7 +419,7 @@ class DTFX:
 
         df.to_excel(excel_writer=writer, sheet_name="各类别考生成绩比较(理科综合)", index=None)
 
-        # 全省理科考生
+        # 全省考生
         df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数'])
 
         sql = "select count(a.zh)  num " \
@@ -495,9 +495,9 @@ class DTFX:
         self.set_list_precision(results)
         df.loc[len(df)] = results
 
-        df.to_excel(excel_writer=writer, sheet_name="各类别理科考生成绩比较(理科综合)", index=None)
+        df.to_excel(excel_writer=writer, sheet_name="各类别考生成绩比较(理科综合)", index=None)
 
-        # 全省理科考生
+        # 全省考生
         df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数'])
 
         sql = "select count(*) from kscj   a right join JBXX   b on a.ksh = b.ksh where a.kl=1"
@@ -572,7 +572,7 @@ class DTFX:
         self.set_list_precision(results)
         df.loc[len(df)] = results
 
-        df.to_excel(excel_writer=writer, sheet_name="各类别理科考生成绩比较(理科综合)", index=None)
+        df.to_excel(excel_writer=writer, sheet_name="各类别考生成绩比较(理科综合)", index=None)
 
         writer.save()
 

@@ -66,8 +66,11 @@ if __name__ == '__main__':
     dshs = np.array(cursor.fetchall()).flatten()
 
 
-    lksx = likeshuxue.DTFX()
-    lksx.DTFX_CITY_TABLE('01')
+    # lksx = likeshuxue.DTFX()
+    # lksx.DTFX_CITY_TABLE('01')
+
+    wksx = wenkeshuxue.DTFX()
+    wksx.DTFX_CITY_TABLE('01')
     # for dsh in dshs:
     #     ztgk_city_img(dsh)
     #     ztgk_city_table(dsh)
