@@ -576,6 +576,7 @@ class DTFX:
 
         writer.save()
 
+    # 单题分析
     def DTFX_CITY_TABLE(self,dsh):
 
         sql = "select mc from c_ds where DS_H = " + dsh
@@ -740,6 +741,7 @@ class DTFX:
 
         df.to_excel(excel_writer=writer,sheet_name="地市考生单题分析情况(理科数学)",index=False)
         writer.save()
+
 
 
 

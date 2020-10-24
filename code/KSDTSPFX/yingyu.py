@@ -821,7 +821,6 @@ class DTFX:
         plt.legend(loc='upper center')
         plt.savefig(path + '\\地市及全省理科考生单科成绩分布(英语).png', dpi=600)
         plt.close()
-        
 
     def ZTKG_PROVINCE_TABLE(self):
 
@@ -1077,5 +1076,171 @@ class DTFX:
         writer.save()
 
 
+    def DTFX_CITY_TABLE(self,dsh):
 
+        sql = "select mc from c_ds where DS_H = " + dsh
+        self.cursor.execute(sql)
+        ds_mc = self.cursor.fetchone()[0]
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + ds_mc
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析单体分析(英语).xlsx")
+
+        sql = r"select count(*) from kscj where ksh like '"+dsh+r"%'  "
+        self.cursor.execute(sql)
+        num_ks = self.cursor.fetchone()[0]
+
+        sql = r"select count(*) from kscj "
+        self.cursor.execute(sql)
+        num_t = self.cursor.fetchone()[0]
+
+        low = int(num_ks/3)
+        high = int(num_ks/1.5)
+
+        df = pd.DataFrame(data=None,columns=['题号','分值','本市平均分','全省平均分','本市得分率','高分组得分率','中间组得分率','低分组得分率'])
+
+        kgths = list(range(1,41))
+        zgths = list(range(61,82))
+
+
+        for kgth in kgths:
+
+            if kgth in range(1,21):
+                num = 2.0
+            else:
+                num = 1.5
+
+            row = []
+            row.append(str(kgth+20))
+            row.append(num)
+
+            total = 0
+
+            # 全省平均分
+            sql = "select sum(kgval) from T_GKPJ2020_TKSKGDAMX a right join jbxx b " \
+                  "on a.ksh = b.ksh where a.idx=" + str(kgth) + " and kmh=101"
+            self.cursor.execute(sql)
+            avg_province = self.cursor.fetchone()[0] / num_t
+
+            # 本市计算高分组平均分
+            sql = "select sum(c.kgval) mean from T_GKPJ2020_TKSKGDAMX c " \
+                  "right join (select a.*,rownum rn from " \
+                  "(SELECT KSCJ.KSH from KSCJ RIGHT JOIN JBXX ON KSCJ.KSH = JBXX.KSH " \
+                  "WHERE wykmh=101 and jbxx.ds_h="+dsh+" ORDER BY KSCJ.wy DESC) a) b " \
+                  "on c.ksh = b.ksh where c.idx = "+str(kgth)+" and c.kmh=101 and b.rn BETWEEN 1 and "+str(low)
+            self.cursor.execute(sql)
+            sum_h = float(self.cursor.fetchone()[0])
+            total = total + sum_h
+            dfl_h = sum_h/ low / num
+
+            # 本市计算中间组平均分
+            sql = "select sum(c.kgval) mean from T_GKPJ2020_TKSKGDAMX c " \
+                  "right join (select a.*,rownum rn from " \
+                  "(SELECT KSCJ.KSH from KSCJ RIGHT JOIN JBXX ON KSCJ.KSH = JBXX.KSH " \
+                  "WHERE wykmh=101 and jbxx.ds_h=" + dsh + " ORDER BY KSCJ.wy DESC) a) b " \
+                  "on c.ksh = b.ksh where c.idx = " + str(kgth) + " and c.kmh=101 and b.rn BETWEEN "+str(low+1)+" and " + str(high)
+            self.cursor.execute(sql)
+            sum_m = float(self.cursor.fetchone()[0])
+            total = total + sum_m
+            dfl_m = sum_m / (high - low) / num
+
+            # 本市计算低分组平均分
+            sql = "select sum(c.kgval) mean from T_GKPJ2020_TKSKGDAMX c " \
+                  "right join (select a.*,rownum rn from " \
+                  "(SELECT KSCJ.KSH from KSCJ RIGHT JOIN JBXX ON KSCJ.KSH = JBXX.KSH " \
+                  "WHERE wykmh=101 and jbxx.ds_h=" + dsh + " ORDER BY KSCJ.wy DESC) a) b " \
+                  "on c.ksh = b.ksh where c.idx = " + str(kgth) + " and c.kmh=101 and b.rn BETWEEN "+str(high+1)+" and " + str(num_ks)
+            self.cursor.execute(sql)
+            sum_l = float(self.cursor.fetchone()[0])
+            total = total + sum_l
+            dfl_l = sum_l / (num_ks - high) / num
+
+            row.append(total/num_ks) # 全市平均分
+            row.append(avg_province) # 全省平均分
+            row.append(total/num_ks/5) # 全市得分率
+            row.append(dfl_h) #高分组
+            row.append(dfl_m) #中间组
+            row.append(dfl_l) #低分组
+
+            self.set_list_precision(row)
+            print(row)
+            df.loc[len(df)] = row
+
+        for zgth in zgths:
+
+            row = []
+            num = 0
+            row.append(str(zgth))
+            if zgth in range(61,71):
+                num = 1.5
+            elif zgth in range(71,81):
+                num = 1.00
+            elif zgth == 81:
+                num = 25.00
+            row.append(num)
+
+            total = 0
+
+            # 全省平均分
+            sql = "select sum(b.sum) from " \
+                  "(select sum(a.xtval) as sum,a.xth,a.ksh from T_GKPJ2020_TSJBNKSXT a " \
+                  "right join jbxx on jbxx.ksh=a.ksh where a.kmh = 101 and a.xth = "+str(zgth)+" GROUP BY a.ksh,a.xth) b"
+            print(sql)
+            self.cursor.execute(sql)
+            avg_province = self.cursor.fetchone()[0] / num_t
+
+            # 高分组得分率
+            sql = "select sum(d.sum) as avg from (SELECT sum(xtval) as sum from T_GKPJ2020_TSJBNKSXT sxt " \
+                  "right join (select b.* from (SELECT a.*,rownum rn from " \
+                  "(select kscj.ksh,kscj.wy from kscj where ksh like \'"+dsh+"%\'  ORDER BY KSCJ.wy desc) a ) b " \
+                  "where b.rn BETWEEN 1 and "+str(low)+") c on sxt.ksh = c.ksh where sxt.kmh=101 and sxt.xth="+str(zgth)+" GROUP BY sxt.ksh) d"
+            print(sql)
+            self.cursor.execute(sql)
+            sum_h = float(self.cursor.fetchone()[0])
+            total = total + sum_h
+            dfl_h = sum_h / low / num
+
+            # 中间组组得分率
+            sql = "select sum(d.sum) as avg from (SELECT sum(xtval) as sum from T_GKPJ2020_TSJBNKSXT sxt " \
+                  "right join (select b.* from (SELECT a.*,rownum rn from " \
+                  "(select kscj.ksh,kscj.wy from kscj where ksh like \'"+dsh+"%\' ORDER BY KSCJ.wy desc) a ) b " \
+                  "where b.rn BETWEEN "+str(low+1)+" and " + str(high) + ") c on sxt.ksh = c.ksh where sxt.kmh=101 and sxt.xth=" + str(zgth) + " GROUP BY sxt.ksh) d"
+            print(sql)
+            self.cursor.execute(sql)
+            sum_m = float(self.cursor.fetchone()[0])
+            total = total + sum_m
+            dfl_m = sum_m / (high - low) / num
+
+            # 低分组得分率
+            sql = "select sum(d.sum) as avg from (SELECT sum(xtval) as sum from T_GKPJ2020_TSJBNKSXT sxt " \
+                  "right join (select b.* from (SELECT a.*,rownum rn from " \
+                  "(select kscj.ksh,kscj.wy from kscj where ksh like \'"+dsh+"%\'  ORDER BY KSCJ.wy desc) a ) b " \
+                  "where b.rn BETWEEN " + str(high + 1) + " and " + str(num_ks) + ") c on sxt.ksh = c.ksh where sxt.kmh=101 and sxt.xth=" + str(zgth) + " GROUP BY sxt.ksh) d"
+            print(sql)
+            self.cursor.execute(sql)
+            sum_l = float(self.cursor.fetchone()[0])
+            total = total + sum_l
+            dfl_l = sum_l / (num_ks - high) / num
+
+            row.append(total/num_ks)  # 全市平均分
+            row.append(avg_province)  # 全省平均分
+            row.append(total / num_ks / num)  # 全市得分率
+            row.append(dfl_h)  # 高分组
+            row.append(dfl_m)  # 中间组
+            row.append(dfl_l)  # 低分组
+
+            self.set_list_precision(row)
+            df.loc[len(df)] = row
+            print(row)
+
+        df.to_excel(excel_writer=writer,sheet_name="地市考生单题分析情况(英语)",index=False)
+        writer.save()
 
