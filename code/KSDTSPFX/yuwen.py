@@ -727,7 +727,6 @@ class DTFX:
         num = self.cursor.fetchone()[0] # 全省人数
 
         sql = r"SELECT YW,COUNT(YW) FROM kscj WHERE YW !=0 GROUP BY YW"
-        print(sql)
         self.cursor.execute(sql)
         items = list(self.cursor.fetchall())
         province = [0] * 151
@@ -854,9 +853,6 @@ class DTFX:
         plt.legend(loc='upper center')
         plt.savefig(path + '\\地市及全省理科考生单科成绩分布(语文).png', dpi=600)
         plt.close()
-        
-        
-
 
     def ZTKG_PROVINCE_TABLE(self):
 
@@ -1110,6 +1106,37 @@ class DTFX:
         df.to_excel(excel_writer=writer, sheet_name="各类别理科考生成绩比较(语文)", index=None)
 
         writer.save()
+
+
+    def YSFFX_CITY_TABLE(self,dsh):
+
+        city_num = [0]*151
+        province_num = [0]*151
+
+        city_total = 0
+        province_total = 0
+
+        sql = r"select yw,count(yw) from kscj where yw!=0 and ksh like '"+dsh+r"%' group by yw order by yw desc"
+        self.cursor.execute(sql)
+        items = self.cursor.fetchall()
+
+        for item in items:
+            province_num[item[0]] = item[1]
+            city_total += item[0]
+
+        sql = r"select yw,count(yw) from kscj where yw!=0 group by yw order by yw desc"
+        self.cursor.execute(sql)
+        items = self.cursor.fetchall()
+
+        for item in items:
+            city_num[item[0]] = item[1]
+            province_total += item[1]
+
+
+
+
+
+
 
 
 

@@ -72,5 +72,6 @@ if __name__ == '__main__':
 
     # ztgk_city_table('01')
     # ztgk_city_img('01')
-    dtfx_city_table('01')
-
+    # dtfx_city_table('01')
+    yw = yuwen.DTFX()
+    yw.YSFFX_CITY_TABLE('01')
