@@ -4,10 +4,12 @@ from KSDTSPFX import wenkeshuxue
 from KSDTSPFX import yingyu
 from KSDTSPFX import likezonghe
 from KSDTSPFX import wenkezonghe
+from CJGK import ZFFB_IMG
 
 import cx_Oracle
 import numpy as np
 
+# 市级报告 总体概括 图片
 def ztgk_city_img(dsh):
     yw = yuwen.DTFX()
     lksx = likeshuxue.DTFX()
@@ -23,6 +25,7 @@ def ztgk_city_img(dsh):
     lkzh.ZTJG_CITY_IMG(dsh)
     wkzh.ZTJG_CITY_IMG(dsh)
 
+# 市级报告 总体概括 表格
 def ztgk_city_table(dsh):
     yw = yuwen.DTFX()
     lksx = likeshuxue.DTFX()
@@ -32,13 +35,14 @@ def ztgk_city_table(dsh):
     wkzh = wenkezonghe.DTFX()
 
 
-    yw.ZTKG_CITY_TABLE(dsh)
+    # yw.ZTKG_CITY_TABLE(dsh)
     lksx.ZTKG_CITY_TABLE(dsh)
-    wksx.ZTKG_CITY_TABLE(dsh)
-    yy.ZTKG_CITY_TABLE(dsh)
-    lkzh.ZTKG_CITY_TABLE(dsh)
-    wkzh.ZTKG_CITY_TABLE(dsh)
+    # wksx.ZTKG_CITY_TABLE(dsh)
+    # yy.ZTKG_CITY_TABLE(dsh)
+    # lkzh.ZTKG_CITY_TABLE(dsh)
+    # wkzh.ZTKG_CITY_TABLE(dsh)
 
+# 市级报告 单题分析 表格
 def dtfx_city_table(dsh):
 
     lksx = likeshuxue.DTFX()
@@ -47,10 +51,10 @@ def dtfx_city_table(dsh):
 
     # lksx.DTFX_CITY_TABLE(dsh)
     # wksx.DTFX_CITY_TABLE(dsh)
-    yy.DTFX_CITY_TABLE(dsh)
+    # yy.DTFX_CITY_TABLE(dsh)
 
-
-def getProvince():
+# 省级报告 总体概括 表格
+def ztgt_province_table():
     yw = yuwen.DTFX()
     lksx = likeshuxue.DTFX()
     wksx = wenkeshuxue.DTFX()
@@ -65,13 +69,31 @@ def getProvince():
     lkzh.ZTKG_PROVINCE_TABLE()
     wkzh.ZTKG_PROVINCE_TABLE()
 
+# 市级报告附录 原始分分析
+def ysffx_city_table(dsh):
+    yw = yuwen.DTFX()
+    lksx = likeshuxue.DTFX()
+    wksx = wenkeshuxue.DTFX()
+    yy = yingyu.DTFX()
+    lkzh = likezonghe.DTFX()
+    wkzh = wenkezonghe.DTFX()
+
+    yw.YSFFX_CITY_TABLE(dsh)
+    lksx.YSFFX_CITY_TABLE(dsh)
+    lksx.YSFFX_CITY_TABLE(dsh)
+    wksx.YSFFX_CITY_TABLE(dsh)
+    lkzh.YSFFX_CITY_TABLE(dsh)
+    wkzh.YSFFX_CITY_TABLE(dsh)
 
 
 if __name__ == '__main__':
 
-
     # ztgk_city_table('01')
     # ztgk_city_img('01')
     # dtfx_city_table('01')
-    yw = yuwen.DTFX()
-    yw.YSFFX_CITY_TABLE('01')
+    # ysffx_city_table('01')
+
+    zffb = ZFFB_IMG.zffb_img()
+    zffb.getImg(1,'01')
+    zffb.getImg(2,'01')
+

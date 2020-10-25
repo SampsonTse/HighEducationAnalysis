@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as  pd
+import matplotlib.ticker as ticker
 import pymysql
 import os
 import matplotlib.pyplot  as plt
@@ -292,13 +293,13 @@ class DTFX:
         sql = "SELECT sx,COUNT(sx) FROM kscj WHERE sx != 0 and kl=2 GROUP BY  sx "
         self.cursor.execute(sql)
         items = list(self.cursor.fetchall())
-        province = [0] * 151
+        province = [None] * 151
 
         for item in items:
             province[item[0]] = round(item[1] / num * 100, 2)
         x = list(range(151))
 
-        plt.plot(x, province, color='springgreen', marker='.', label='全省')
+        plt.plot(x, province, color='orange', marker='.', label='全省')
 
         # 全市文科
         sql = "SELECT COUNT(sx) FROM kscj where kl=2 and KSH LIKE '" + dsh + r"%'"
@@ -308,20 +309,20 @@ class DTFX:
         sql = r"SELECT sx,COUNT(sx) FROM kscj WHERE sx != 0 and kl=2 and KSH LIKE '" + dsh + r"%' GROUP BY  sx"
         self.cursor.execute(sql)
         items = list(self.cursor.fetchall())
-        city = [0] * 151
+        city = [None] * 151
 
         for item in items:
             city[item[0]] = round(item[1] / num * 100, 2)
 
         x = list(range(151))
 
-        plt.plot(x, city, color='orange', marker='.', label='全市')
+        plt.plot(x, city, color='springgreen', marker='.', label='全市')
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
         plt.xlabel('得分')
         plt.ylabel('人数百分比（%）')
-        plt.legend(loc='upper center')
+        plt.legend(loc='upper center',bbox_to_anchor=(1.05, 1.05))
         plt.savefig(path + '\\地市及全省考生单科成绩分布(文科数学).png', dpi=600)
         plt.close()
-
 
     def ZTKG_PROVINCE_TABLE(self):
 
@@ -576,7 +577,6 @@ class DTFX:
 
         writer.save()
 
-
     def DTFX_CITY_TABLE(self,dsh):
 
         sql = "select mc from c_ds where DS_H = " + dsh
@@ -740,6 +740,78 @@ class DTFX:
             print(row)
 
         df.to_excel(excel_writer=writer,sheet_name="地市考生单题分析情况(文科数学)",index=False)
+        writer.save()
+
+    def YSFFX_CITY_TABLE(self, dsh):
+
+        sql = ""
+        sql = "select mc from c_ds where DS_H = " + dsh
+        self.cursor.execute(sql)
+        ds_mc = self.cursor.fetchone()[0]
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + ds_mc
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题水平分析原始分概括(文科数学).xlsx")
+
+        # 文科生
+        city_num = [0] * 151
+        province_num = [0] * 151
+
+        city_total = 0
+        province_total = 0
+
+        df = pd.DataFrame(data=None,
+                          columns=['一分段', '人数(本市)', '百分比(本市)', '累计百分比(本市)', '人数(全省)', '百分比(全省)', '累计百分比(全省)'])
+
+        # 地市
+        sql = r"select sx,count(sx) from kscj where kl=2 and yw!=0 and ksh like '" + dsh + r"%' group by sx order by sx desc"
+        self.cursor.execute(sql)
+        items = self.cursor.fetchall()
+
+        for item in items:
+            city_num[item[0]] = item[1]
+            city_total += item[1]  # 人数
+
+        # 全省
+        sql = r"select sx,count(sx) from kscj where kl=2 and sx!=0 group by sx order by sx desc"
+        self.cursor.execute(sql)
+        items = self.cursor.fetchall()
+
+        for item in items:
+            province_num[item[0]] = item[1]
+            province_total += item[1]  # 人数
+
+        i = 150
+        acc_city = 0
+        acc_province = 0
+        while i > 1:
+            if city_num[i] > 0:
+                acc_city += city_num[i]  # 累计百分比
+                acc_province += province_num[i]  # 累计百分比
+                row = []
+                row.append(i)
+                row.append(city_num[i])  # 本市人数
+                row.append((city_num[i] / city_total) * 100)  # 本市百分比
+                row.append((acc_city / city_total) * 100)  # 本市累计百分比
+
+                row.append(province_num[i])
+                row.append((province_num[i] / province_total) * 100)  # 全省百分比
+                row.append((acc_province / province_total) * 100)  # 全省累计百分比
+                self.set_list_precision(row)
+                df.loc[len(df)] = row
+
+            i = i - 1
+
+        df.to_excel(excel_writer=writer, sheet_name='地市及全省考生一分段概括(文科数学)', index=None)
+
         writer.save()
 
 
