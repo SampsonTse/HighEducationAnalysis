@@ -45,6 +45,8 @@ def ztgk_city_table(dsh):
 # 市级报告 单题分析 表格
 def dtfx_city_table(dsh):
 
+    yw = yuwen.DTFX()
+    yw.DTFX_CITY_TABLE(dsh)
     lksx = likeshuxue.DTFX()
     wksx = wenkeshuxue.DTFX()
     yy = yingyu.DTFX()
@@ -80,20 +82,21 @@ def ysffx_city_table(dsh):
 
     yw.YSFFX_CITY_TABLE(dsh)
     lksx.YSFFX_CITY_TABLE(dsh)
-    lksx.YSFFX_CITY_TABLE(dsh)
+    yy.YSFFX_CITY_TABLE(dsh)
     wksx.YSFFX_CITY_TABLE(dsh)
     lkzh.YSFFX_CITY_TABLE(dsh)
     wkzh.YSFFX_CITY_TABLE(dsh)
+
 
 
 if __name__ == '__main__':
 
     # ztgk_city_table('01')
     # ztgk_city_img('01')
-    # dtfx_city_table('01')
+    dtfx_city_table('01')
     # ysffx_city_table('01')
 
-    zffb = ZFFB_IMG.zffb_img()
-    zffb.getImg(1,'01')
-    zffb.getImg(2,'01')
+    # zffb = ZFFB_IMG.zffb_img()
+    # zffb.getImg(1,'01')
+    # zffb.getImg(2,'01')
 
