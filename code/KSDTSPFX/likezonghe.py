@@ -8,6 +8,7 @@ import decimal
 import cx_Oracle
 import openpyxl
 
+
 plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']
 np.set_printoptions(precision=2)
 
@@ -27,8 +28,8 @@ class DTFX:
             if isinstance(L[i], float) or isinstance(L[i], decimal.Decimal):
                 L[i] = format(L[i], '.2f')
 
-    # 制表
-    def ZTKG_CITY_TABLE(self, dsh):
+    # 市级报告 总体概括 制表
+    def ZTGK_CITY_TABLE(self, dsh):
 
         sql = ""
         sql = "select mc from c_ds where DS_H = " + dsh
@@ -261,8 +262,8 @@ class DTFX:
 
         writer.save()
 
-    # 画图
-    def ZTJG_CITY_IMG(self, dsh):
+    # 市级报告 总体概括 画图
+    def ZTGK_CITY_IMG(self, dsh):
 
         sql = ""
         sql = "select mc from c_ds where DS_H=" + dsh
@@ -321,10 +322,11 @@ class DTFX:
         plt.xlabel('得分')
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center',bbox_to_anchor=(1.05, 1.05))
-        plt.savefig(path + '\\地市及全省考生单科成绩分布(理科综合).png', dpi=600)
+        plt.savefig(path + '\\地市及全省考生单科成绩分布(理科综合).png', dpi=1200)
         plt.close()
 
-    def ZTKG_PROVINCE_TABLE(self):
+    # 省级报告 总体概括
+    def ZTGK_PROVINCE_TABLE(self):
 
         sql = ""
 
@@ -577,6 +579,7 @@ class DTFX:
 
         writer.save()
 
+    # 市级报告附录 原始分分析
     def YSFFX_CITY_TABLE(self,dsh):
 
         sql = ""
@@ -586,7 +589,7 @@ class DTFX:
 
         pwd = os.getcwd()
         father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
-        path = father_path + r"\考生答题分析"
+        path = father_path + r"\考生答题分析(附录)"
 
         if not os.path.exists(path):
             os.makedirs(path)

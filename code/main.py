@@ -87,16 +87,36 @@ def ysffx_city_table(dsh):
     lkzh.YSFFX_CITY_TABLE(dsh)
     wkzh.YSFFX_CITY_TABLE(dsh)
 
+# 市级报告附录 单题分析
+def dtfx_appendix_city(dsh):
+    yw = yuwen.DTFX()
+    lksx = likeshuxue.DTFX()
+    wksx = wenkeshuxue.DTFX()
+    yy = yingyu.DTFX()
 
+    wksx.DTFX_CITY_APPENDIX(dsh)
+    yw.DTFX_CITY_APPENDIX(dsh)
+    lksx.DTFX_CITY_APPENDIX(dsh)
+    yy.DTFX_CITY_APPENDIX(dsh)
+
+
+def dtfx_city_img(dsh):
+    yw = yuwen.DTFX()
+    lksx = likeshuxue.DTFX()
+    wksx = wenkeshuxue.DTFX()
+    yy = yingyu.DTFX()
+
+    # yw.DTFX_CITY_IMG(dsh)
+    # lksx.DTFX_CITY_IMG(dsh)
+    # wksx.DTFX_CITY_IMG(dsh)
+    # yy.DTFX_CITY_IMG(dsh)
+
+    yw.DTFX_PROVINCE()
 
 if __name__ == '__main__':
 
-    # ztgk_city_table('01')
-    # ztgk_city_img('01')
-    dtfx_city_table('01')
-    # ysffx_city_table('01')
+    # dtfx_appendix_city('01')
+    dtfx_city_img('01')
 
-    # zffb = ZFFB_IMG.zffb_img()
-    # zffb.getImg(1,'01')
-    # zffb.getImg(2,'01')
+
 

@@ -1,6 +1,7 @@
 import numpy as np
-import pandas as  pd
+import pandas as pd
 import pymysql
+import math
 import os
 import matplotlib.pyplot  as plt
 import decimal
@@ -27,8 +28,8 @@ class DTFX:
             if isinstance(L[i], float) or isinstance(L[i], decimal.Decimal):
                 L[i] = format(L[i], '.2f')
 
-    # 制表
-    def ZTKG_CITY_TABLE(self, dsh):
+    # 市级报告 总体概括 制表
+    def ZTGK_CITY_TABLE(self, dsh):
 
         sql = ""
         sql = "select mc from c_ds where DS_H = " + dsh
@@ -261,8 +262,8 @@ class DTFX:
 
         writer.save()
 
-    # 画图
-    def ZTJG_CITY_IMG(self, dsh):
+    # 市级报告 总体概括 画图
+    def ZTGK_CITY_IMG(self, dsh):
 
         sql = ""
         sql = "select mc from c_ds where DS_H=" + dsh
@@ -321,11 +322,11 @@ class DTFX:
         plt.xlabel('得分')
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center',bbox_to_anchor=(1.05, 1.05))
-        plt.savefig(path + '\\地市及全省考生单科成绩分布(理科数学).png', dpi=600)
+        plt.savefig(path + '\\地市及全省考生单科成绩分布(理科数学).png', dpi=1200)
         plt.close()
 
-    # 全省总体分析
-    def ZTKG_PROVINCE_TABLE(self):
+    # 省级报告 总体概括
+    def ZTGK_PROVINCE_TABLE(self):
 
         sql = ""
 
@@ -341,7 +342,7 @@ class DTFX:
 
         xbs = [1, 2]
         hjs = [["1", "3"], ["2", "4"]]
-        ywjs = [["1", "2"], ["3", "4"]]
+        wyjs = [["1", "2"], ["3", "4"]]
 
         writer = pd.ExcelWriter(path + '\\' + "全省考生答题分析总体概括(理科数学).xlsx")
 
@@ -389,17 +390,17 @@ class DTFX:
             df.loc[len(df)] = results
 
         # 应往届
-        for ywj in ywjs:
+        for wyj in wyjs:
             sql = "select count(a.SX)   num,AVG(a.SX)   mean,STDDEV_SAMP(a.SX)   std " \
-                  "from kscj   a right join JBXX   b on a.ksh = b.ksh where b.kslb_h = " + ywj[0] + " or b.kslb_h = " + \
-                  ywj[1]
+                  "from kscj   a right join JBXX   b on a.ksh = b.ksh where b.kslb_h = " + wyj[0] + " or b.kslb_h = " + \
+                  wyj[1]
 
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
             results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
-            if "1" in ywj:
+            if "1" in wyj:
                 results.insert(0, '应届')
             else:
                 results.insert(0, '往届')
@@ -467,17 +468,17 @@ class DTFX:
             df.loc[len(df)] = results
 
         # 应往届
-        for ywj in ywjs:
+        for wyj in wyjs:
             sql = "select count(a.SX)   num,AVG(a.SX)   mean,STDDEV_SAMP(a.SX)   std " \
                   "from kscj   a right join JBXX   b on a.ksh = b.ksh " \
-                  "where a.kl=1 and (b.kslb_h = " + ywj[0] + " or b.kslb_h = " + ywj[1] + ")"
+                  "where a.kl=1 and (b.kslb_h = " + wyj[0] + " or b.kslb_h = " + wyj[1] + ")"
 
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
             results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
-            if "1" in ywj:
+            if "1" in wyj:
                 results.insert(0, '应届')
             else:
                 results.insert(0, '往届')
@@ -544,17 +545,17 @@ class DTFX:
             df.loc[len(df)] = results
 
         # 应往届
-        for ywj in ywjs:
+        for wyj in wyjs:
             sql = "select count(a.SX)   num,AVG(a.SX)   mean,STDDEV_SAMP(a.SX)   std " \
                   "from kscj   a right join JBXX   b on a.ksh = b.ksh " \
-                  "where a.kl=1 and (b.kslb_h = " + ywj[0] + " or b.kslb_h = " + ywj[1] + ")"
+                  "where a.kl=1 and (b.kslb_h = " + wyj[0] + " or b.kslb_h = " + wyj[1] + ")"
 
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
             results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
-            if "1" in ywj:
+            if "1" in wyj:
                 results.insert(0, '应届')
             else:
                 results.insert(0, '往届')
@@ -578,7 +579,7 @@ class DTFX:
 
         writer.save()
 
-    # 单题分析
+    # 市级报告 单题分析
     def DTFX_CITY_TABLE(self,dsh):
 
         sql = "select mc from c_ds where DS_H = " + dsh
@@ -596,7 +597,7 @@ class DTFX:
             os.makedirs(path)
 
 
-        writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析单体分析(理科数学).xlsx")
+        writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析单题分析(理科数学).xlsx")
 
 
         sql = r"select count(*) from kscj where ksh like '"+dsh+r"%' and kl = 1 "
@@ -744,7 +745,7 @@ class DTFX:
         df.to_excel(excel_writer=writer,sheet_name="地市考生单题分析情况(理科数学)",index=False)
         writer.save()
 
-
+    # 市级报告(附录) 原始分分析
     def YSFFX_CITY_TABLE(self,dsh):
 
         sql = ""
@@ -754,7 +755,7 @@ class DTFX:
 
         pwd = os.getcwd()
         father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
-        path = father_path + r"\考生答题分析"
+        path = father_path + r"\考生答题分析(附录)"
 
         if not os.path.exists(path):
             os.makedirs(path)
@@ -775,7 +776,7 @@ class DTFX:
                           columns=['一分段', '人数(本市)', '百分比(本市)', '累计百分比(本市)', '人数(全省)', '百分比(全省)', '累计百分比(全省)'])
 
         # 地市
-        sql = r"select sx,count(sx) from kscj where kl = 1 and yw!=0 and ksh like '" + dsh + r"%' group by sx order by sx desc"
+        sql = r"select sx,count(sx) from kscj where kl = 1 and sx!=0 and ksh like '" + dsh + r"%' group by sx order by sx desc"
         self.cursor.execute(sql)
         items = self.cursor.fetchall()
 
@@ -817,6 +818,275 @@ class DTFX:
 
         writer.save()
 
+    # 市级报告附录 单题分析
+    def DTFX_CITY_APPENDIX(self, dsh):
 
+        sql = "select mc from c_ds where DS_H = " + dsh
+        self.cursor.execute(sql)
+        ds_mc = self.cursor.fetchone()[0]
 
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析(附录)"
 
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + ds_mc
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析单题分析(理科数学).xlsx")
+
+        rows = []
+        sql = r"select count(*) from kscj where kl = 1 and ksh like '" + dsh + r"%'"
+        print(sql)
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+
+        # 1/3
+        low = total / 3
+        # 2/3
+        high = total / 1.5
+
+        idxs = range(1, 13)
+
+        for idx in idxs:
+
+            a_h = 0
+            b_h = 0
+            c_h = 0
+            d_h = 0
+
+            a_m = 0
+            b_m = 0
+            c_m = 0
+            d_m = 0
+
+            a_l = 0
+            b_l = 0
+            c_l = 0
+            d_l = 0
+
+            a_t = 0
+            b_t = 0
+            c_t = 0
+            d_t = 0
+
+            row = []
+            # 高分组
+            sql = r"select DA,count(DA) as num from T_GKPJ2020_TKSKGDAMX amx right join " \
+                  r"(select * from (select a.*,rownum rn from (select ksh,sx from kscj " \
+                  r"where kl=1 and ksh like '" + dsh + r"%' ORDER BY sx desc) a ) b" \
+                  r" where b.rn BETWEEN 1 and " + str(low) + r") c on amx.ksh = c.ksh " \
+                  r"where amx.kmh=002 and amx.idx=" + str(idx) + r" GROUP BY amx.da"
+            print(sql)
+            self.cursor.execute(sql)
+            items = []
+            items = self.cursor.fetchall()
+            for item in items:
+                if item[0] == 'A':
+                    a_h = item[1]
+                    a_t += a_h
+                if item[0] == 'B':
+                    b_h = item[1]
+                    b_t += b_h
+                if item[0] == 'C':
+                    c_h = item[1]
+                    c_t += c_h
+                if item[0] == 'D':
+                    d_h = item[1]
+                    d_t += d_h
+
+            # 中间组
+            sql = r"select DA,count(DA) as num from T_GKPJ2020_TKSKGDAMX amx right join " \
+                  r"(select * from (select a.*,rownum rn from (select ksh,sx from kscj " \
+                  r"where kl=1 and ksh like '" + dsh + r"%' ORDER BY sx desc) a ) b" \
+                  r" where b.rn BETWEEN " + str(low + 1) + " and " + str(high) + r") c on amx.ksh = c.ksh " \
+                  r"where amx.kmh=002 and amx.idx=" + str(idx) + r" GROUP BY amx.da"
+            print(sql)
+            self.cursor.execute(sql)
+            items = []
+            items = self.cursor.fetchall()
+            for item in items:
+                if item[0] == 'A':
+                    a_m = item[1]
+                    a_t += a_m
+                if item[0] == 'B':
+                    b_m = item[1]
+                    b_t += b_m
+                if item[0] == 'C':
+                    c_m = item[1]
+                    c_t += c_m
+                if item[0] == 'D':
+                    d_m = item[1]
+                    d_t += d_m
+
+            # 低分组
+            sql = r"select DA,count(DA) as num from T_GKPJ2020_TKSKGDAMX amx right join " \
+                  r"(select * from (select a.*,rownum rn from (select ksh,sx from kscj " \
+                  r"where kl=1 and ksh like '" + dsh + r"%' ORDER BY sx desc) a ) b" \
+                  r" where b.rn BETWEEN " + str(high + 1) + " and " + str(total) + r") c on amx.ksh = c.ksh " \
+                  r"where amx.kmh=002 and amx.idx=" + str(idx) + r" GROUP BY amx.da"
+            print(sql)
+            self.cursor.execute(sql)
+            items = []
+            items = self.cursor.fetchall()
+            for item in items:
+                if item[0] == 'A':
+                    a_l = item[1]
+                    a_t += a_l
+                if item[0] == 'B':
+                    b_l = item[1]
+                    b_t += b_l
+                if item[0] == 'C':
+                    c_l = item[1]
+                    c_t += c_l
+                if item[0] == 'D':
+                    d_l = item[1]
+                    d_t += d_l
+
+            row.append((a_t / (a_h + a_m + a_l)) * 100)  # 全部选A
+            row.append((a_h / low) * 100)  # 高分组选A
+            row.append((a_m / (high - low)) * 100)  # 中间组选A
+            row.append((a_l / (total - high)) * 100)  # 低分组选A
+
+            row.append((b_t / (b_h + b_m + b_l)) * 100)  # 全部选B
+            row.append((b_h / low) * 100)  # 高分组选B
+            row.append((b_m / (high - low)) * 100)  # 中间组选B
+            row.append((b_l / (total - high)) * 100)  # 低分组选B
+
+            row.append((c_t / (c_h + a_m + c_l)) * 100)  # 全部选C
+            row.append((c_h / low) * 100)  # 高分组选C
+            row.append((c_m / (high - low)) * 100)  # 中间组选C
+            row.append((c_l / (total - high)) * 100)  # 低分组选C
+
+            row.append((d_t / (d_h + d_m + d_l)) * 100)  # 全部选D
+            row.append((d_h / low) * 100)  # 高分组选D
+            row.append((d_m / (high - low)) * 100)  # 中间组选D
+            row.append((d_l / (total - high)) * 100)  # 低分组选D
+
+            self.set_list_precision(row)
+            rows.append(row)
+
+        df = pd.DataFrame(data=None, columns=["题号", "全部(A)", "高分组(A)", "中间组(A)", "低分组(A)",
+                                              "全部(B)", "高分组(B)", "中间组(B)", "低分组(B)",
+                                              "全部(C)", "高分组(C)", "中间组(C)", "低分组(C)",
+                                              "全部(D)", "高分组(D)", "中间组(D)", "低分组(D)"])
+
+        for i in range(len(rows)):
+            rows[i].insert(0, i+1)
+            df.loc[len(df)] = rows[i]
+
+        df.to_excel(excel_writer=writer, index=None, sheet_name="地市不同层次考生选择题受选率统计(理科数学)")
+        writer.save()
+
+    # 市级报告 单题分析 画图
+    def DTFX_CITY_IMG(self, dsh):
+        sql = "select mc from c_ds where DS_H = " + dsh
+        self.cursor.execute(sql)
+        ds_mc = self.cursor.fetchone()[0]
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + ds_mc
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        sql = r"select count(ksh) from (SELECT DISTINCT ksh from kscj where ksh like '"+dsh+r"%' and kl = 1) a"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+        ph_num = int(total * 0.27)
+
+        idxs = range(1,13)
+        xths = range(13,24)
+
+        x = []  # 难度
+        y = []  # 区分度
+
+        for idx in idxs:
+            num = 5.0
+            sql = r"select sum(kgval) FROM T_GKPJ2020_TKSKGDAMX amx right join kscj on kscj.ksh = amx.ksh where amx.ksh like '"+dsh+"%' and kmh = 002 and idx = " + str(idx)
+            self.cursor.execute(sql)
+            difficulty = self.cursor.fetchone()[0] / total / num  # 难度
+
+            # 前27%得分率
+            sql = r"select sum(kgval) from T_GKPJ2020_TKSKGDAMX amx right join " \
+                  r"(select ksh,sx from (select ksh,sx,rownum rn from " \
+                  r"(select ksh,sx from kscj where ksh like '" + dsh + "%' ORDER BY sx desc) a ) b " \
+                                                                       r"where b.rn BETWEEN 1 and " + str(
+                ph_num) + ") c on amx.ksh = c.ksh where amx.kmh = 002 and amx.idx = " + str(idx)
+            print(sql)
+            self.cursor.execute(sql)
+            ph = self.cursor.fetchone()[0] / ph_num / num
+
+            # 后27%得分率
+            sql = r"select sum(kgval) from T_GKPJ2020_TKSKGDAMX amx right join " \
+                  r"(select ksh,sx from (select ksh,sx,rownum rn from " \
+                  r"(select ksh,sx from kscj where ksh like '" + dsh + "%' ORDER BY sx desc) a ) b " \
+                                                                       r"where b.rn BETWEEN " + str(
+                total - ph_num) + r" and " + str(
+                total) + r") c on amx.ksh = c.ksh where amx.kmh = 002 and amx.idx = " + str(idx)
+            print(sql)
+            self.cursor.execute(sql)
+            pl = self.cursor.fetchone()[0] / (total - ph_num) / num
+
+            x.append(difficulty)
+            y.append(ph - pl)
+
+        for xth in xths:
+            if xth in [13,14,15,16]:
+                num = 5.0
+            elif xth in [17,18,19,20,21]:
+                num = 12.0
+            elif xth in [22,23]:
+                num = 10.0
+
+            sql = r"select sum(xtval) from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
+                  r"where sxt.ksh like '" + dsh + "%' and kmh=002 and dth=" + str(xth)
+            self.cursor.execute(sql)
+            difficulty = self.cursor.fetchone()[0] / total / num  # 难度
+            x.append(difficulty)
+
+            sql = r"select sum(xtval) from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
+                  r"where sxt.kmh = 002 and sxt.dth=" + str(xth) + " and sxt.ksh like '" + dsh + r"%' GROUP BY sxt.ksh"
+            self.cursor.execute(sql)
+            xt_score = np.array(self.cursor.fetchall(), dtype='float64').flatten()
+
+            sql = r"select sx from kscj right join " \
+                  r"(select a.*,rownum rn from (select sxt.ksh,sum(xtval) from " \
+                  r"T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
+                  r"where kmh = 002 and dth=" + str(xth) + r" and sxt.ksh " \
+                   r"like '" + dsh + r"%' GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn "
+            self.cursor.execute(sql)
+            zf_score = np.array(self.cursor.fetchall(), dtype='float64').flatten()
+
+            n = len(xt_score)
+
+            D_a = n * np.sum(xt_score * zf_score)
+            D_b = np.sum(zf_score) * np.sum(xt_score)
+            D_c = n * np.sum(xt_score ** 2) - np.sum(xt_score) ** 2
+            D_d = n * np.sum(zf_score ** 2) - np.sum(zf_score) ** 2
+
+            qfd = (D_a - D_b) / (math.sqrt(D_c) * math.sqrt(D_d))
+            y.append(qfd)
+
+        txt = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17",
+               "18", "19", "20", "21","22","23"]
+
+        plt.scatter(x, y)
+        plt.scatter(x, y)
+        plt.xlim((0, 1))
+        plt.ylim((0, 1))
+        ax = plt.gca()
+        ax.spines['right'].set_color('none')
+        ax.spines['top'].set_color('none')
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(0.1))
+        ax.yaxis.set_major_locator(ticker.MultipleLocator(0.1))
+        for i in range(len(x)):
+            plt.annotate(txt[i], xy=(x[i], y[i]), xytext=(x[i] + 0.008, y[i] + 0.008),arrowprops=dict(arrowstyle='-'))
+        plt.savefig(path + '\\各题难度-区分度分布散点图(理科数学).png', dpi=1200)
+        plt.show()
