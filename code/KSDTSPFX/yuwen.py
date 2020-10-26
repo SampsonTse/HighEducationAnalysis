@@ -1280,7 +1280,7 @@ class DTFX:
         rows.append(row)
 
 
-        for i in len(rows):
+        for i in range(len(row)):
             rows[i].insert(0,txt[0])
             df.loc[len(df)] = rows[i]
 
