@@ -1144,46 +1144,49 @@ class DTFX:
 
         rows = []
 
-        for idx in idxs:
-            row = []
-
-            num = 3.0
-            row.append(num)
-
-            sql = "select avg(kgval),STDDEV_SAMP(kgval) from T_GKPJ2020_TKSKGDAMX amx right join kscj" \
-                  " on kscj.ksh=amx.ksh where amx.kmh=001 and amx.idx = "+str(idx)
-            self.cursor.execute(sql)
-            result = self.cursor.fetchone()
-            mean = result[0]
-            std = result[1]
-            diffculty = mean/num
-
-            sql = "select sum(kgval) from T_GKPJ2020_TKSKGDAMX amx " \
-                  "right join (select b.* from (select a.*,rownum rn from " \
-                  "(select ksh,yw from kscj order by yw desc) a) b where rn BETWEEN 1 and "+str(ph_num)+") c on c.ksh = amx.ksh"
-
-            self.cursor.execute(sql)
-            ph = self.cursor.fetchone()[0] / ph_num
-
-            sql = "select sum(kgval) from T_GKPJ2020_TKSKGDAMX amx " \
-                  "right join (select b.* from (select a.*,rownum rn from " \
-                  "(select ksh,yw from kscj order by yw desc) a) b where rn BETWEEN "+str(total-ph_num)+" and " + str(total) + ") c on c.ksh = amx.ksh"
-
-            self.cursor.execute(sql)
-            pl = self.cursor.fetchone()[0] / ph_num
-
-            qfd = ph - pl
-
-            row.append(mean)
-            row.append(std)
-            row.append(diffculty)
-            row.append(qfd)
-
-            self.set_list_precision(row)
-            rows.append(row)
-
-            x.append(diffculty)
-            y.append(qfd)
+        # for idx in idxs:
+        #     row = []
+        #
+        #     num = 3.0
+        #     row.append(num)
+        #
+        #     sql = "select avg(kgval),STDDEV_SAMP(kgval) from T_GKPJ2020_TKSKGDAMX amx right join kscj" \
+        #           " on kscj.ksh=amx.ksh where amx.kmh=001 and amx.idx = "+str(idx)
+        #     print(sql)
+        #     self.cursor.execute(sql)
+        #     result = self.cursor.fetchone()
+        #     mean = result[0]
+        #     std = result[1]
+        #     diffculty = mean/num
+        #
+        #     sql = "select sum(kgval) from T_GKPJ2020_TKSKGDAMX amx " \
+        #           "right join (select b.* from (select a.*,rownum rn from " \
+        #           "(select ksh,yw from kscj order by yw desc) a) b where rn BETWEEN 1 and "+str(ph_num)+") c " \
+        #           "on c.ksh = amx.ksh where kmh = 001 and idx = "+str(idx)
+        #     print(sql)
+        #     self.cursor.execute(sql)
+        #     ph = self.cursor.fetchone()[0] / ph_num / num
+        #
+        #     sql = "select sum(kgval) from T_GKPJ2020_TKSKGDAMX amx " \
+        #           "right join (select b.* from (select a.*,rownum rn from " \
+        #           "(select ksh,yw from kscj order by yw desc) a) b where rn BETWEEN "+str(total-ph_num)+" and " + str(total) + ") c on " \
+        #           "c.ksh = amx.ksh where kmh = 001 and idx = "+str(idx)
+        #     print(sql)
+        #     self.cursor.execute(sql)
+        #     pl = self.cursor.fetchone()[0] / ph_num / num
+        #
+        #     qfd = ph - pl
+        #
+        #     row.append(mean)
+        #     row.append(std)
+        #     row.append(diffculty)
+        #     row.append(qfd)
+        #     print(row)
+        #     self.set_list_precision(row)
+        #     rows.append(row)
+        #
+        #     x.append(diffculty)
+        #     y.append(qfd)
 
         for xth in xths:
             row = []
@@ -1207,26 +1210,31 @@ class DTFX:
             diffculty = mean/num
 
             sql = r"select sum(xtval) from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh where sxt.kmh=001 and sxt.dth="+str(xth)+" GROUP BY sxt.ksh"
+            print(sql)
             self.cursor.execute(sql)
-            xt_score = np.array(self.cursor.fetchone()).flatten()
+            xt_score = np.array(self.cursor.fetchall(),dtype="float64").flatten()
 
             sql = r"select yw from kscj right join (select a.*,rownum rn from(select sxt.ksh,sum(xtval) " \
                   r"from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh where sxt.kmh=001 " \
                   r"and sxt.dth="+str(xth)+" GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn"
-
+            print(sql)
             self.cursor.execute(sql)
-            zf_score = np.array(self.cursor.fetchone()).flatten()
+            zf_score = np.array(self.cursor.fetchall(),dtype="float64").flatten()
 
             n = len(xt_score)
 
-            D_a = n * np.sum(xt_score * zf_score)
+            print(zf_score)
+            print(xt_score)
+            print(n)
+
+            D_a =  n*np.sum(xt_score * zf_score)
             D_b = np.sum(zf_score) * np.sum(xt_score)
-            D_c = n * np.sum(xt_score ** 2) - np.sum(xt_score) ** 2
-            D_d = n * np.sum(zf_score ** 2) - np.sum(zf_score) ** 2
+            D_c = n * np.sum(xt_score**2) - np.sum(xt_score)**2
+            D_d = n * np.sum(zf_score**2) - np.sum(zf_score)**2
+
 
             qfd = (D_a - D_b) / (math.sqrt(D_c) * math.sqrt(D_d))
 
-            row.append(num)
             row.append(mean)
             row.append(std)
             row.append(diffculty)
@@ -1234,7 +1242,7 @@ class DTFX:
 
             self.set_list_precision(row)
             rows.append(row)
-
+            print(row)
             x.append(diffculty)
             y.append(qfd)
 
@@ -1250,14 +1258,14 @@ class DTFX:
 
         sql = r"select sum(xtval) from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh where sxt.kmh=001 and (dth=13 or dth=23) GROUP BY sxt.ksh"
         self.cursor.execute(sql)
-        xt_score = np.array(self.cursor.fetchone()).flatten()
+        xt_score = np.array(self.cursor.fetchall()).flatten()
 
         sql = r"select yw from kscj right join (select a.*,rownum rn from(select sxt.ksh,sum(xtval) " \
               r"from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh where sxt.kmh=001 " \
               r"and (dth=13 or dth=23) GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn"
 
         self.cursor.execute(sql)
-        zf_score = np.array(self.cursor.fetchone()).flatten()
+        zf_score = np.array(self.cursor.fetchall()).flatten()
 
         n = len(xt_score)
 
@@ -1278,14 +1286,23 @@ class DTFX:
         row.append(qfd)
         self.set_list_precision(row)
         rows.append(row)
+        print(row)
 
 
-        for i in range(len(row)):
+        for i in range(len(rows)):
             rows[i].insert(0,txt[0])
             df.loc[len(df)] = rows[i]
 
         df.to_excel(writer,index=None,sheet_name="考生单题作答情况(语文)")
+        writer.save()
 
+        plt.xlim((0, 1))
+        plt.ylim((0, 1))
+        ax = plt.gca()
+        ax.spines['right'].set_color('none')
+        ax.spines['top'].set_color('none')
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(0.1))
+        ax.yaxis.set_major_locator(ticker.MultipleLocator(0.1))
         plt.scatter(x, y)
 
         for i in range(len(x)):
@@ -1590,15 +1607,16 @@ class DTFX:
             sql = r"select sum(xtval) from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
                   r"where sxt.ksh like '"+dsh+"%' and kmh=001 and dth="+str(xth)
             self.cursor.execute(sql)
+            print(sql)
             difficulty = self.cursor.fetchone()[0] / total / num # 难度
             x.append(difficulty)
 
 
             sql = r"select sum(xtval) from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
                   r"where sxt.kmh = 001 and sxt.dth="+str(xth)+" and sxt.ksh like '"+dsh+r"%' GROUP BY sxt.ksh"
+            print(sql)
             self.cursor.execute(sql)
             xt_score = np.array(self.cursor.fetchall(),dtype='float64').flatten()
-
             sql = r"select yw from kscj right join " \
                   r"(select a.*,rownum rn from (select sxt.ksh,sum(xtval) from " \
                   r"T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
@@ -1612,7 +1630,8 @@ class DTFX:
             D_a = n * np.sum(xt_score * zf_score)
             D_b = np.sum(zf_score) * np.sum(xt_score)
             D_c = n * np.sum(xt_score**2) - np.sum(xt_score)**2
-            D_d = n * np.sum(zf_score ** 2) - np.sum(zf_score) ** 2
+            D_d = n * np.sum(zf_score ** 2) - np.sum(zf_score)**2
+
 
             qfd = (D_a-D_b) / (math.sqrt(D_c) * math.sqrt(D_d))
             y.append(qfd)
