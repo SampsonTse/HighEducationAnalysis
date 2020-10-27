@@ -877,7 +877,7 @@ class DTFX:
         hjs = [["1", "3"], ["2", "4"]]
         ywjs = [["1", "2"], ["3", "4"]]
 
-        writer = pd.ExcelWriter(path + '\\' + "全省考生答题分析总体概括(语文).xlsx")
+        writer = pd.ExcelWriter(path + '\\' + "全省考生答题分析原始分概括(语文).xlsx")
 
         # 全省考生
         df = pd.DataFrame(data=None,columns=['维度','人数','比率(%)','平均分','标准差','差异系数'])
@@ -1130,8 +1130,7 @@ class DTFX:
         df = pd.DataFrame(data=None,columns=["题号","分值","平均分","标准差","难度","区分度"])
 
         idxs = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13]
-        # xths = [6, 8, 9, 15, 16, 20, 21, 22]
-        xths = [21,22]
+        xths = [6, 8, 9, 15, 16, 20, 21, 22]
         txt = ["01", "02", "03", "04", "05", "07", "10", "11", "12", "14", "17", "18", "19", "06", "08", "09", "15",
                "16", "20", "21", "22"]
 
@@ -1192,39 +1191,37 @@ class DTFX:
         for xth in xths:
             row = []
             print(xth)
-            if xth in [6,8,9,15,16,20]:
-                num = 6
-                row.append(num)
+            if xth in [6, 8, 9, 15, 16, 20]:
+                num = 6.0
             elif xth == 21:
-                num = 5
-                row.append(num)
-            else:
-                num = 60
-                row.append(num)
-            print(num)
+                num = 5.0
+            elif xth == 22:
+                num = 60.00
+            row.append(num)
 
             sql = "select avg(xtval),STDDEV_SAMP(xtval) from T_GKPJ2020_TSJBNKSXT sxt " \
-                  "right join kscj on sxt.ksh = kscj.ksh where kmh = 001 and dth ="+str(xth)
-
+                  "right join kscj on sxt.ksh = kscj.ksh where kmh = 001 and dth =" + str(xth)
+            print(sql)
             self.cursor.execute(sql)
             result = self.cursor.fetchone()
             mean = result[0]
             std = result[1]
             diffculty = mean/num
 
-            sql = r"select sum(xtval) from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
-                  r"where sxt.kmh = 001 and sxt.dth=" + str(xth) + r"  GROUP BY sxt.ksh"
+            sql = r"select a.*,rownum rn from (select sum(xtval),sxt.ksh from T_GKPJ2020_TSJBNKSXT sxt right join " \
+                  r"kscj on kscj.ksh = sxt.ksh where kmh = 001 and dth="+str(xth)+r" GROUP BY sxt.ksh) a"
             print(sql)
             self.cursor.execute(sql)
-            xt_score = np.array(self.cursor.fetchall(), dtype='float64').flatten()
-
-            sql = r"select yw from kscj right join " \
-                  r"(select a.*,rownum rn from (select sxt.ksh,sum(xtval) from " \
-                  r"T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
-                  r"where kmh = 001 and dth=" + str(xth) + r" GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn "
+            xt_score = np.array(self.cursor.fetchall(), dtype='float64')
+            xt_score = np.delete(xt_score, [1,2], axis=1).flatten()
+            sql = r"select yw,kscj.ksh,b.rn from kscj right join (select a.*,rownum rn from " \
+                  r"(select sum(xtval),sxt.ksh from T_GKPJ2020_TSJBNKSXT sxt right join kscj on " \
+                  r"kscj.ksh = sxt.ksh where kmh = 001 and dth="+str(xth)+" GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn"
             print(sql)
             self.cursor.execute(sql)
-            zf_score = np.array(self.cursor.fetchall(), dtype='float64').flatten()
+            zf_score = np.array(self.cursor.fetchall(), dtype='float64')
+            print(zf_score)
+            zf_score = np.delete(xt_score, [1, 2], axis=1).flatten()
 
             print(zf_score)
             print(xt_score)
@@ -1261,16 +1258,16 @@ class DTFX:
         std = result[1]
         diffculty = mean / num
 
-        sql = r"select sum(xtval) from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
+        sql = r"select sum(xtval),sxt.ksh from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
               r"where sxt.kmh = 001 and (sxt.dth=13 or sxt.dth=23)  GROUP BY sxt.ksh"
         print(sql)
         self.cursor.execute(sql)
-        xt_score = np.array(self.cursor.fetchall(), dtype='float64').flatten()
-
+        xt_score = np.array(self.cursor.fetchall(), dtype='float64')
+        xt_score = np.delete(xt_score, -1, axis=1).flatten()
         sql = r"select yw from kscj right join " \
-              r"(select a.*,rownum rn from (select sxt.ksh,sum(xtval) from " \
+              r"(select a.*,rownum rn from (select sum(xtval),sxt.ksh from " \
               r"T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
-              r"where kmh = 001 and (dth=13 or dth=23 GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn "
+              r"where kmh = 001 and (dth=13 or dth=23) GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn "
         print(sql)
         self.cursor.execute(sql)
         zf_score = np.array(self.cursor.fetchall(), dtype='float64').flatten()
@@ -1317,9 +1314,9 @@ class DTFX:
         plt.scatter(x, y)
 
         for i in range(len(x)):
-            plt.annotate(txt[i], xy=(x[i], y[i]), xytext=(x[i] + 0.005, y[i] + 0.005),arrowprops=dict(arrowstyle='->',connectionstyle="arc3"))
+            plt.annotate(txt[i], xy=(x[i], y[i]), xytext=(x[i] + 0.008, y[i] + 0.008),
+                         arrowprops=dict(arrowstyle='->',connectionstyle="arc3,rad = .2"))
         plt.savefig(path + '\\各题难度-区分度分布散点图(语文).png', dpi=1200)
-
 
     # 市级报告 单题分析
     def DTFX_CITY_TABLE(self,dsh):
@@ -1614,7 +1611,6 @@ class DTFX:
             elif xth in [22]:
                 num = 60.0
 
-
             sql = r"select sum(xtval) from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
                   r"where sxt.ksh like '"+dsh+"%' and kmh=001 and dth="+str(xth)
             self.cursor.execute(sql)
@@ -1623,13 +1619,14 @@ class DTFX:
             x.append(difficulty)
 
 
-            sql = r"select sum(xtval) from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
+            sql = r"select sum(xtval),sxt.ksh from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
                   r"where sxt.kmh = 001 and sxt.dth="+str(xth)+" and sxt.ksh like '"+dsh+r"%' GROUP BY sxt.ksh"
             print(sql)
             self.cursor.execute(sql)
-            xt_score = np.array(self.cursor.fetchall(),dtype='float64').flatten()
+            xt_score = np.array(self.cursor.fetchall(), dtype='float64')
+            xt_score = np.delete(xt_score, -1, axis=1).flatten()
             sql = r"select yw from kscj right join " \
-                  r"(select a.*,rownum rn from (select sxt.ksh,sum(xtval) from " \
+                  r"(select a.*,rownum rn from (select sum(xtval),sxt.ksh, from " \
                   r"T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
                   r"where kmh = 001 and dth="+str(xth)+r" and sxt.ksh " \
                   r"like '"+dsh+r"%' GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn "
@@ -1656,13 +1653,14 @@ class DTFX:
         difficulty = self.cursor.fetchone()[0] / total / num  # 难度
         x.append(difficulty)
 
-        sql = r"select sum(xtval) from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
+        sql = r"select sum(xtval),sxt.ksh from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
               r"where sxt.kmh = 001 and (dth=13 or dth=23) and sxt.ksh like '" + dsh + r"%' GROUP BY sxt.ksh"
         self.cursor.execute(sql)
-        xt_score = np.array(self.cursor.fetchall(),dtype='float64').flatten()
+        xt_score = np.array(self.cursor.fetchall(), dtype='float64')
+        xt_score = np.delete(xt_score, -1, axis=1).flatten()
 
         sql = r"select yw from kscj right join " \
-              r"(select a.*,rownum rn from (select sxt.ksh,sum(xtval) from " \
+              r"(select a.*,rownum rn from (select sum(xtval),sxt.ksh from " \
               r"T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
               r"where kmh = 001 and (dth=13 or dth=23) and sxt.ksh " \
               r"like '" + dsh + r"%' GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn "
@@ -2035,15 +2033,226 @@ class DTFX:
         writer.save()
 
 
+    # 省级报告 各市考生成绩比较
+    def GSQKFX_PROVINCE(self):
+        sql = "select ds_h,mc from c_ds"
+        self.cursor.execute(sql)
+        dss = self.cursor.fetchall()
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + "全省"
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + "各市情况分析(语文).xlsx")
+
+        df = pd.DataFrame(data=None,columns=["地市代码","地市全称","人数","比率","平均分","标准差","差异系数(%)"])
+
+        row = []
+        row.append("00")
+        row.append("全省")
+        sql = "select count(*) from kscj where yw!=0"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+
+        sql = "select count(*) as num,avg(yw),stddev_samp(yw) from kscj where yw!=0"
+        self.cursor.execute(sql)
+        item = self.cursor.fetchone()
+        row.append(item[0])
+        row.append((item[0]/total)*100)
+        row.append(item[1])
+        row.append(item[2])
+        row.append(item[2]/item[1])
+        self.set_list_precision(row)
+        df.loc[len(df)] = row
+
+        for ds in dss:
+            row = []
+            row.append(ds[0])
+            row.append(ds[1])
 
 
+            sql = r"select count(*) as num,avg(yw),stddev_samp(yw) from kscj where yw!=0 and ksh like '"+ds[0]+r"%'"
+            self.cursor.execute(sql)
+            item = self.cursor.fetchone()
+            row.append(item[0])
+            row.append((item[0] / total) * 100)
+            row.append(item[1])
+            row.append(item[2])
+            row.append(item[2] / item[1])
+            self.set_list_precision(row)
+            df.loc[len(df)] = row
+
+        df.to_excel(writer,index=None,sheet_name="各市考生成绩比较(语文)")
+
+        # 文科
+        df = pd.DataFrame(data=None,columns=["地市代码","地市全称","人数","比率","平均分","标准差","差异系数(%)"])
+        row = []
+        row.append("00")
+        row.append("全省")
+        sql = "select count(*) from kscj where yw!=0 and kl=2"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+
+        sql = "select count(*) as num,avg(yw),stddev_samp(yw) from kscj where yw!=0 and kl=2"
+        self.cursor.execute(sql)
+        item = self.cursor.fetchone()
+        row.append(item[0])
+        row.append((item[0] / total) * 100)
+        row.append(item[1])
+        row.append(item[2])
+        row.append(item[2] / item[1])
+        self.set_list_precision(row)
+        df.loc[len(df)] = row
+
+        for ds in dss:
+            row = []
+            row.append(ds[0])
+            row.append(ds[1])
 
 
+            sql = r"select count(*) as num,avg(yw),stddev_samp(yw) from kscj where yw!=0 and ksh like '" + ds[0] + r"%' and kl=2"
+            self.cursor.execute(sql)
+            item = self.cursor.fetchone()
+            row.append(item[0])
+            row.append((item[0] / total) * 100)
+            row.append(item[1])
+            row.append(item[2])
+            row.append(item[2] / item[1])
+            self.set_list_precision(row)
+            df.loc[len(df)] = row
+
+        df.to_excel(writer, index=None, sheet_name="各市文科考生成绩比较(语文)")
+
+        # 理科
+        df = pd.DataFrame(data=None,columns=["地市代码","地市全称","人数","比率","平均分","标准差","差异系数(%)"])
+        row = []
+        row.append("00")
+        row.append("全省")
+        sql = "select count(*) from kscj where yw!=0 and kl=1"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+
+        sql = "select count(*) as num,avg(yw),stddev_samp(yw) from kscj where yw!=0 and kl=1"
+        self.cursor.execute(sql)
+        item = self.cursor.fetchone()
+        row.append(item[0])
+        row.append((item[0] / total) * 100)
+        row.append(item[1])
+        row.append(item[2])
+        row.append(item[2] / item[1])
+        self.set_list_precision(row)
+        df.loc[len(df)] = row
+
+        for ds in dss:
+            row = []
+            row.append(ds[0])
+            row.append(ds[1])
 
 
+            sql = r"select count(*) as num,avg(yw),stddev_samp(yw) from kscj where yw!=0 and ksh like '" + ds[0] + r"%' and kl=1"
+            self.cursor.execute(sql)
+            item = self.cursor.fetchone()
+            row.append(item[0])
+            row.append((item[0] / total) * 100)
+            row.append(item[1])
+            row.append(item[2])
+            row.append(item[2] / item[1])
+
+            df.loc[len(df)] = row
+
+        df.to_excel(writer, index=None, sheet_name="各市理科考生成绩比较(语文)")
+
+        writer.save()
 
 
+    # 省级报告(附录) 原始分概括
+    def YSFGK_PROVINCE_APPENDIX(self):
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析(附录)"
 
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + "全省"
+        if not os.path.exists(path):
+            os.makedirs(path)
 
+        writer = pd.ExcelWriter(path + '\\' + "原始分概括(语文).xlsx")
 
+        sql = "select count(*) from kscj where yw!=0"
+        self.cursor(sql)
+        total = self.cursor.fetchone()[0]
+
+        df = pd.DataFrame(data=None,columns=['一分段','人数','百分比','累计百分比'])
+
+        sql = "select yw,count(yw) from kscj where yw!=0 group by (yw) order by yw desc"
+        self.cursor.execute(sql)
+        results = self.cursor.fetchall()
+
+        num = 0
+
+        for result in results:
+            row = []
+            row.append(result[0])
+            row.append(result[1])
+            row.append(result[1]/total)
+            num += result[1]
+            row.append(num/total)
+            df.loc[len(df)] = row
+
+        df.to_excel(writer,index=None,sheet_name="全省考生一分段(语文)")
+
+        sql = "select count(*) from kscj where yw!=0 and kl=1"
+        self.cursor(sql)
+        total = self.cursor.fetchone()[0]
+
+        df = pd.DataFrame(data=None, columns=['一分段', '人数', '百分比', '累计百分比'])
+
+        sql = "select yw,count(yw) from where yw!=0 and kl=1 kscj group by (yw) order by yw desc"
+        self.cursor.execute(sql)
+        results = self.cursor.fetchall()
+
+        num = 0
+
+        for result in results:
+            row = []
+            row.append(result[0])
+            row.append(result[1])
+            row.append(result[1] / total)
+            num += result[1]
+            row.append(num / total)
+            df.loc[len(df)] = row
+
+        df.to_excel(writer, index=None, sheet_name="全省理科考生一分段(语文)")
+
+        sql = "select count(*) from kscj where yw!=0 and kl=2"
+        self.cursor(sql)
+        total = self.cursor.fetchone()[0]
+
+        df = pd.DataFrame(data=None, columns=['一分段', '人数', '百分比', '累计百分比'])
+
+        sql = "select yw,count(yw) from where yw!=0 and kl=2 kscj group by (yw) order by yw desc"
+        self.cursor.execute(sql)
+        results = self.cursor.fetchall()
+
+        num = 0
+
+        for result in results:
+            row = []
+            row.append(result[0])
+            row.append(result[1])
+            row.append(result[1] / total)
+            num += result[1]
+            row.append(num / total)
+            self.set_list_precision(row)
+            df.loc[len(df)] = row
+
+        df.to_excel(writer, index=None, sheet_name="全省文科考生一分段(语文)")
+        writer.save()
 

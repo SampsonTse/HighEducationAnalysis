@@ -113,10 +113,27 @@ def dtfx_city_img(dsh):
 
     yw.DTFX_PROVINCE()
 
-import math
+# 省级报告 各市答题情况
+def province_gsdtqk():
+    yw = yuwen.DTFX()
+    lksx = likeshuxue.DTFX()
+    wksx = wenkeshuxue.DTFX()
+    yy = yingyu.DTFX()
+    lkzh = likezonghe.DTFX()
+    wkzh = wenkezonghe.DTFX()
+
+    yw.GSQKFX_PROVINCE()
+    lksx.GSQKFX_PROVINCE()
+    wksx.GSQKFX_PROVINCE()
+    yy.GSQKFX_PROVINCE()
+    lkzh.GSQKFX_PROVINCE()
+    wkzh.GSQKFX_PROVINCE()
+
 
 if __name__ == '__main__':
 
-    # dtfx_appendix_city('01')
     dtfx_city_img('01')
 
+    a = np.array([[0,1,2],[0,1,3],[0,1,3],[0,1,3],[0,1,3]])
+    a = np.delete(a,[1,2],axis=1)
+    print(a)

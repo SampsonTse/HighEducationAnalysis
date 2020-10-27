@@ -344,7 +344,7 @@ class DTFX:
         hjs = [["1", "3"], ["2", "4"]]
         ywjs = [["1", "2"], ["3", "4"]]
 
-        writer = pd.ExcelWriter(path + '\\' + "全省考生答题分析总体概括(文科综合).xlsx")
+        writer = pd.ExcelWriter(path + '\\' + "全省考生答题分析原始分概括(文科综合).xlsx")
 
         # 全省考生
         df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数'])
@@ -653,3 +653,101 @@ class DTFX:
         writer.save()
 
 
+    # 省级报告 各市考生成绩比较
+    def GSQKFX_PROVINCE(self):
+        sql = "select ds_h,mc from c_ds"
+        self.cursor.execute(sql)
+        dss = self.cursor.fetchall()
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + "全省"
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + "各市情况分析(文科综合).xlsx")
+
+        df = pd.DataFrame(data=None,columns=["地市代码","地市全称","人数","比率","平均分","标准差","差异系数(%)"])
+
+        # 文科
+        row = []
+        row.append("00")
+        row.append("全省")
+        sql = "select count(*) from kscj where zh!=0 and kl=2"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+
+        sql = "select count(*) as num,avg(zh),stddev_samp(zh) from kscj where zh!=0 and kl=2"
+        self.cursor.execute(sql)
+        item = self.cursor.fetchone()
+        row.append(item[0])
+        row.append((item[0] / total) * 100)
+        row.append(item[1])
+        row.append(item[2])
+        row.append(item[2] / item[1])
+        self.set_list_precision(row)
+        df.loc[len(df)] = row
+
+        for ds in dss:
+            row = []
+            row.append(ds[0])
+            row.append(ds[1])
+
+
+            sql = r"select count(*) as num,avg(zh),stddev_samp(zh) from kscj where zh!=0 and ksh like '" + ds[0] + r"%' and kl=2"
+            self.cursor.execute(sql)
+            item = self.cursor.fetchone()
+            row.append(item[0])
+            row.append((item[0] / total) * 100)
+            row.append(item[1])
+            row.append(item[2])
+            row.append(item[2] / item[1])
+            self.set_list_precision(row)
+            df.loc[len(df)] = row
+
+        df.to_excel(writer, index=None, sheet_name="各市文科考生成绩比较(文科综合)")
+        writer.save()
+
+    # 省级报告(附录) 原始分概括
+    def YSFGK_PROVINCE_APPENDIX(self):
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析(附录)"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + "全省"
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + "原始分概括(文科综合).xlsx")
+
+        sql = "select count(*) from kscj where zh!=0 and kl=2"
+        self.cursor(sql)
+        total = self.cursor.fetchone()[0]
+
+        df = pd.DataFrame(data=None, columns=['一分段', '人数', '百分比', '累计百分比'])
+
+        sql = "select zh,count(zh) from where zh!=0 and kl=2 kscj group by (zh) order by zh desc"
+        self.cursor.execute(sql)
+        results = self.cursor.fetchall()
+
+        num = 0
+
+        for result in results:
+            row = []
+            row.append(result[0])
+            row.append(result[1])
+            row.append(result[1] / total)
+            num += result[1]
+            row.append(num / total)
+            self.set_list_precision(row)
+            df.loc[len(df)] = row
+
+        df.to_excel(writer, index=None, sheet_name="全省考生一分段(文科综合)")
+
+        writer.save()
