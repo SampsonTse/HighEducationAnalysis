@@ -1130,7 +1130,8 @@ class DTFX:
         df = pd.DataFrame(data=None,columns=["题号","分值","平均分","标准差","难度","区分度"])
 
         idxs = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13]
-        xths = [6, 8, 9, 15, 16, 20, 21, 22]
+        # xths = [6, 8, 9, 15, 16, 20, 21, 22]
+        xths = [21,22]
         txt = ["01", "02", "03", "04", "05", "07", "10", "11", "12", "14", "17", "18", "19", "06", "08", "09", "15",
                "16", "20", "21", "22"]
 
@@ -1190,6 +1191,7 @@ class DTFX:
 
         for xth in xths:
             row = []
+            print(xth)
             if xth in [6,8,9,15,16,20]:
                 num = 6
                 row.append(num)
@@ -1199,6 +1201,7 @@ class DTFX:
             else:
                 num = 60
                 row.append(num)
+            print(num)
 
             sql = "select avg(xtval),STDDEV_SAMP(xtval) from T_GKPJ2020_TSJBNKSXT sxt " \
                   "right join kscj on sxt.ksh = kscj.ksh where kmh = 001 and dth ="+str(xth)
@@ -1209,29 +1212,29 @@ class DTFX:
             std = result[1]
             diffculty = mean/num
 
-            sql = r"select sum(xtval) from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh where sxt.kmh=001 and sxt.dth="+str(xth)+" GROUP BY sxt.ksh"
+            sql = r"select sum(xtval) from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
+                  r"where sxt.kmh = 001 and sxt.dth=" + str(xth) + r"  GROUP BY sxt.ksh"
             print(sql)
             self.cursor.execute(sql)
-            xt_score = np.array(self.cursor.fetchall(),dtype="float64").flatten()
+            xt_score = np.array(self.cursor.fetchall(), dtype='float64').flatten()
 
-            sql = r"select yw from kscj right join (select a.*,rownum rn from(select sxt.ksh,sum(xtval) " \
-                  r"from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh where sxt.kmh=001 " \
-                  r"and sxt.dth="+str(xth)+" GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn"
+            sql = r"select yw from kscj right join " \
+                  r"(select a.*,rownum rn from (select sxt.ksh,sum(xtval) from " \
+                  r"T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
+                  r"where kmh = 001 and dth=" + str(xth) + r" GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn "
             print(sql)
             self.cursor.execute(sql)
-            zf_score = np.array(self.cursor.fetchall(),dtype="float64").flatten()
-
-            n = len(xt_score)
+            zf_score = np.array(self.cursor.fetchall(), dtype='float64').flatten()
 
             print(zf_score)
             print(xt_score)
-            print(n)
 
-            D_a =  n*np.sum(xt_score * zf_score)
+            n = len(xt_score)
+
+            D_a = n * np.sum(xt_score * zf_score)
             D_b = np.sum(zf_score) * np.sum(xt_score)
-            D_c = n * np.sum(xt_score**2) - np.sum(xt_score)**2
-            D_d = n * np.sum(zf_score**2) - np.sum(zf_score)**2
-
+            D_c = n * np.sum(xt_score ** 2) - np.sum(xt_score) ** 2
+            D_d = n * np.sum(zf_score ** 2) - np.sum(zf_score) ** 2
 
             qfd = (D_a - D_b) / (math.sqrt(D_c) * math.sqrt(D_d))
 
@@ -1247,6 +1250,8 @@ class DTFX:
             y.append(qfd)
 
 
+        num = 10.0
+
         sql = "select avg(xtval),STDDEV_SAMP(xtval) from T_GKPJ2020_TSJBNKSXT sxt " \
               "right join kscj on sxt.ksh = kscj.ksh where kmh = 001 and (dth=13 or dth=23)"
 
@@ -1256,13 +1261,19 @@ class DTFX:
         std = result[1]
         diffculty = mean / num
 
-        sql = r"select sum(xtval) from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh where sxt.kmh=001 and (dth=13 or dth=23) GROUP BY sxt.ksh"
+        sql = r"select sum(xtval) from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
+              r"where sxt.kmh = 001 and (sxt.dth=13 or sxt.dth=23)  GROUP BY sxt.ksh"
+        print(sql)
         self.cursor.execute(sql)
-        xt_score = np.array(self.cursor.fetchall()).flatten()
+        xt_score = np.array(self.cursor.fetchall(), dtype='float64').flatten()
 
-        sql = r"select yw from kscj right join (select a.*,rownum rn from(select sxt.ksh,sum(xtval) " \
-              r"from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh where sxt.kmh=001 " \
-              r"and (dth=13 or dth=23) GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn"
+        sql = r"select yw from kscj right join " \
+              r"(select a.*,rownum rn from (select sxt.ksh,sum(xtval) from " \
+              r"T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
+              r"where kmh = 001 and (dth=13 or dth=23 GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn "
+        print(sql)
+        self.cursor.execute(sql)
+        zf_score = np.array(self.cursor.fetchall(), dtype='float64').flatten()
 
         self.cursor.execute(sql)
         zf_score = np.array(self.cursor.fetchall()).flatten()
@@ -1275,7 +1286,7 @@ class DTFX:
         D_d = n * np.sum(zf_score ** 2) - np.sum(zf_score) ** 2
 
         qfd = (D_a - D_b) / (math.sqrt(D_c) * math.sqrt(D_d))
-
+        print(qfd)
         x.append(diffculty)
         y.append(qfd)
 
@@ -1635,6 +1646,7 @@ class DTFX:
 
             qfd = (D_a-D_b) / (math.sqrt(D_c) * math.sqrt(D_d))
             y.append(qfd)
+            print(y)
 
         num = 10.0
 

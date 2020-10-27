@@ -113,10 +113,10 @@ def dtfx_city_img(dsh):
 
     yw.DTFX_PROVINCE()
 
+import math
+
 if __name__ == '__main__':
 
     # dtfx_appendix_city('01')
     dtfx_city_img('01')
-
-
 
