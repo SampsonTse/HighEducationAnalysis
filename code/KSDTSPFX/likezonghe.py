@@ -727,12 +727,12 @@ class DTFX:
         writer = pd.ExcelWriter(path + '\\' + "原始分概括(理科综合).xlsx")
 
         sql = "select count(*) from kscj where zh!=0 and kl=1"
-        self.cursor(sql)
+        self.cursor.execute(sql)
         total = self.cursor.fetchone()[0]
 
         df = pd.DataFrame(data=None, columns=['一分段', '人数', '百分比', '累计百分比'])
 
-        sql = "select zh,count(zh) from where zh!=0 and kl=1 kscj group by (zh) order by zh desc"
+        sql = "select zh,count(zh) from kscj where zh!=0 and kl=1  group by (zh) order by zh desc"
         self.cursor.execute(sql)
         results = self.cursor.fetchall()
 
@@ -742,9 +742,9 @@ class DTFX:
             row = []
             row.append(result[0])
             row.append(result[1])
-            row.append(result[1] / total)
+            row.append((result[1] / total) * 100)
             num += result[1]
-            row.append(num / total)
+            row.append((num / total) * 100)
             self.set_list_precision(row)
             df.loc[len(df)] = row
 

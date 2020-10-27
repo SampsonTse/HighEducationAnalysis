@@ -9,8 +9,8 @@ from CJGK import ZFFB_IMG
 import cx_Oracle
 import numpy as np
 
-# 市级报告 总体概括 图片
-def ztgk_city_img(dsh):
+
+def city(dsh):
     yw = yuwen.DTFX()
     lksx = likeshuxue.DTFX()
     wksx = wenkeshuxue.DTFX()
@@ -18,87 +18,39 @@ def ztgk_city_img(dsh):
     lkzh = likezonghe.DTFX()
     wkzh = wenkezonghe.DTFX()
 
-    yw.ZTJG_CITY_IMG(dsh)
-    lksx.ZTJG_CITY_IMG(dsh)
-    wksx.ZTJG_CITY_IMG(dsh)
-    yy.ZTJG_CITY_IMG(dsh)
-    lkzh.ZTJG_CITY_IMG(dsh)
-    wkzh.ZTJG_CITY_IMG(dsh)
-
-# 市级报告 总体概括 表格
-def ztgk_city_table(dsh):
-    yw = yuwen.DTFX()
-    lksx = likeshuxue.DTFX()
-    wksx = wenkeshuxue.DTFX()
-    yy = yingyu.DTFX()
-    lkzh = likezonghe.DTFX()
-    wkzh = wenkezonghe.DTFX()
-
-
-    # yw.ZTKG_CITY_TABLE(dsh)
-    lksx.ZTKG_CITY_TABLE(dsh)
-    # wksx.ZTKG_CITY_TABLE(dsh)
-    # yy.ZTKG_CITY_TABLE(dsh)
-    # lkzh.ZTKG_CITY_TABLE(dsh)
-    # wkzh.ZTKG_CITY_TABLE(dsh)
-
-# 市级报告 单题分析 表格
-def dtfx_city_table(dsh):
-
-    yw = yuwen.DTFX()
+    yw.ZTGK_CITY_TABLE(dsh)
+    yw.ZTGK_CITY_IMG(dsh)
     yw.DTFX_CITY_TABLE(dsh)
-    lksx = likeshuxue.DTFX()
-    wksx = wenkeshuxue.DTFX()
-    yy = yingyu.DTFX()
-
-    # lksx.DTFX_CITY_TABLE(dsh)
-    # wksx.DTFX_CITY_TABLE(dsh)
-    # yy.DTFX_CITY_TABLE(dsh)
-
-# 省级报告 总体概括 表格
-def ztgt_province_table():
-    yw = yuwen.DTFX()
-    lksx = likeshuxue.DTFX()
-    wksx = wenkeshuxue.DTFX()
-    yy = yingyu.DTFX()
-    lkzh = likezonghe.DTFX()
-    wkzh = wenkezonghe.DTFX()
-
-    yw.ZTKG_PROVINCE_TABLE()
-    lksx.ZTKG_PROVINCE_TABLE()
-    wksx.ZTKG_PROVINCE_TABLE()
-    yy.ZTKG_PROVINCE_TABLE()
-    lkzh.ZTKG_PROVINCE_TABLE()
-    wkzh.ZTKG_PROVINCE_TABLE()
-
-# 市级报告附录 原始分分析
-def ysffx_city_table(dsh):
-    yw = yuwen.DTFX()
-    lksx = likeshuxue.DTFX()
-    wksx = wenkeshuxue.DTFX()
-    yy = yingyu.DTFX()
-    lkzh = likezonghe.DTFX()
-    wkzh = wenkezonghe.DTFX()
-
-    yw.YSFFX_CITY_TABLE(dsh)
-    lksx.YSFFX_CITY_TABLE(dsh)
-    yy.YSFFX_CITY_TABLE(dsh)
-    wksx.YSFFX_CITY_TABLE(dsh)
-    lkzh.YSFFX_CITY_TABLE(dsh)
-    wkzh.YSFFX_CITY_TABLE(dsh)
-
-# 市级报告附录 单题分析
-def dtfx_appendix_city(dsh):
-    yw = yuwen.DTFX()
-    lksx = likeshuxue.DTFX()
-    wksx = wenkeshuxue.DTFX()
-    yy = yingyu.DTFX()
-
-    wksx.DTFX_CITY_APPENDIX(dsh)
     yw.DTFX_CITY_APPENDIX(dsh)
-    lksx.DTFX_CITY_APPENDIX(dsh)
-    yy.DTFX_CITY_APPENDIX(dsh)
+    yw.YSFFX_CITY_TABLE(dsh)
 
+    lksx.ZTGK_CITY_TABLE(dsh)
+    lksx.ZTGK_CITY_IMG(dsh)
+    lksx.DTFX_CITY_TABLE(dsh)
+    lksx.DTFX_CITY_APPENDIX(dsh)
+    lksx.YSFFX_CITY_TABLE(dsh)
+
+    wksx.ZTGK_CITY_TABLE(dsh)
+    wksx.ZTGK_CITY_TABLE(dsh)
+    wksx.DTFX_CITY_IMG(dsh)
+    wksx.DTFX_CITY_APPENDIX(dsh)
+    wksx.YSFFX_CITY_TABLE(dsh)
+
+    yy.ZTGK_CITY_TABLE(dsh)
+    yy.ZTGK_CITY_IMG(dsh)
+    yy.DTFX_CITY_TABLE(dsh)
+    yy.DTFX_CITY_APPENDIX(dsh)
+    yy.YSFFX_CITY_TABLE(dsh)
+
+
+    lkzh.ZTGK_CITY_TABLE(dsh)
+    lkzh.ZTGK_CITY_TABLE(dsh)
+    lkzh.YSFFX_CITY_TABLE(dsh)
+
+
+    wkzh.ZTGK_CITY_TABLE(dsh)
+    wkzh.ZTGK_CITY_IMG(dsh)
+    wkzh.YSFFX_CITY_TABLE(dsh)
 
 def dtfx_city_img(dsh):
     yw = yuwen.DTFX()
@@ -113,8 +65,7 @@ def dtfx_city_img(dsh):
 
     yw.DTFX_PROVINCE()
 
-# 省级报告 各市答题情况
-def province_gsdtqk():
+def province():
     yw = yuwen.DTFX()
     lksx = likeshuxue.DTFX()
     wksx = wenkeshuxue.DTFX()
@@ -122,18 +73,42 @@ def province_gsdtqk():
     lkzh = likezonghe.DTFX()
     wkzh = wenkezonghe.DTFX()
 
-    yw.GSQKFX_PROVINCE()
-    lksx.GSQKFX_PROVINCE()
-    wksx.GSQKFX_PROVINCE()
-    yy.GSQKFX_PROVINCE()
-    lkzh.GSQKFX_PROVINCE()
-    wkzh.GSQKFX_PROVINCE()
+    yw.ZTGK_PROVINCE_TABLE()
+    yw.YSFGK_PROVINCE_APPENDIX()
+
+    lksx.ZTGK_PROVINCE_TABLE()
+    lksx.YSFGK_PROVINCE_APPENDIX()
+
+    wksx.ZTGK_PROVINCE_TABLE()
+    wksx.YSFGK_PROVINCE_APPENDIX()
+
+    yy.ZTGK_PROVINCE_TABLE()
+    yy.YSFGK_PROVINCE_APPENDIX()
+
+
+    lkzh.ZTGK_PROVINCE_TABLE()
+    lkzh.YSFGK_PROVINCE_APPENDIX()
+
+    wkzh.ZTGK_PROVINCE_TABLE()
+    wkzh.YSFGK_PROVINCE_APPENDIX()
+
+
+
+
 
 
 if __name__ == '__main__':
 
     dtfx_city_img('01')
 
-    a = np.array([[0,1,2],[0,1,3],[0,1,3],[0,1,3],[0,1,3]])
-    a = np.delete(a,[1,2],axis=1)
-    print(a)
+    province()
+
+    dshs = ["01","02","03","04","05","06","07","08","09","12","13","14","15","16","17","18","19","20","51","52","53"]
+
+    for dsh in dshs:
+        city(dsh)
+
+
+
+
+
