@@ -83,5 +83,5 @@ class zffb_img:
         plt.xlabel('得分')
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center',bbox_to_anchor=(1.05, 1.05))
-        plt.savefig(path + '\\'+kl_mc+'总分分布.png', dpi=600)
+        plt.savefig(path + '\\'+kl_mc+'总分分布.png', dpi=1200)
         plt.close()

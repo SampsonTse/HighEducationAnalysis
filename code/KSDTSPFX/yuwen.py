@@ -858,8 +858,8 @@ class DTFX:
         plt.savefig(path + '\\地市及全省理科考生单科成绩分布(语文).png', dpi=1200)
         plt.close()
 
-    # 省级报告 总体概括
-    def ZTGK_PROVINCE_TABLE(self):
+    # 省级报告 原始分概括
+    def YSFGK_PROVINCE_TABLE(self):
 
         sql = ""
 
@@ -1112,6 +1112,106 @@ class DTFX:
 
         writer.save()
 
+    # 省级报告 原始分概括 画图
+    def YSFGK_PROVINCE_IMG(self):
+
+        sql = ""
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + "全省"
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+
+        plt.rcParams['figure.figsize'] = (15.0, 6)
+        plt.xlim((0, 150))
+        ax = plt.gca()
+        ax.spines['right'].set_color('none')
+        ax.spines['top'].set_color('none')
+
+        sql = "select count(*) from kscj where yw!=0"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+
+        score = [None] * 151
+        sql = "select yw,count(yw) from kscj where yw!=0 group by yw order by yw desc"
+        self.cursor.execute(sql)
+        items = self.cursor.fetchall()
+
+        for item in items:
+            score[item[0]] =item[1] / total
+
+        x = list(range(151))
+
+        plt.plot(x, score, color='springgreen', marker='.', label='全省')
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(25))
+        plt.xlabel('得分')
+        plt.ylabel('人数百分比（%）')
+        plt.legend(loc='upper center', bbox_to_anchor=(1.05, 1.05))
+        plt.savefig(path + '\\'  + '全省考生单科成绩分布(语文).png', dpi=1200)
+        plt.close()
+
+        plt.rcParams['figure.figsize'] = (15.0, 6)
+        plt.xlim((0, 150))
+        ax = plt.gca()
+        ax.spines['right'].set_color('none')
+        ax.spines['top'].set_color('none')
+
+        sql = "select count(*) from kscj where yw!=0 and kl = 2"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+
+        score = [None] * 151
+        sql = "select yw,count(yw) from kscj where yw!=0 and kl = 2 group by yw order by yw desc"
+        self.cursor.execute(sql)
+        items = self.cursor.fetchall()
+
+        for item in items:
+            score[item[0]] = item[1] / total
+
+        x = list(range(151))
+
+        plt.plot(x, score, color='springgreen', marker='.', label='全省')
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(25))
+        plt.xlabel('得分')
+        plt.ylabel('人数百分比（%）')
+        plt.legend(loc='upper center', bbox_to_anchor=(1.05, 1.05))
+        plt.savefig(path + '\\' + '全省文科考生单科成绩分布(语文).png', dpi=1200)
+        plt.close()
+
+        plt.rcParams['figure.figsize'] = (15.0, 6)
+        plt.xlim((0, 150))
+        ax = plt.gca()
+        ax.spines['right'].set_color('none')
+        ax.spines['top'].set_color('none')
+
+        sql = "select count(*) from kscj where yw!=0 and kl=1"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+
+        score = [None] * 151
+        sql = "select yw,count(yw) from kscj where yw!=0 and kl=1 group by yw order by yw desc"
+        self.cursor.execute(sql)
+        items = self.cursor.fetchall()
+
+        for item in items:
+            score[item[0]] = item[1] / total
+
+        x = list(range(151))
+
+        plt.plot(x, score, color='springgreen', marker='.', label='全省')
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(25))
+        plt.xlabel('得分')
+        plt.ylabel('人数百分比（%）')
+        plt.legend(loc='upper center', bbox_to_anchor=(1.05, 1.05))
+        plt.savefig(path + '\\' + '全省理科考生单科成绩分布(语文).png', dpi=1200)
+        plt.close()
+
     # 省级报告 单题分析(图、表)
     def DTFX_PROVINCE(self):
         sql = ""
@@ -1129,8 +1229,8 @@ class DTFX:
         writer = pd.ExcelWriter(path + '\\' + "考生单题分析(语文).xlsx")
         df = pd.DataFrame(data=None,columns=["题号","分值","平均分","标准差","难度","区分度"])
 
-        idxs = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13]
-        xths = [6, 8, 9, 15, 14, 16, 20, 21, 22]
+        idxs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+        xths = [6, 8, 9, 15, 16, 20, 21, 22]
         # xths = [22]
         txt = ["01", "02", "03", "04", "05", "07", "10", "11", "12", "14", "17", "18", "19", "06", "08", "09", "15",
                "16", "20", "21", "22","13"]
@@ -1215,7 +1315,6 @@ class DTFX:
 
             self.cursor.execute(sql)
             result = np.array(self.cursor.fetchall(),dtype="float64")
-
             zf_score = np.array(result[:, 0],dtype="float64")
             xt_score = np.array(result[:,1],dtype="float64")
 
@@ -1283,6 +1382,7 @@ class DTFX:
         self.set_list_precision(row)
         rows.append(row)
         print(row)
+        print(rows)
 
 
         for i in range(len(rows)):
@@ -1293,9 +1393,14 @@ class DTFX:
         df.to_excel(writer,index=None,sheet_name="考生单题作答情况(语文)")
         writer.save()
 
+        plt.figure()
+        plt.rcParams['figure.figsize'] = (15.0, 6)
+        ax = plt.gca()
+        ax.spines['right'].set_color('none')
+        ax.spines['top'].set_color('none')
+
         plt.xlim((0, 1))
         plt.ylim((0, 1))
-        ax = plt.gca()
         ax.spines['right'].set_color('none')
         ax.spines['top'].set_color('none')
         ax.xaxis.set_major_locator(ticker.MultipleLocator(0.1))
@@ -1306,6 +1411,7 @@ class DTFX:
             plt.annotate(txt[i], xy=(x[i], y[i]), xytext=(x[i] + 0.008, y[i] + 0.008),
                          arrowprops=dict(arrowstyle='->',connectionstyle="arc3,rad = .2"))
         plt.savefig(path + '\\各题难度-区分度分布散点图(语文).png', dpi=1200)
+        plt.close()
 
     # 市级报告 单题分析
     def DTFX_CITY_TABLE(self,dsh):
@@ -1608,7 +1714,7 @@ class DTFX:
             x.append(difficulty)
 
             sql = r"select yw,b.sum from kscj right join " \
-                  r"(select a.*,rownum rn from (select sum(xtval) as sum,sxt.ksh from T_GKPJ2020_TSJBNKSXT sxt " \
+                  r"(select a.*,rownum rn from (select sum(xtval)  sum,sxt.ksh from T_GKPJ2020_TSJBNKSXT sxt " \
                   r"right join kscj on kscj.ksh = sxt.ksh where kmh = 001 " \
                   r"and sxt.ksh like '"+dsh+r"%' and dth="+str(xth)+" GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn"
 
@@ -1638,20 +1744,17 @@ class DTFX:
         difficulty = self.cursor.fetchone()[0] / total / num  # 难度
         x.append(difficulty)
 
-        sql = r"select sum(xtval),sxt.ksh from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
-              r"where sxt.kmh = 001 and (dth=13 or dth=23) and sxt.ksh like '" + dsh + r"%' GROUP BY sxt.ksh"
-        self.cursor.execute(sql)
-        xt_score = np.array(self.cursor.fetchall(), dtype='float64')
-        xt_score = np.delete(xt_score, -1, axis=1).flatten()
 
-        sql = r"select yw from kscj right join " \
-              r"(select a.*,rownum rn from (select sum(xtval),sxt.ksh from " \
+        sql = r"select yw,b.sum from kscj right join " \
+              r"(select a.*,rownum rn from (select sum(xtval)  sum,sxt.ksh from " \
               r"T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
               r"where kmh = 001 and (dth=13 or dth=23) and sxt.ksh " \
               r"like '" + dsh + r"%' GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn "
         print(sql)
         self.cursor.execute(sql)
-        zf_score = np.array(self.cursor.fetchall(),dtype='float64').flatten()
+        result = np.array(self.cursor.fetchall(), dtype="float64")
+        zf_score = np.array(result[:, 0], dtype="float64")
+        xt_score = np.array(result[:, 1], dtype="float64")
 
         n = len(xt_score)
 
@@ -1679,7 +1782,7 @@ class DTFX:
         for i in range(len(x)):
             plt.annotate(txt[i], xy=(x[i], y[i]), xytext=(x[i] + 0.008, y[i] + 0.008),arrowprops=dict(arrowstyle='-'))
         plt.savefig(path + '\\各题难度-区分度分布散点图(语文).png', dpi=1200)
-        plt.show()
+        plt.close()
 
     # 市级报告附录 原始分概括
     def YSFFX_CITY_TABLE(self,dsh):

@@ -325,8 +325,8 @@ class DTFX:
         plt.savefig(path + '\\地市及全省考生单科成绩分布(理科综合).png', dpi=1200)
         plt.close()
 
-    # 省级报告 总体概括
-    def ZTGK_PROVINCE_TABLE(self):
+    # 省级报告 原始分概括
+    def YSFGK_PROVINCE_TABLE(self):
 
         sql = ""
 
@@ -579,6 +579,50 @@ class DTFX:
 
         writer.save()
 
+    # 省级报告 原始分概括 画图
+    def YSFGK_PROVINCE_IMG(self):
+
+        sql = ""
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + "全省"
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        plt.rcParams['figure.figsize'] = (15.0, 6)
+        plt.xlim((0, 300))
+        ax = plt.gca()
+        ax.spines['right'].set_color('none')
+        ax.spines['top'].set_color('none')
+
+        sql = "select count(*) from kscj where zh!=0 and kl=1"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+
+        score = [None] * 301
+        sql = "select zh,count(zh) from kscj where zh!=0 and kl=1 group by zh order by zh desc"
+        self.cursor.execute(sql)
+        items = self.cursor.fetchall()
+
+        for item in items:
+            score[item[0]] = item[1] / total
+
+        x = list(range(301))
+
+        plt.plot(x, score, color='springgreen', marker='.', label='全省')
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(25))
+        plt.xlabel('得分')
+        plt.ylabel('人数百分比（%）')
+        plt.legend(loc='upper center', bbox_to_anchor=(1.05, 1.05))
+        plt.savefig(path + '\\' + '全省考生单科成绩分布(理科综合).png', dpi=1200)
+        plt.close()
+
+
     # 市级报告附录 原始分分析
     def YSFFX_CITY_TABLE(self,dsh):
 
@@ -709,7 +753,7 @@ class DTFX:
             self.set_list_precision(row)
             df.loc[len(df)] = row
 
-        df.to_excel(writer, index=None, sheet_name="各市理科考生成绩比较(理科综合)")
+        df.to_excel(writer, index=None, sheet_name="各市考生成绩比较(理科综合)")
         writer.save()
 
     # 省级报告(附录) 原始分概括
