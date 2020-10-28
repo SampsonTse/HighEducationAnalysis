@@ -40,12 +40,12 @@ class city_report:
         self.wkzh.ZTGK_CITY_TABLE(self.dsh)
         self.lkzh.ZTGK_CITY_TABLE(self.dsh)
 
-    # 单题分析(图没有验证)
+    # 单题分析
     def dtfx(self):
-        self.yw.DTFX_CITY_TABLE(self.dsh)
-        self.kwsx.DTFX_CITY_TABLE(self.dsh)
-        self.lksx.DTFX_CITY_TABLE(self.dsh)
-        self.yy.DTFX_CITY_TABLE(self.dsh)
+        # self.yw.DTFX_CITY_TABLE(self.dsh)
+        # self.kwsx.DTFX_CITY_TABLE(self.dsh)
+        # self.lksx.DTFX_CITY_TABLE(self.dsh)
+        # self.yy.DTFX_CITY_TABLE(self.dsh)
 
         self.yw.DTFX_CITY_IMG(self.dsh)
         self.wksx.DTFX_CITY_IMG(self.dsh)

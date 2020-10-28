@@ -78,7 +78,7 @@ class pro_report_appendix:
         del self.lksx
         del self.yy
         del self.wkzh
-        del self.lkzx
+        del self.lkzh
 
     # 原始分概括
     def ysfgk(self):

@@ -1439,8 +1439,7 @@ class DTFX:
             qfd = (D_a - D_b) / (math.sqrt(D_c) * math.sqrt(D_d))
             y.append(qfd)
 
-
-        plt.scatter(x, y)
+        plt.rcParams['figure.figsize'] = (15.0, 6)
         plt.scatter(x, y)
         plt.xlim((0, 1))
         plt.ylim((0, 1))
@@ -1649,9 +1648,9 @@ class DTFX:
         total = self.cursor.fetchone()[0]
 
         # 1/3
-        low = total / 3
+        low = int(total / 3)
         # 2/3
-        high = total / 1.5
+        high = int(total / 1.5)
 
         idxs = range(1, 41)
 
@@ -1750,22 +1749,22 @@ class DTFX:
                     d_l = item[1]
                     d_t += d_l
 
-            row.append((a_t / (a_h + a_m + a_l)) * 100)  # 全部选A
+            row.append((a_t / (a_t+b_t+c_t+d_t)) * 100)  # 全部选A
             row.append((a_h / low) * 100)  # 高分组选A
             row.append((a_m / (high - low)) * 100)  # 中间组选A
             row.append((a_l / (total - high)) * 100)  # 低分组选A
 
-            row.append((b_t / (b_h + b_m + b_l)) * 100)  # 全部选B
+            row.append((b_t / (a_t+b_t+c_t+d_t)) * 100)  # 全部选B
             row.append((b_h / low) * 100)  # 高分组选B
             row.append((b_m / (high - low)) * 100)  # 中间组选B
             row.append((b_l / (total - high)) * 100)  # 低分组选B
 
-            row.append((c_t / (c_h + a_m + c_l)) * 100)  # 全部选C
+            row.append((c_t / (a_t+b_t+c_t+d_t)) * 100)  # 全部选C
             row.append((c_h / low) * 100)  # 高分组选C
             row.append((c_m / (high - low)) * 100)  # 中间组选C
             row.append((c_l / (total - high)) * 100)  # 低分组选C
 
-            row.append((d_t / (d_h + d_m + d_l)) * 100)  # 全部选D
+            row.append((d_t / (a_t+b_t+c_t+d_t)) * 100)  # 全部选D
             row.append((d_h / low) * 100)  # 高分组选D
             row.append((d_m / (high - low)) * 100)  # 中间组选D
             row.append((d_l / (total - high)) * 100)  # 低分组选D
@@ -1811,9 +1810,9 @@ class DTFX:
         total = self.cursor.fetchone()[0]
 
         # 1/3
-        low = total / 3
+        low = int(total / 3)
         # 2/3
-        high = total / 1.5
+        high = int(total / 1.5)
 
         idxs = range(1,41)
 
@@ -1912,22 +1911,22 @@ class DTFX:
                     d_l = item[1]
                     d_t += d_l
 
-            row.append((a_t / (a_h + a_m + a_l)) * 100)  # 全部选A
+            row.append((a_t / (a_t+b_t+c_t+d_t)) * 100)  # 全部选A
             row.append((a_h / low) * 100)  # 高分组选A
             row.append((a_m / (high - low)) * 100)  # 中间组选A
             row.append((a_l / (total - high)) * 100)  # 低分组选A
 
-            row.append((b_t / (b_h + b_m + b_l)) * 100)  # 全部选B
+            row.append((b_t / (a_t+b_t+c_t+d_t)) * 100)  # 全部选B
             row.append((b_h / low) * 100)  # 高分组选B
             row.append((b_m / (high - low)) * 100)  # 中间组选B
             row.append((b_l / (total - high)) * 100)  # 低分组选B
 
-            row.append((c_t / (c_h + a_m + c_l)) * 100)  # 全部选C
+            row.append((c_t / (a_t+b_t+c_t+d_t)) * 100)  # 全部选C
             row.append((c_h / low) * 100)  # 高分组选C
             row.append((c_m / (high - low)) * 100)  # 中间组选C
             row.append((c_l / (total - high)) * 100)  # 低分组选C
 
-            row.append((d_t / (d_h + d_m + d_l)) * 100)  # 全部选D
+            row.append((d_t / (a_t+b_t+c_t+d_t)) * 100)  # 全部选D
             row.append((d_h / low) * 100)  # 高分组选D
             row.append((d_m / (high - low)) * 100)  # 中间组选D
             row.append((d_l / (total - high)) * 100)  # 低分组选D

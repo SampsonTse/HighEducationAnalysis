@@ -837,7 +837,7 @@ class DTFX:
         txt = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17",
                "18", "19", "20", "21", "22", "23"]
 
-        plt.scatter(x, y)
+        plt.rcParams['figure.figsize'] = (15.0, 6)
         plt.scatter(x, y)
         plt.xlim((0, 1))
         plt.ylim((0, 1))
@@ -946,9 +946,9 @@ class DTFX:
         total = self.cursor.fetchone()[0]
 
         # 1/3
-        low = total / 3
+        low = int(total / 3)
         # 2/3
-        high = total / 1.5
+        high = int(total / 1.5)
 
         idxs = range(1, 13)
 
@@ -980,7 +980,7 @@ class DTFX:
                   r"(select * from (select a.*,rownum rn from (select ksh,sx from kscj " \
                   r"where kl=2  ORDER BY sx desc) a ) b" \
                   r" where b.rn BETWEEN 1 and " + str(low) + r") c on amx.ksh = c.ksh " \
-                  r"where amx.kmh=002 and amx.idx=" + str(idx) + r" GROUP BY amx.da"
+                  r"where amx.kmh=003 and amx.idx=" + str(idx) + r" GROUP BY amx.da"
             print(sql)
             self.cursor.execute(sql)
             items = []
@@ -1004,7 +1004,7 @@ class DTFX:
                   r"(select * from (select a.*,rownum rn from (select ksh,sx from kscj " \
                   r"where kl=2  ORDER BY sx desc) a ) b" \
                   r" where b.rn BETWEEN " + str(low + 1) + " and " + str(high) + r") c on amx.ksh = c.ksh " \
-                  r"where amx.kmh=002 and amx.idx=" + str(idx) + r" GROUP BY amx.da"
+                  r"where amx.kmh=003 and amx.idx=" + str(idx) + r" GROUP BY amx.da"
             print(sql)
             self.cursor.execute(sql)
             items = []
@@ -1028,7 +1028,7 @@ class DTFX:
                   r"(select * from (select a.*,rownum rn from (select ksh,sx from kscj " \
                   r"where kl=2  ORDER BY sx desc) a ) b" \
                   r" where b.rn BETWEEN " + str(high + 1) + " and " + str(total) + r") c on amx.ksh = c.ksh " \
-                  r"where amx.kmh=002 and amx.idx=" + str(idx) + r" GROUP BY amx.da"
+                  r"where amx.kmh=003 and amx.idx=" + str(idx) + r" GROUP BY amx.da"
             print(sql)
             self.cursor.execute(sql)
             items = []
@@ -1047,22 +1047,22 @@ class DTFX:
                     d_l = item[1]
                     d_t += d_l
 
-            row.append((a_t / (a_h + a_m + a_l)) * 100)  # 全部选A
+            row.append((a_t / (a_t+b_t+c_t+d_t)) * 100)  # 全部选A
             row.append((a_h / low) * 100)  # 高分组选A
             row.append((a_m / (high - low)) * 100)  # 中间组选A
             row.append((a_l / (total - high)) * 100)  # 低分组选A
 
-            row.append((b_t / (b_h + b_m + b_l)) * 100)  # 全部选B
+            row.append((b_t / (a_t+b_t+c_t+d_t)) * 100)  # 全部选B
             row.append((b_h / low) * 100)  # 高分组选B
             row.append((b_m / (high - low)) * 100)  # 中间组选B
             row.append((b_l / (total - high)) * 100)  # 低分组选B
 
-            row.append((c_t / (c_h + a_m + c_l)) * 100)  # 全部选C
+            row.append((c_t / (a_t+b_t+c_t+d_t)) * 100)  # 全部选C
             row.append((c_h / low) * 100)  # 高分组选C
             row.append((c_m / (high - low)) * 100)  # 中间组选C
             row.append((c_l / (total - high)) * 100)  # 低分组选C
 
-            row.append((d_t / (d_h + d_m + d_l)) * 100)  # 全部选D
+            row.append((d_t / (a_t+b_t+c_t+d_t)) * 100)  # 全部选D
             row.append((d_h / low) * 100)  # 高分组选D
             row.append((d_m / (high - low)) * 100)  # 中间组选D
             row.append((d_l / (total - high)) * 100)  # 低分组选D
@@ -1108,9 +1108,9 @@ class DTFX:
         total = self.cursor.fetchone()[0]
 
         # 1/3
-        low = total / 3
+        low = int(total / 3)
         # 2/3
-        high = total / 1.5
+        high = int(total / 1.5)
 
         idxs = range(1, 13)
 
@@ -1209,22 +1209,22 @@ class DTFX:
                     d_l = item[1]
                     d_t += d_l
 
-            row.append((a_t / (a_h + a_m + a_l)) * 100)  # 全部选A
+            row.append((a_t / (a_t+b_t+c_t+d_t)) * 100)  # 全部选A
             row.append((a_h / low) * 100)  # 高分组选A
             row.append((a_m / (high - low)) * 100)  # 中间组选A
             row.append((a_l / (total - high)) * 100)  # 低分组选A
 
-            row.append((b_t / (b_h + b_m + b_l)) * 100)  # 全部选B
+            row.append((b_t / (a_t+b_t+c_t+d_t)) * 100)  # 全部选B
             row.append((b_h / low) * 100)  # 高分组选B
             row.append((b_m / (high - low)) * 100)  # 中间组选B
             row.append((b_l / (total - high)) * 100)  # 低分组选B
 
-            row.append((c_t / (c_h + a_m + c_l)) * 100)  # 全部选C
+            row.append((c_t / (a_t+b_t+c_t+d_t)) * 100)  # 全部选C
             row.append((c_h / low) * 100)  # 高分组选C
             row.append((c_m / (high - low)) * 100)  # 中间组选C
             row.append((c_l / (total - high)) * 100)  # 低分组选C
 
-            row.append((d_t / (d_h + d_m + d_l)) * 100)  # 全部选D
+            row.append((d_t / (a_t+b_t+c_t+d_t)) * 100)  # 全部选D
             row.append((d_h / low) * 100)  # 高分组选D
             row.append((d_m / (high - low)) * 100)  # 中间组选D
             row.append((d_l / (total - high)) * 100)  # 低分组选D
@@ -1384,7 +1384,7 @@ class DTFX:
             row.append(num)
 
             sql = "select avg(kgval),STDDEV_SAMP(kgval) from T_GKPJ2020_TKSKGDAMX amx right join kscj" \
-                  " on kscj.ksh=amx.ksh where amx.kmh=002 and kscj.kl=2 and amx.idx = " + str(idx)
+                  " on kscj.ksh=amx.ksh where amx.kmh=003 and kscj.kl=2 and amx.idx = " + str(idx)
             print(sql)
             self.cursor.execute(sql)
             result = self.cursor.fetchone()
@@ -1395,7 +1395,7 @@ class DTFX:
             sql = "select sum(kgval) from T_GKPJ2020_TKSKGDAMX amx " \
                   "right join (select b.* from (select a.*,rownum rn from " \
                   "(select ksh,sx from kscj where kl=2 order by sx desc) a) b where rn BETWEEN 1 and " + str(ph_num) + ") c " \
-                  "on c.ksh = amx.ksh where kmh = 002 and idx = " + str(idx)
+                  "on c.ksh = amx.ksh where kmh = 003 and idx = " + str(idx)
             print(sql)
             self.cursor.execute(sql)
             ph = self.cursor.fetchone()[0] / ph_num / num
@@ -1403,7 +1403,7 @@ class DTFX:
             sql = "select sum(kgval) from T_GKPJ2020_TKSKGDAMX amx " \
                   "right join (select b.* from (select a.*,rownum rn from " \
                   "(select ksh,sx from kscj where kl=2 order by sx desc) a) b where rn BETWEEN " + str(total - ph_num) + " and " + str(total) + ") c on " \
-                  "c.ksh = amx.ksh where kmh = 002 and idx = " + str(idx)
+                  "c.ksh = amx.ksh where kmh = 003 and idx = " + str(idx)
             print(sql)
             self.cursor.execute(sql)
             pl = self.cursor.fetchone()[0] / ph_num / num
@@ -1437,7 +1437,7 @@ class DTFX:
             row.append(num)
 
             sql = "select avg(xtval),STDDEV_SAMP(xtval) from T_GKPJ2020_TSJBNKSXT sxt " \
-                  "right join kscj on sxt.ksh = kscj.ksh where kscj.kl=2 and kmh = 002 and dth =" + str(xth)
+                  "right join kscj on sxt.ksh = kscj.ksh where kscj.kl=2 and kmh = 003 and dth =" + str(xth)
             print(sql)
             self.cursor.execute(sql)
             result = self.cursor.fetchone()
@@ -1447,7 +1447,7 @@ class DTFX:
 
             sql = "select sx,b.sum from kscj right join " \
                   "(select a.*,rownum rn from (select sum(xtval)  sum,sxt.ksh from T_GKPJ2020_TSJBNKSXT sxt " \
-                  "right join kscj on kscj.ksh = sxt.ksh where kscj.kl=2 and kmh = 002 and dth=" + str(xth) + " GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn"
+                  "right join kscj on kscj.ksh = sxt.ksh where kscj.kl=2 and kmh = 003 and dth=" + str(xth) + " GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn"
 
             self.cursor.execute(sql)
             result = np.array(self.cursor.fetchall(), dtype="float64")
