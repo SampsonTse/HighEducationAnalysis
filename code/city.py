@@ -22,7 +22,7 @@ class city_report:
         del self.lksx
         del self.yy
         del self.wkzh
-        del self.lkzx
+        del self.lkzh
 
     # 总体概括
     def ztgk(self):
@@ -42,10 +42,10 @@ class city_report:
 
     # 单题分析
     def dtfx(self):
-        # self.yw.DTFX_CITY_TABLE(self.dsh)
-        # self.kwsx.DTFX_CITY_TABLE(self.dsh)
-        # self.lksx.DTFX_CITY_TABLE(self.dsh)
-        # self.yy.DTFX_CITY_TABLE(self.dsh)
+        self.yw.DTFX_CITY_TABLE(self.dsh)
+        self.wksx.DTFX_CITY_TABLE(self.dsh)
+        self.lksx.DTFX_CITY_TABLE(self.dsh)
+        self.yy.DTFX_CITY_TABLE(self.dsh)
 
         self.yw.DTFX_CITY_IMG(self.dsh)
         self.wksx.DTFX_CITY_IMG(self.dsh)
@@ -58,8 +58,8 @@ class city_report:
 
 
 class city_report_appendix:
-    def __init__(self,ksh):
-        self.ksh = ksh
+    def __init__(self,dsh):
+        self.dsh = dsh
         self.yw = yuwen.DTFX()
         self.lksx = likeshuxue.DTFX()
         self.wksx = wenkeshuxue.DTFX()
@@ -73,7 +73,7 @@ class city_report_appendix:
         del self.lksx
         del self.yy
         del self.wkzh
-        del self.lkzx
+        del self.lkzh
 
     # 原始分概括
     def ysfgk(self):
@@ -89,7 +89,7 @@ class city_report_appendix:
         self.yw.DTFX_CITY_APPENDIX(self.dsh)
         self.wksx.DTFX_CITY_APPENDIX(self.dsh)
         self.lksx.DTFX_CITY_APPENDIX(self.dsh)
-        self.wlsx.DTFX_CITY_APPENDIX(self.dsh)
+        self.yy.DTFX_CITY_APPENDIX(self.dsh)
 
     # 结构分析(暂时做不了)
     def jgfx(self):

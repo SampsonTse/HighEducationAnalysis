@@ -52,7 +52,7 @@ class DTFX:
         # 理科
         df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数', '平均分(全省)'])
 
-        sql = r'select count(a.SX) from kscj  a right join JBXX  b on a.KSH = b.KSH WHERE b.DS_H=' + dsh + r' and a.kl=1'
+        sql = r'select count(a.SX) from kscj  a right join JBXX  b on a.KSH = b.KSH WHERE b.DS_H=' + dsh + r' and a.kl=1 and a.sx!=0'
         print(sql)
         self.cursor.execute(sql)
         num = self.cursor.fetchone()[0]  # 总人数
@@ -190,7 +190,7 @@ class DTFX:
         df.loc[len(df)] = result
 
         # 计算维度为总计
-        sql = r"select count(A.SX)   num,AVG(A.SX)   mean,STDDEV_SAMP(A.SX)   std " \
+        sql = r"select count(A.SX)  num,AVG(A.SX)   mean,STDDEV_SAMP(A.SX)   std " \
               r"from kscj   a right join JBXX   b on a.KSH = b.KSH" \
               r" where b.DS_H=" + dsh + r" and a.kl=1 and a.SX!=0"
 
@@ -200,7 +200,7 @@ class DTFX:
         result = list(result)
         result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
 
-        sql = r"select AVG(A.SX)   mean from kscj   A right join JBXX   B on A.KSH = B.KSH and a.kl=1 where a.SX!=0"
+        sql = r"select AVG(A.SX)  mean from kscj   A right join JBXX   B on A.KSH = B.KSH and a.kl=1 where a.SX!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
@@ -620,170 +620,6 @@ class DTFX:
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center', bbox_to_anchor=(1.05, 1.05))
         plt.savefig(path + '\\' + '全省考生单科成绩分布(理科数学).png', dpi=1200)
-        plt.close()
-
-    # 省级报告 单题分析(图、表)
-    def DTFX_PROVINCE(self):
-        sql = ""
-
-        pwd = os.getcwd()
-        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
-        path = father_path + r"\考生答题分析"
-
-        if not os.path.exists(path):
-            os.makedirs(path)
-        path = path + "\\" + "全省"
-        if not os.path.exists(path):
-            os.makedirs(path)
-
-        writer = pd.ExcelWriter(path + '\\' + "考生单题分析(理科数学).xlsx")
-        df = pd.DataFrame(data=None, columns=["题号", "分值", "平均分", "标准差", "难度", "区分度"])
-
-        idxs = list(range(1,13))
-        xths = list(range(13,24))
-
-        x = []
-        y = []
-
-        sql = "select count(sx) from kscj"
-        self.cursor.execute(sql)
-        total = self.cursor.fetchone()[0]
-        ph_num = int(total * 0.27)
-
-        rows = []
-
-        for idx in idxs:
-            row = []
-
-            if idx<10:
-                row.append("0"+str(idx))
-            else:
-                row.append(str(idx))
-
-            num = 3.0
-            row.append(num)
-
-            sql = "select avg(kgval),STDDEV_SAMP(kgval) from T_GKPJ2020_TKSKGDAMX amx right join kscj" \
-                  " on kscj.ksh=amx.ksh where kscj.kl=1 amx.kmh=002 and amx.idx = " + str(idx)
-            print(sql)
-            self.cursor.execute(sql)
-            result = self.cursor.fetchone()
-            mean = result[0]
-            std = result[1]
-            diffculty = mean / num
-
-            sql = "select sum(kgval) from T_GKPJ2020_TKSKGDAMX amx " \
-                  "right join (select b.* from (select a.*,rownum rn from " \
-                  "(select ksh,sx from kscj order by sx desc) a) b where rn BETWEEN 1 and " + str(ph_num) + ") c " \
-                                                                                                            "on c.ksh = amx.ksh where kmh = 002 and idx = " + str(
-                idx)
-            print(sql)
-            self.cursor.execute(sql)
-            ph = self.cursor.fetchone()[0] / ph_num / num
-
-            sql = "select sum(kgval) from T_GKPJ2020_TKSKGDAMX amx " \
-                  "right join (select b.* from (select a.*,rownum rn from " \
-                  "(select ksh,sx from kscj order by sx desc) a) b where rn BETWEEN " + str(
-                total - ph_num) + " and " + str(total) + ") c on " \
-                                                         "c.ksh = amx.ksh where kmh = 002 and idx = " + str(idx)
-            print(sql)
-            self.cursor.execute(sql)
-            pl = self.cursor.fetchone()[0] / ph_num / num
-
-            qfd = ph - pl
-
-            row.append(mean)
-            row.append(std)
-            row.append(diffculty)
-            row.append(qfd)
-            print(row)
-            self.set_list_precision(row)
-            rows.append(row)
-
-            x.append(diffculty)
-            y.append(qfd)
-
-        for xth in xths:
-            row = []
-            row.append(str(xth))
-            if xth in [6, 8, 9, 15, 16, 20]:
-                num = 6.0
-            elif xth == 21:
-                num = 5.0
-            elif xth == 22:
-                num = 60.00
-            row.append(num)
-
-            sql = "select avg(xtval),STDDEV_SAMP(xtval) from T_GKPJ2020_TSJBNKSXT sxt " \
-                  "right join kscj on sxt.ksh = kscj.ksh where kmh = 002 and dth =" + str(xth)
-
-            self.cursor.execute(sql)
-            result = self.cursor.fetchone()
-            mean = result[0]
-            std = result[1]
-            diffculty = mean / num
-
-
-            sql = r"select sx,b.sum from kscj right join " \
-                  r"(select a.*,rownum rn from (select sum(xtval) sum,sxt.ksh from " \
-                  r"T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
-                  r"where kmh = 002 and dth=" + str(
-                xth) + r"  GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn "
-            print(sql)
-            self.cursor.execute(sql)
-            result = np.array(self.cursor.fetchall(), dtype="float64")
-            zf_score = np.array(result[:, 0], dtype="float64")
-            xt_score = np.array(result[:, 1], dtype="float64")
-
-            print(zf_score)
-            print(xt_score)
-
-            n = len(xt_score)
-
-            D_a = n * np.sum(xt_score * zf_score)
-            D_b = np.sum(zf_score) * np.sum(xt_score)
-            D_c = n * np.sum(xt_score ** 2) - np.sum(xt_score) ** 2
-            D_d = n * np.sum(zf_score ** 2) - np.sum(zf_score) ** 2
-
-            qfd = (D_a - D_b) / (math.sqrt(D_c) * math.sqrt(D_d))
-
-            row.append(mean)
-            row.append(std)
-            row.append(diffculty)
-            row.append(qfd)
-
-            self.set_list_precision(row)
-            rows.append(row)
-            print(row)
-            x.append(diffculty)
-            y.append(qfd)
-
-
-        for i in range(len(rows)):
-            df.loc[len(df)] = rows[i]
-
-        df.to_excel(writer, index=None, sheet_name="考生单题作答情况(理科数学)")
-        writer.save()
-
-        plt.figure()
-        plt.rcParams['figure.figsize'] = (15.0, 6)
-        ax = plt.gca()
-        ax.spines['right'].set_color('none')
-        ax.spines['top'].set_color('none')
-
-        plt.xlim((0, 1))
-        plt.ylim((0, 1))
-        ax.spines['right'].set_color('none')
-        ax.spines['top'].set_color('none')
-        ax.xaxis.set_major_locator(ticker.MultipleLocator(0.1))
-        ax.yaxis.set_major_locator(ticker.MultipleLocator(0.1))
-        plt.rcParams['figure.figsize'] = (15.0, 6)
-        plt.scatter(x, y)
-
-        for i in range(len(x)):
-            plt.annotate(rows[i][0], xy=(x[i], y[i]), xytext=(x[i] + 0.008, y[i] + 0.008),
-                         arrowprops=dict(arrowstyle='->', connectionstyle="arc3,rad = .2"))
-        plt.savefig(path + '\\各题难度-区分度分布散点图(理科数学).png', dpi=1200)
         plt.close()
 
     # 市级报告 单题分析
@@ -1438,18 +1274,24 @@ class DTFX:
                "18", "19", "20", "21","22","23"]
 
         plt.scatter(x, y)
-        plt.rcParams['figure.figsize'] = (15.0, 6)
+        plt.rcParams['figure.figsize'] = (15.0,6.0)
         plt.xlim((0, 1))
         plt.ylim((0, 1))
+        plt.xlabel("难度")
+        plt.ylabel("区分度")
         ax = plt.gca()
         ax.spines['right'].set_color('none')
         ax.spines['top'].set_color('none')
         ax.xaxis.set_major_locator(ticker.MultipleLocator(0.1))
         ax.yaxis.set_major_locator(ticker.MultipleLocator(0.1))
+        th = []
         for i in range(len(x)):
-            plt.annotate(txt[i], xy=(x[i], y[i]), xytext=(x[i] + 0.008, y[i] + 0.008),arrowprops=dict(arrowstyle='-'))
+            th.append(txt[i])
+            plt.annotate(txt[i], xy=(x[i], y[i]), xytext=(x[i] , y[i] + 0.008),arrowprops=dict(arrowstyle='-'))
         plt.savefig(path + '\\各题难度-区分度分布散点图(理科数学).png', dpi=1200)
         plt.close()
+
+
 
     # 省级报告 各市考生成绩比较
     def GSQKFX_PROVINCE(self):
@@ -1694,7 +1536,7 @@ class DTFX:
         df.to_excel(writer, index=None, sheet_name="考生单题作答情况(理科数学)")
         writer.save()
 
-        plt.rcParams['figure.figsize'] = (15.0, 6)
+        plt.rcParams['figure.figsize'] = (15.0,6.0)
         plt.xlim((0, 1))
         plt.ylim((0, 1))
         ax = plt.gca()
@@ -1704,8 +1546,12 @@ class DTFX:
         ax.yaxis.set_major_locator(ticker.MultipleLocator(0.1))
         plt.scatter(x, y)
 
+        th = []
         for i in range(len(x)):
-            plt.annotate(rows[i][0], xy=(x[i], y[i]), xytext=(x[i] + 0.008, y[i] + 0.008),
+            th.append(rows[i][0])
+            plt.annotate(rows[i][0], xy=(x[i], y[i]), xytext=(x[i] , y[i] + 0.008),
                          arrowprops=dict(arrowstyle='->', connectionstyle="arc3,rad = .2"))
         plt.savefig(path + '\\各题难度-区分度分布散点图(理科数学).png', dpi=1200)
         plt.close()
+
+        

@@ -376,7 +376,7 @@ class DTFX:
         # 理科
         df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数', '平均分(全省)'])
 
-        sql = r'select count(a.wy) from kscj  a right join JBXX  b on a.KSH = b.KSH WHERE b.DS_H=' + dsh + r' and a.kl=1'
+        sql = r'select count(a.wy) from kscj  a right join JBXX  b on a.KSH = b.KSH WHERE b.DS_H=' + dsh + r' and a.kl=1 and a.wy!=0'
         print(sql)
         self.cursor.execute(sql)
         num = self.cursor.fetchone()[0]  # 总人数
@@ -1369,7 +1369,7 @@ class DTFX:
         total = self.cursor.fetchone()[0]
         ph_num = int(total * 0.27)
 
-        idxs = range(1,40)
+        idxs = range(1,41)
         xths = range(61,82)
 
         x = []  # 难度
@@ -1380,7 +1380,7 @@ class DTFX:
                 num = 2.0
             else:
                 num = 1.5
-            sql = r"select sum(kgval),sxt.ksh FROM T_GKPJ2020_TKSKGDAMX amx right join kscj on kscj.ksh = amx.ksh where amx.ksh like '"+dsh+"%' and kmh = 101 and idx = " + str(idx)
+            sql = r"select sum(kgval) FROM T_GKPJ2020_TKSKGDAMX amx right join kscj on kscj.ksh = amx.ksh where amx.ksh like '"+dsh+"%' and kmh = 101 and idx = " + str(idx)
             self.cursor.execute(sql)
             difficulty = self.cursor.fetchone()[0] / total / num  # 难度
 
@@ -1439,20 +1439,25 @@ class DTFX:
             qfd = (D_a - D_b) / (math.sqrt(D_c) * math.sqrt(D_d))
             y.append(qfd)
 
-        plt.rcParams['figure.figsize'] = (15.0, 6)
+        plt.rcParams['figure.figsize'] = (15.0,6.0)
         plt.scatter(x, y)
         plt.xlim((0, 1))
         plt.ylim((0, 1))
+        plt.xlabel("难度")
+        plt.ylabel("区分度")
         ax = plt.gca()
         ax.spines['right'].set_color('none')
         ax.spines['top'].set_color('none')
         ax.xaxis.set_major_locator(ticker.MultipleLocator(0.1))
         ax.yaxis.set_major_locator(ticker.MultipleLocator(0.1))
+        th = []
         for i in range(len(x)):
-            plt.annotate(str(i+20), xy=(x[i], y[i]), xytext=(x[i] + 0.008, y[i] + 0.008),
+            th.append(str(i+20))
+            plt.annotate(str(i+20), xy=(x[i], y[i]), xytext=(x[i] , y[i] + 0.008),
                          arrowprops=dict(arrowstyle='-'))
         plt.savefig(path + '\\各题难度-区分度分布散点图(英语).png', dpi=1200)
         plt.close()
+
 
     # 市级报告附录 原始分分析
     def YSFFX_CITY_TABLE(self,dsh):
@@ -2308,21 +2313,25 @@ class DTFX:
         writer.save()
 
         plt.figure()
-        plt.rcParams['figure.figsize'] = (15.0, 6)
+        plt.rcParams['figure.figsize'] = (15.0,6.0)
         ax = plt.gca()
         ax.spines['right'].set_color('none')
         ax.spines['top'].set_color('none')
 
         plt.xlim((0, 1))
         plt.ylim((0, 1))
+        plt.xlabel("难度")
+        plt.ylabel("区分度")
         ax.spines['right'].set_color('none')
         ax.spines['top'].set_color('none')
         ax.xaxis.set_major_locator(ticker.MultipleLocator(0.1))
         ax.yaxis.set_major_locator(ticker.MultipleLocator(0.1))
         plt.scatter(x, y)
 
+        th = []
         for i in range(len(x)):
-            plt.annotate(rows[i][0], xy=(x[i], y[i]), xytext=(x[i] + 0.008, y[i] + 0.008),
+            th.append(rows[i][0])
+            plt.annotate(rows[i][0], xy=(x[i], y[i]), xytext=(x[i] , y[i] + 0.008),
                          arrowprops=dict(arrowstyle='->',connectionstyle="arc3,rad = .2"))
         plt.savefig(path + '\\各题难度-区分度分布散点图(英语).png', dpi=1200)
         plt.close()

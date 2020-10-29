@@ -52,7 +52,7 @@ class DTFX:
         # 文科
         df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数', '平均分(全省)'])
 
-        sql = r'select count(a.sx) from kscj  a right join JBXX  b on a.KSH = b.KSH WHERE b.DS_H=' + dsh + r' and a.kl=2'
+        sql = r'select count(a.sx) from kscj  a right join JBXX  b on a.KSH = b.KSH WHERE b.DS_H=' + dsh + r' and a.kl=2 and a.sx!=0'
         print(sql)
         self.cursor.execute(sql)
         num = self.cursor.fetchone()[0]  # 总人数
@@ -837,19 +837,24 @@ class DTFX:
         txt = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17",
                "18", "19", "20", "21", "22", "23"]
 
-        plt.rcParams['figure.figsize'] = (15.0, 6)
+        plt.rcParams['figure.figsize'] = (15.0,6.0)
         plt.scatter(x, y)
         plt.xlim((0, 1))
         plt.ylim((0, 1))
+        plt.xlabel("难度")
+        plt.ylabel("区分度")
         ax = plt.gca()
         ax.spines['right'].set_color('none')
         ax.spines['top'].set_color('none')
         ax.xaxis.set_major_locator(ticker.MultipleLocator(0.1))
         ax.yaxis.set_major_locator(ticker.MultipleLocator(0.1))
+        th = []
         for i in range(len(x)):
-            plt.annotate(txt[i], xy=(x[i], y[i]), xytext=(x[i] + 0.008, y[i] + 0.008),arrowprops=dict(arrowstyle='-'))
+            th = [txt[i]]
+            plt.annotate(txt[i], xy=(x[i], y[i]), xytext=(x[i] , y[i] + 0.008),arrowprops=dict(arrowstyle='-'))
         plt.savefig(path + '\\各题难度-区分度分布散点图(文科数学).png', dpi=1200)
         plt.close()
+
 
     # 市级报告附录 原始分分析
     def YSFFX_CITY_TABLE(self, dsh):
@@ -1483,24 +1488,29 @@ class DTFX:
         writer.save()
 
         plt.figure()
-        plt.rcParams['figure.figsize'] = (15.0, 6)
+        plt.rcParams['figure.figsize'] = (15.0,6.0)
         ax = plt.gca()
         ax.spines['right'].set_color('none')
         ax.spines['top'].set_color('none')
 
         plt.xlim((0, 1))
         plt.ylim((0, 1))
+        plt.xlabel("难度")
+        plt.ylabel("区分度")
         ax.spines['right'].set_color('none')
         ax.spines['top'].set_color('none')
         ax.xaxis.set_major_locator(ticker.MultipleLocator(0.1))
         ax.yaxis.set_major_locator(ticker.MultipleLocator(0.1))
         plt.scatter(x, y)
 
+        th = []
         for i in range(len(x)):
-            plt.annotate(rows[i][0], xy=(x[i], y[i]), xytext=(x[i] + 0.008, y[i] + 0.008),
+            th.append(rows[i][0])
+            plt.annotate(rows[i][0], xy=(x[i], y[i]), xytext=(x[i] , y[i] + 0.008),
                          arrowprops=dict(arrowstyle='->', connectionstyle="arc3,rad = .2"))
         plt.savefig(path + '\\各题难度-区分度分布散点图(文科数学).png', dpi=1200)
         plt.close()
+
 
     # 省级报告 原始分概括 画图
     def YSFGK_PROVINCE_IMG(self):

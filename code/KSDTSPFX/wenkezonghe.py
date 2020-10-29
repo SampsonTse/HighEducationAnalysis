@@ -51,7 +51,7 @@ class DTFX:
         # 文科
         df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数', '平均分(全省)'])
 
-        sql = r'select count(a.zh) from kscj  a right join JBXX  b on a.KSH = b.KSH WHERE b.DS_H=' + dsh + r' and a.kl=2'
+        sql = r'select count(a.zh) from kscj  a right join JBXX  b on a.KSH = b.KSH WHERE b.DS_H=' + dsh + r' and a.kl=2 and a.zh!=0'
         print(sql)
         self.cursor.execute(sql)
         num = self.cursor.fetchone()[0]  # 总人数
