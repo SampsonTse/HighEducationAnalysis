@@ -65,7 +65,7 @@ class DTFX:
         self.cursor.execute(sql)
         result = self.cursor.fetchone()
         result = list(result)
-        result.append(((float(result[2]) / float(result[1])) * 100) * 100)  # 差异系数
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
 
         sql = r"select AVG(A.wy)   mean from kscj   A right join JBXX   B on A.KSH = B.KSH where b.XB_H = 1 and a.wy!=0"
         self.cursor.execute(sql)
@@ -360,13 +360,14 @@ class DTFX:
         result = self.cursor.fetchone()
         result = list(result)
         result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '总计')
 
         sql = r"select AVG(A.wy)   mean from kscj   A right join JBXX   B on A.KSH = B.KSH and a.kl=2 and a.wy!=0"
         self.cursor.execute(sql)
         result.append(self.cursor.fetchone()[0])
 
-        result.insert(1, (result[0] / num) * 100)
-        result.insert(0, '总计')
+
 
         self.set_list_precision(result)
         df.loc[len(df)] = result
@@ -851,18 +852,18 @@ class DTFX:
         # 全省考生
         df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数'])
 
-        sql = "select count(*) from kscj  a right join JBXX  b on a.ksh = b.ksh"
+        sql = "select count(*) from kscj  a right join JBXX  b on a.ksh = b.ksh where a.wy!=0"
         self.cursor.execute(sql)
         num = self.cursor.fetchone()[0]
 
         # 性别
         for xb in xbs:
             sql = "select count(a.wy)   num,AVG(a.wy)   mean,STDDEV_SAMP(a.wy)   std " \
-                  "from kscj   a right join JBXX   b on a.ksh = b.ksh where b.xb_h=" + str(xb)
+                  "from kscj   a right join JBXX  b on a.ksh = b.ksh where a.wy!=0 and b.xb_h=" + str(xb)
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
-            results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+            results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
             if xb == 1:
                 results.insert(0, '男')
@@ -875,13 +876,12 @@ class DTFX:
         # 户籍
         for hj in hjs:
             sql = "select count(a.wy)   num,AVG(a.wy)   mean,STDDEV_SAMP(a.wy)   std " \
-                  "from kscj   a right join JBXX   b on a.ksh = b.ksh where b.kslb_h = " + str(
-                hj[0]) + " or b.kslb_h = " + hj[1]
+                  "from kscj   a right join JBXX   b on a.ksh = b.ksh where a.wy!=0 and (b.kslb_h = " + str(hj[0]) + " or b.kslb_h = " + hj[1]+")"
 
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
-            results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+            results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
             if "1" in hj:
                 results.insert(0, '城镇')
@@ -894,13 +894,12 @@ class DTFX:
         # 应往届
         for ywj in ywjs:
             sql = "select count(a.wy)   num,AVG(a.wy)   mean,STDDEV_SAMP(a.wy)   std " \
-                  "from kscj   a right join JBXX   b on a.ksh = b.ksh where b.kslb_h = " + ywj[0] + " or b.kslb_h = " + \
-                  ywj[1]
+                  "from kscj   a right join JBXX   b on a.ksh = b.ksh where a.wy!=0 and (b.kslb_h = "+ywj[0]+" or b.kslb_h = "+ywj[1]+")"
 
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
-            results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+            results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
             if "1" in ywj:
                 results.insert(0, '应届')
@@ -911,11 +910,11 @@ class DTFX:
             df.loc[len(df)] = results
 
         sql = "select count(a.wy)  num,AVG(a.wy)  mean,STDDEV_SAMP(a.wy)  std " \
-              "from kscj a right join JBXX  b on a.ksh = b.ksh"
+              "from kscj a right join JBXX  b on a.ksh = b.ksh where a.wy!=0"
         self.cursor.execute(sql)
         results = self.cursor.fetchone()
         results = list(results)
-        results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+        results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
         results.insert(1, results[0] / num * 100)  # 比率
         results.insert(0, '总计')
 
@@ -940,7 +939,7 @@ class DTFX:
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
-            results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+            results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
             if xb == 1:
                 results.insert(0, '男')
@@ -959,7 +958,7 @@ class DTFX:
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
-            results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+            results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
             if "1" in hj:
                 results.insert(0, '城镇')
@@ -978,7 +977,7 @@ class DTFX:
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
-            results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+            results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
             if "1" in ywj:
                 results.insert(0, '应届')
@@ -993,7 +992,7 @@ class DTFX:
         self.cursor.execute(sql)
         results = self.cursor.fetchone()
         results = list(results)
-        results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+        results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
         results.insert(1, results[0] / num * 100)  # 比率
         results.insert(0, '总计')
 
@@ -1017,7 +1016,7 @@ class DTFX:
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
-            results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+            results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
             if xb == 1:
                 results.insert(0, '男')
@@ -1036,7 +1035,7 @@ class DTFX:
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
-            results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+            results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
             if "1" in hj:
                 results.insert(0, '城镇')
@@ -1055,7 +1054,7 @@ class DTFX:
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
-            results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+            results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
             if "1" in ywj:
                 results.insert(0, '应届')
@@ -1070,7 +1069,7 @@ class DTFX:
         self.cursor.execute(sql)
         results = self.cursor.fetchone()
         results = list(results)
-        results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+        results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
         results.insert(1, results[0] / num * 100)  # 比率
         results.insert(0, '总计')
 
@@ -1364,7 +1363,7 @@ class DTFX:
         if not os.path.exists(path):
             os.makedirs(path)
 
-        sql = r"select count(ksh) from (SELECT DISTINCT ksh from kscj where ksh like '01%' ) a"
+        sql = r"select count(ksh) from (SELECT DISTINCT ksh from kscj where ksh like '"+dsh+"%' ) a"
         self.cursor.execute(sql)
         total = self.cursor.fetchone()[0]
         ph_num = int(total * 0.27)

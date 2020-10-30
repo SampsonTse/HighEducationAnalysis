@@ -4,6 +4,8 @@ from KSDTSPFX import wenkeshuxue
 from KSDTSPFX import yingyu
 from KSDTSPFX import likezonghe
 from KSDTSPFX import wenkezonghe
+from KSDTSPFX.LKZHDK import wuli,shengwu,huaxue
+from KSDTSPFX.WKZHDK import lishi,zhengzhi,dili
 
 
 class city_report:
@@ -16,6 +18,14 @@ class city_report:
         self.lkzh = likezonghe.DTFX()
         self.wkzh = wenkezonghe.DTFX()
 
+        self.wl = wuli.DTFX()
+        self.sw = shengwu.DTFX()
+        self.hx = huaxue.DTFX()
+
+        self.dl = dili.DTFX()
+        self.zz = zhengzhi.DTFX()
+        self.ls = lishi.DTFX()
+
     def __del__(self):
         del self.yw
         del self.wksx
@@ -24,8 +34,30 @@ class city_report:
         del self.wkzh
         del self.lkzh
 
+        del self.sw
+        del self.wl
+        del self.hx
+        del self.dl
+        del self.zz
+        del self.ls
+
     # 总体概括
     def ztgk(self):
+
+        self.zz.ZTGK_CITY_TABLE(self.dsh)
+        self.dl.ZTGK_CITY_TABLE(self.dsh)
+        self.ls.ZTGK_CITY_TABLE(self.dsh)
+        self.sw.ZTGK_CITY_TABLE(self.dsh)
+        self.wl.ZTGK_CITY_TABLE(self.dsh)
+        self.hx.ZTGK_CITY_TABLE(self.dsh)
+
+        self.zz.ZTGK_CITY_IMG(self.dsh)
+        self.dl.ZTGK_CITY_IMG(self.dsh)
+        self.ls.ZTGK_CITY_IMG(self.dsh)
+        self.sw.ZTGK_CITY_IMG(self.dsh)
+        self.wl.ZTGK_CITY_IMG(self.dsh)
+        self.hx.ZTGK_CITY_IMG(self.dsh)
+
         self.yw.ZTGK_CITY_IMG(self.dsh)
         self.lksx.ZTGK_CITY_IMG(self.dsh)
         self.wksx.ZTGK_CITY_IMG(self.dsh)
@@ -40,8 +72,15 @@ class city_report:
         self.wkzh.ZTGK_CITY_TABLE(self.dsh)
         self.lkzh.ZTGK_CITY_TABLE(self.dsh)
 
-    # 单题分析
+    # 单题分析 综合单科图片没做
     def dtfx(self):
+        # self.zz.DTFX_CITY_TABLE(self.dsh)
+        # self.dl.DTFX_CITY_TABLE(self.dsh)
+        # self.ls.DTFX_CITY_TABLE(self.dsh)
+        # self.sw.DTFX_CITY_TABLE(self.dsh)
+        # self.wl.DTFX_CITY_TABLE(self.dsh)
+        # self.hx.DTFX_CITY_TABLE(self.dsh)
+
         self.yw.DTFX_CITY_TABLE(self.dsh)
         self.wksx.DTFX_CITY_TABLE(self.dsh)
         self.lksx.DTFX_CITY_TABLE(self.dsh)
@@ -58,7 +97,7 @@ class city_report:
 
 
 class city_report_appendix:
-    def __init__(self,dsh):
+    def __init__(self, dsh):
         self.dsh = dsh
         self.yw = yuwen.DTFX()
         self.lksx = likeshuxue.DTFX()
@@ -67,6 +106,14 @@ class city_report_appendix:
         self.lkzh = likezonghe.DTFX()
         self.wkzh = wenkezonghe.DTFX()
 
+        self.wl = wuli.DTFX()
+        self.sw = shengwu.DTFX()
+        self.hx = huaxue.DTFX()
+
+        self.dl = dili.DTFX()
+        self.zz = zhengzhi.DTFX()
+        self.ls = lishi.DTFX()
+
     def __del__(self):
         del self.yw
         del self.wksx
@@ -74,6 +121,13 @@ class city_report_appendix:
         del self.yy
         del self.wkzh
         del self.lkzh
+
+        del self.sw
+        del self.wl
+        del self.hx
+        del self.dl
+        del self.zz
+        del self.ls
 
     # 原始分概括
     def ysfgk(self):

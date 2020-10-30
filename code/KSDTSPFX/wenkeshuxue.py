@@ -359,7 +359,7 @@ class DTFX:
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
-            results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+            results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
             if xb == 1:
                 results.insert(0, '男')
@@ -378,7 +378,7 @@ class DTFX:
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
-            results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+            results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
             if "1" in hj:
                 results.insert(0, '城镇')
@@ -397,7 +397,7 @@ class DTFX:
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
-            results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+            results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
             if "1" in ywj:
                 results.insert(0, '应届')
@@ -412,7 +412,7 @@ class DTFX:
         self.cursor.execute(sql)
         results = self.cursor.fetchone()
         results = list(results)
-        results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+        results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
         results.insert(1, results[0] / num * 100)  # 比率
         results.insert(0, '总计')
 
@@ -437,7 +437,7 @@ class DTFX:
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
-            results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+            results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
             if xb == 1:
                 results.insert(0, '男')
@@ -456,7 +456,7 @@ class DTFX:
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
-            results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+            results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
             if "1" in hj:
                 results.insert(0, '城镇')
@@ -475,7 +475,7 @@ class DTFX:
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
-            results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+            results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
             if "1" in ywj:
                 results.insert(0, '应届')
@@ -490,7 +490,7 @@ class DTFX:
         self.cursor.execute(sql)
         results = self.cursor.fetchone()
         results = list(results)
-        results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+        results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
         results.insert(1, results[0] / num * 100)  # 比率
         results.insert(0, '总计')
 
@@ -514,7 +514,7 @@ class DTFX:
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
-            results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+            results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
             if xb == 1:
                 results.insert(0, '男')
@@ -533,7 +533,7 @@ class DTFX:
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
-            results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+            results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
             if "1" in hj:
                 results.insert(0, '城镇')
@@ -552,7 +552,7 @@ class DTFX:
             self.cursor.execute(sql)
             results = self.cursor.fetchone()
             results = list(results)
-            results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+            results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
             results.insert(1, results[0] / num * 100)  # 比率
             if "1" in ywj:
                 results.insert(0, '应届')
@@ -567,7 +567,7 @@ class DTFX:
         self.cursor.execute(sql)
         results = self.cursor.fetchone()
         results = list(results)
-        results.append((float(results[2]) / float(results[1])) * 100 * 100)  # 差异系数
+        results.append((float(results[2]) / float(results[1])) * 100)  # 差异系数
         results.insert(1, results[0] / num * 100)  # 比率
         results.insert(0, '总计')
 
