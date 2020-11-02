@@ -622,7 +622,6 @@ class DTFX:
         plt.savefig(path + '\\' + '全省考生单科成绩分布(理科综合).png', dpi=1200)
         plt.close()
 
-
     # 市级报告附录 原始分分析
     def YSFFX_CITY_TABLE(self,dsh):
 
@@ -668,7 +667,7 @@ class DTFX:
         items = self.cursor.fetchall()
 
         for item in items:
-            province_num[item[0]] = item[1]
+            province_num[int(item[0])] = item[1]
             province_total += item[1]  # 人数
 
         i = 300

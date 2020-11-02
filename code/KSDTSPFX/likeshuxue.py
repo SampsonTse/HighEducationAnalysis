@@ -833,7 +833,7 @@ class DTFX:
         items = self.cursor.fetchall()
 
         for item in items:
-            province_num[item[0]] = item[1]
+            province_num[int(item[0])] = item[1]
             province_total += item[1]  # 人数
 
         i = 150
@@ -1290,8 +1290,6 @@ class DTFX:
             plt.annotate(txt[i], xy=(x[i], y[i]), xytext=(x[i] , y[i] + 0.008),arrowprops=dict(arrowstyle='-'))
         plt.savefig(path + '\\各题难度-区分度分布散点图(理科数学).png', dpi=1200)
         plt.close()
-
-
 
     # 省级报告 各市考生成绩比较
     def GSQKFX_PROVINCE(self):

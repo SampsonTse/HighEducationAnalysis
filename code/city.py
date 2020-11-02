@@ -95,6 +95,14 @@ class city_report:
     def jgfx(self):
         pass
 
+    def test(self):
+        # self.hx.DTFX_PROVINCE_APPENDIX()
+        # self.sw.DTFX_PROVINCE_APPENDIX()
+        self.wl.DTFX_PROVINCE_APPENDIX()
+        self.ls.DTFX_PROVINCE_APPENDIX()
+        self.zz.DTFX_PROVINCE_APPENDIX()
+        self.dl.DTFX_PROVINCE_APPENDIX()
+
 
 class city_report_appendix:
     def __init__(self, dsh):
@@ -148,3 +156,5 @@ class city_report_appendix:
     # 结构分析(暂时做不了)
     def jgfx(self):
         pass
+
+

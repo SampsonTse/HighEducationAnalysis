@@ -89,8 +89,8 @@ class pro_report:
         pass
 
 class pro_report_appendix:
-    def __init__(self, dsh):
-        self.dsh = dsh
+    def __init__(self):
+
         self.yw = yuwen.DTFX()
         self.lksx = likeshuxue.DTFX()
         self.wksx = wenkeshuxue.DTFX()
