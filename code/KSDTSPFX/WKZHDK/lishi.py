@@ -948,7 +948,7 @@ class DTFX:
             row.append((d_h / low) * 100)  # 高分组选D
             row.append((d_m / (high - low)) * 100)  # 中间组选D
             row.append((d_l / (total - high)) * 100)  # 低分组选D
-
+            row.insert(0, str(idx))
             self.set_list_precision(row)
             rows.append(row)
 
@@ -1289,7 +1289,7 @@ class DTFX:
             # 低分组
             sql = r"select amx.da,count(amx.da) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join " \
                   r"(select a.*,rownum rn from (select ksh,zf from TYMHPT.T_GKPJ2020_TKSTZCJMX where" \
-                  r"  and tzh=9 and kmh=006 ORDER BY zf desc) a) b on amx.ksh=b.ksh " \
+                  r"   tzh=9 and kmh=006 ORDER BY zf desc) a) b on amx.ksh=b.ksh " \
                   r"where b.rn BETWEEN " + str(high+1) + r" and " + str(total) + r" and amx.kmh=006 and amx.idx=" + str(idx) + " GROUP BY amx.da"
             print(sql)
             self.cursor.execute(sql)
@@ -1328,7 +1328,7 @@ class DTFX:
             row.append((d_h / low) * 100)  # 高分组选D
             row.append((d_m / (high - low)) * 100)  # 中间组选D
             row.append((d_l / (total - high)) * 100)  # 低分组选D
-
+            row.insert(0, str(idx))
             self.set_list_precision(row)
             rows.append(row)
 
@@ -1338,7 +1338,7 @@ class DTFX:
                                               "全部(D)", "高分组(D)", "中间组(D)", "低分组(D)"])
 
         for i in range(len(rows)):
-            rows[i].insert(0, i + 1)
+
             df.loc[len(df)] = rows[i]
 
         df.to_excel(excel_writer=writer, index=None, sheet_name="地市不同层次考生选择题受选率统计(历史)")

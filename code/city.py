@@ -98,9 +98,9 @@ class city_report:
     def test(self):
         # self.hx.DTFX_PROVINCE_APPENDIX()
         # self.sw.DTFX_PROVINCE_APPENDIX()
-        self.wl.DTFX_PROVINCE_APPENDIX()
-        self.ls.DTFX_PROVINCE_APPENDIX()
-        self.zz.DTFX_PROVINCE_APPENDIX()
+        # self.wl.DTFX_PROVINCE_APPENDIX()
+        # self.ls.DTFX_PROVINCE_APPENDIX()
+        # self.zz.DTFX_PROVINCE_APPENDIX()
         self.dl.DTFX_PROVINCE_APPENDIX()
 
 

@@ -947,7 +947,7 @@ class DTFX:
             row.append((d_h / low) * 100)  # 高分组选D
             row.append((d_m / (high - low)) * 100)  # 中间组选D
             row.append((d_l / (total - high)) * 100)  # 低分组选D
-
+            row.insert(0, str(idx))
             self.set_list_precision(row)
             rows.append(row)
 
@@ -957,7 +957,7 @@ class DTFX:
                                               "全部(D)", "高分组(D)", "中间组(D)", "低分组(D)"])
 
         for i in range(len(rows)):
-            rows[i].insert(0, i + 1)
+
             df.loc[len(df)] = rows[i]
 
         df.to_excel(excel_writer=writer, index=None, sheet_name="地市不同层次考生选择题受选率统计(化学)")
@@ -1328,7 +1328,7 @@ class DTFX:
             row.append((d_h / low) * 100)  # 高分组选D
             row.append((d_m / (high - low)) * 100)  # 中间组选D
             row.append((d_l / (total - high)) * 100)  # 低分组选D
-
+            row.insert(0, str(idx))
             self.set_list_precision(row)
             rows.append(row)
 
@@ -1338,7 +1338,7 @@ class DTFX:
                                               "全部(D)", "高分组(D)", "中间组(D)", "低分组(D)"])
 
         for i in range(len(rows)):
-            rows[i].insert(0, i + 1)
+
             df.loc[len(df)] = rows[i]
 
         df.to_excel(excel_writer=writer, index=None, sheet_name="地市不同层次考生选择题受选率统计(化学)")
