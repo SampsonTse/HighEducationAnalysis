@@ -58,50 +58,49 @@ class city_report:
         self.wl.ZTGK_CITY_IMG(self.dsh)
         self.hx.ZTGK_CITY_IMG(self.dsh)
 
-        self.yw.ZTGK_CITY_IMG(self.dsh)
-        self.lksx.ZTGK_CITY_IMG(self.dsh)
-        self.wksx.ZTGK_CITY_IMG(self.dsh)
-        self.yy.ZTGK_CITY_IMG(self.dsh)
-        self.lkzh.ZTGK_CITY_IMG(self.dsh)
-        self.wkzh.ZTGK_CITY_IMG(self.dsh)
-
-        self.yw.ZTGK_CITY_TABLE(self.dsh)
-        self.lksx.ZTGK_CITY_TABLE(self.dsh)
-        self.wksx.ZTGK_CITY_TABLE(self.dsh)
-        self.yy.ZTGK_CITY_TABLE(self.dsh)
-        self.wkzh.ZTGK_CITY_TABLE(self.dsh)
-        self.lkzh.ZTGK_CITY_TABLE(self.dsh)
+        # self.yw.ZTGK_CITY_IMG(self.dsh)
+        # self.lksx.ZTGK_CITY_IMG(self.dsh)
+        # self.wksx.ZTGK_CITY_IMG(self.dsh)
+        # self.yy.ZTGK_CITY_IMG(self.dsh)
+        # self.lkzh.ZTGK_CITY_IMG(self.dsh)
+        # self.wkzh.ZTGK_CITY_IMG(self.dsh)
+        #
+        # self.yw.ZTGK_CITY_TABLE(self.dsh)
+        # self.lksx.ZTGK_CITY_TABLE(self.dsh)
+        # self.wksx.ZTGK_CITY_TABLE(self.dsh)
+        # self.yy.ZTGK_CITY_TABLE(self.dsh)
+        # self.wkzh.ZTGK_CITY_TABLE(self.dsh)
+        # self.lkzh.ZTGK_CITY_TABLE(self.dsh)
 
     # 单题分析 综合单科图片没做
     def dtfx(self):
-        # self.zz.DTFX_CITY_TABLE(self.dsh)
-        # self.dl.DTFX_CITY_TABLE(self.dsh)
-        # self.ls.DTFX_CITY_TABLE(self.dsh)
-        # self.sw.DTFX_CITY_TABLE(self.dsh)
-        # self.wl.DTFX_CITY_TABLE(self.dsh)
-        # self.hx.DTFX_CITY_TABLE(self.dsh)
+        self.zz.DTFX_CITY_TABLE(self.dsh)
+        self.dl.DTFX_CITY_TABLE(self.dsh)
+        self.ls.DTFX_CITY_TABLE(self.dsh)
+        self.sw.DTFX_CITY_TABLE(self.dsh)
+        self.wl.DTFX_CITY_TABLE(self.dsh)
+        self.hx.DTFX_CITY_TABLE(self.dsh)
 
-        self.yw.DTFX_CITY_TABLE(self.dsh)
-        self.wksx.DTFX_CITY_TABLE(self.dsh)
-        self.lksx.DTFX_CITY_TABLE(self.dsh)
-        self.yy.DTFX_CITY_TABLE(self.dsh)
+        self.zz.DTFX_CITY_IMG(self.dsh)
+        self.dl.DTFX_CITY_IMG(self.dsh)
+        self.ls.DTFX_CITY_IMG(self.dsh)
+        self.sw.DTFX_CITY_IMG(self.dsh)
+        self.wl.DTFX_CITY_IMG(self.dsh)
+        self.hx.DTFX_CITY_IMG(self.dsh)
 
-        self.yw.DTFX_CITY_IMG(self.dsh)
-        self.wksx.DTFX_CITY_IMG(self.dsh)
-        self.lksx.DTFX_CITY_IMG(self.dsh)
-        self.yy.DTFX_CITY_IMG(self.dsh)
+        # self.yw.DTFX_CITY_TABLE(self.dsh)
+        # self.wksx.DTFX_CITY_TABLE(self.dsh)
+        # self.lksx.DTFX_CITY_TABLE(self.dsh)
+        # self.yy.DTFX_CITY_TABLE(self.dsh)
+
+        # self.yw.DTFX_CITY_IMG(self.dsh)
+        # self.wksx.DTFX_CITY_IMG(self.dsh)
+        # self.lksx.DTFX_CITY_IMG(self.dsh)
+        # self.yy.DTFX_CITY_IMG(self.dsh)
 
     # 结构分析(暂时做不了)
     def jgfx(self):
         pass
-
-    def test(self):
-        # self.hx.DTFX_PROVINCE_APPENDIX()
-        # self.sw.DTFX_PROVINCE_APPENDIX()
-        # self.wl.DTFX_PROVINCE_APPENDIX()
-        # self.ls.DTFX_PROVINCE_APPENDIX()
-        # self.zz.DTFX_PROVINCE_APPENDIX()
-        self.dl.DTFX_PROVINCE_APPENDIX()
 
 
 class city_report_appendix:
@@ -139,19 +138,31 @@ class city_report_appendix:
 
     # 原始分概括
     def ysfgk(self):
-        self.yw.YSFFX_CITY_TABLE(self.dsh)
-        self.lksx.YSFFX_CITY_TABLE(self.dsh)
-        self.wksx.YSFFX_CITY_TABLE(self.dsh)
-        self.yy.YSFFX_CITY_TABLE(self.dsh)
-        self.lkzh.YSFFX_CITY_TABLE(self.dsh)
-        self.wkzh.YSFFX_CITY_TABLE(self.dsh)
+        self.sw.YSFFX_CITY_TABLE(self.dsh)
+        self.hx.YSFFX_CITY_TABLE(self.dsh)
+        self.wl.YSFFX_CITY_TABLE(self.dsh)
+        self.zz.YSFFX_CITY_TABLE(self.dsh)
+        self.ls.YSFFX_CITY_TABLE(self.dsh)
+        self.dl.YSFFX_CITY_TABLE(self.dsh)
+        # self.yw.YSFFX_CITY_TABLE(self.dsh)
+        # self.lksx.YSFFX_CITY_TABLE(self.dsh)
+        # self.wksx.YSFFX_CITY_TABLE(self.dsh)
+        # self.yy.YSFFX_CITY_TABLE(self.dsh)
+        # self.lkzh.YSFFX_CITY_TABLE(self.dsh)
+        # self.wkzh.YSFFX_CITY_TABLE(self.dsh)
 
     # 单题分析
     def dtfx(self):
-        self.yw.DTFX_CITY_APPENDIX(self.dsh)
-        self.wksx.DTFX_CITY_APPENDIX(self.dsh)
-        self.lksx.DTFX_CITY_APPENDIX(self.dsh)
-        self.yy.DTFX_CITY_APPENDIX(self.dsh)
+        self.sw.DTFX_CITY_APPENDIX(self.dsh)
+        self.hx.DTFX_CITY_APPENDIX(self.dsh)
+        self.wl.DTFX_CITY_APPENDIX(self.dsh)
+        self.zz.DTFX_CITY_APPENDIX(self.dsh)
+        self.ls.DTFX_CITY_APPENDIX(self.dsh)
+        self.dl.DTFX_CITY_APPENDIX(self.dsh)
+        # self.yw.DTFX_CITY_APPENDIX(self.dsh)
+        # self.wksx.DTFX_CITY_APPENDIX(self.dsh)
+        # self.lksx.DTFX_CITY_APPENDIX(self.dsh)
+        # self.yy.DTFX_CITY_APPENDIX(self.dsh)
 
     # 结构分析(暂时做不了)
     def jgfx(self):
