@@ -103,8 +103,7 @@ class city_report:
         pass
 
     def test(self):
-        self.hx.DTFX_CITY_TABLE(self.dsh)
-
+        self.hx.ZTGK_CITY_IMG(self.dsh)
 
 class city_report_appendix:
     def __init__(self, dsh):
