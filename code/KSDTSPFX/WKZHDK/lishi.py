@@ -958,7 +958,6 @@ class DTFX:
                                               "全部(D)", "高分组(D)", "中间组(D)", "低分组(D)"])
 
         for i in range(len(rows)):
-            rows[i].insert(0, i + 1)
             df.loc[len(df)] = rows[i]
 
         df.to_excel(excel_writer=writer, index=None, sheet_name="地市不同层次考生选择题受选率统计(历史)")

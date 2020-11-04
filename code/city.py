@@ -72,7 +72,7 @@ class city_report:
         # self.wkzh.ZTGK_CITY_TABLE(self.dsh)
         # self.lkzh.ZTGK_CITY_TABLE(self.dsh)
 
-    # 单题分析 综合单科图片没做
+    # 单题分析
     def dtfx(self):
         self.zz.DTFX_CITY_TABLE(self.dsh)
         self.dl.DTFX_CITY_TABLE(self.dsh)
@@ -101,6 +101,9 @@ class city_report:
     # 结构分析(暂时做不了)
     def jgfx(self):
         pass
+
+    def test(self):
+        self.hx.DTFX_CITY_TABLE(self.dsh)
 
 
 class city_report_appendix:
