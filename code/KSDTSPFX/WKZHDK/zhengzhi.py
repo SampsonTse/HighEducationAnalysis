@@ -49,7 +49,6 @@ class DTFX:
               r"mx.ksh=b.ksh where jmx.kmh = 006 and jmx.tzh=6 and jmx.zf!=0"
         self.cursor.execute(sql)
         num = self.cursor.fetchone()[0]
-        print(num)
 
         # 计算维度为男
         sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
@@ -208,11 +207,10 @@ class DTFX:
         df.loc[len(df)] = result
 
         # 计算维度为总计
-        sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
-              r"jmx right join (select kscj.ksh from " \
-              r"GKEVA2020.kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh " \
-              r"where jbxx.ds_h=" + dsh + " ) b on jmx.ksh=b.ksh " \
-              r"where jmx.kmh = 006 and jmx.tzh=6 and jmx.zf!=0"
+
+        sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join (select kscj.ksh from " \
+              r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh where kscj.zh!=0 and jbxx.ds_h=" + dsh + r") b on j" \
+              r"mx.ksh=b.ksh where jmx.kmh = 006 and jmx.tzh=6 and jmx.zf!=0"
 
         result = []
         self.cursor.execute(sql)
@@ -238,7 +236,7 @@ class DTFX:
 
         # 各区县考生成绩比较
         sql = r"select xq_h,mc from GKEVA2020.c_xq where xq_h like '" + dsh + r"%'"
-        print(sql)
+        
         self.cursor.execute(sql)
         xqhs = list(self.cursor.fetchall())
         xqhs.pop(0)
@@ -247,8 +245,7 @@ class DTFX:
 
         # 全省
         sql = r"select count(jmx.zf),avg(jmx.zf),STDDEV_SAMP(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
-              r"right join GKEVA2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.tzh=6 and kscj.zh!=0 and jmx.kmh = 006 "
-        print(sql)
+              r"right join GKEVA2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.tzh=6 and kscj.zh!=0 and jmx.kmh = 006 and jmx.zf!=0"
         self.cursor.execute(sql)
 
         result = self.cursor.fetchone()
@@ -261,7 +258,8 @@ class DTFX:
 
         # 全市
         sql = r"select count(jmx.zf),avg(jmx.zf),STDDEV_SAMP(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
-              r"right join GKEVA2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.tzh=6 and kscj.zh!=0  and jmx.kmh = 006 and  jmx.KSH LIKE '" + dsh + "%'"
+              r"right join GKEVA2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.tzh=6 and kscj.zh!=0 " \
+              r"and jmx.zf!=0 and jmx.kmh = 006 and  jmx.KSH LIKE '" + dsh + "%'"
         self.cursor.execute(sql)
         result = self.cursor.fetchone()
         result = list(result)
@@ -273,12 +271,12 @@ class DTFX:
 
         for xqh in xqhs:
             result = []
-            print(xqh)
+            
             sql = r"select count(jmx.zf),avg(jmx.zf),STDDEV_SAMP(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
                   r"jmx right join GKEVA2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.tzh=6" \
-                  r" and kscj.zh!=0  and jmx.kmh = 006 and  jmx.KSH LIKE '" + xqh[0] + r"%'"
+                  r" and kscj.zh!=0 and jmx.zf!=0 and jmx.kmh = 006 and  jmx.KSH LIKE '" + xqh[0] + r"%'"
             self.cursor.execute(sql)
-            print(sql)
+            
             result = self.cursor.fetchone()
             result = list(result)
             if None in result:
@@ -315,35 +313,35 @@ class DTFX:
         ax.spines['top'].set_color('none')
 
         # 全省
-        sql = "select count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh = jmx.ksh where jmx.tzh=6 and kmh = 006"
+        sql = "select count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh = jmx.ksh where jmx.tzh=6 and jmx.kmh = 006"
+        
         self.cursor.execute(sql)
         num = self.cursor.fetchone()[0]  # 全省人数
 
-        sql = "select jmx.zf,count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh = jmx.ksh where jmx.tzh=6 and kmh = 006  GROUP BY (jmx.zf) ORDER BY jmx.zf desc"
+        sql = "select jmx.zf,count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh = jmx.ksh where jmx.tzh=6 and jmx.kmh = 006  GROUP BY (jmx.zf) ORDER BY jmx.zf desc"
         self.cursor.execute(sql)
         items = list(self.cursor.fetchall())
 
         province = [None] * 101
         for item in items:
-            print(item[1] / num * 100)
-            print(item[0])
-            province[int(item[0])] =item[1] / num * 100
+            province[int(item[0])] = item[1] / num * 100
         x = list(range(101))
         plt.plot(x, province, color='orange', marker='.', label='全省')
 
         # 全市
-        sql = r"select count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh = jmx.ksh where jmx.tzh=6 and kmh = 006 and ksh like '" + dsh + r"%'"
+        sql = r"select count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh = jmx.ksh where jmx.tzh=6 and jmx.kmh = 006 and jmx.ksh like '" + dsh + r"%'"
         self.cursor.execute(sql)
         num = self.cursor.fetchone()[0]  # 全省人数
 
         sql = "select jmx.zf,count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh = jmx.ksh where jmx.tzh=6 " \
-              "and kmh = 006  and ksh like '" + dsh + r"%'GROUP BY (jmx.zf) ORDER BY jmx.zf desc"
+              "and jmx.kmh = 006  and jmx.ksh like '" + dsh + r"%'GROUP BY (jmx.zf) ORDER BY jmx.zf desc"
+        
         self.cursor.execute(sql)
         items = list(self.cursor.fetchall())
         city = [None] * 101
 
         for item in items:
-            city[int(item[0])] =item[1] / num * 100
+            city[int(item[0])] = item[1] / num * 100
 
         x = list(range(101))
 
@@ -354,6 +352,48 @@ class DTFX:
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center', bbox_to_anchor=(1.05, 1.05))
         plt.savefig(path + '\\地市及全省考生单科成绩分布(政治).png', dpi=1200)
+        plt.close()
+
+    # 省级报告 总体概括 图
+    def YSFGK_PROVINCE_IMG(self):
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + "全省"
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        plt.rcParams['figure.figsize'] = (15.0, 6)
+        ax = plt.gca()
+        ax.spines['right'].set_color('none')
+        ax.spines['top'].set_color('none')
+
+        # 全省
+        sql = "select count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx left join gkeva2020.kscj kscj on kscj.ksh = jmx.ksh where jmx.tzh=6 and jmx.kmh = 006"
+        
+        self.cursor.execute(sql)
+        num = self.cursor.fetchone()[0]  # 全省人数
+
+        sql = "select jmx.zf,count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx left join gkeva2020.kscj kscj on kscj.ksh = jmx.ksh where jmx.tzh=6 and jmx.kmh = 006  GROUP BY (jmx.zf) ORDER BY jmx.zf desc"
+        self.cursor.execute(sql)
+        items = list(self.cursor.fetchall())
+
+        province = [None] * 101
+        for item in items:
+            province[int(item[0])] = item[1] / num * 100
+        x = list(range(101))
+        plt.plot(x, province, color='springgreen', marker='.', label='全省')
+
+        plt.xlim((0, 100))
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
+        plt.xlabel('得分')
+        plt.ylabel('人数百分比（%）')
+        plt.legend(loc='upper center', bbox_to_anchor=(1.05, 1.05))
+        plt.savefig(path + '\\全省考生单科成绩分布(政治).png', dpi=1200)
         plt.close()
 
     # 省级报告 原始分概括 表
@@ -378,7 +418,7 @@ class DTFX:
               r"mx.ksh=b.ksh where jmx.kmh = 006 and jmx.tzh=6 and jmx.zf!=0"
         self.cursor.execute(sql)
         num = self.cursor.fetchone()[0]
-        print(num)
+        
 
         # 计算维度为男
         sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
@@ -509,47 +549,6 @@ class DTFX:
         df.to_excel(writer, sheet_name="各类别考生成绩比较(政治)", index=None)
         writer.save()
 
-    # 省级报告 总体概括 图
-    def YSFGK_PROVINCE_IMG(self):
-
-        pwd = os.getcwd()
-        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
-        path = father_path + r"\考生答题分析"
-
-        if not os.path.exists(path):
-            os.makedirs(path)
-        path = path + "\\" + "全省"
-        if not os.path.exists(path):
-            os.makedirs(path)
-
-        plt.rcParams['figure.figsize'] = (15.0, 6)
-        ax = plt.gca()
-        ax.spines['right'].set_color('none')
-        ax.spines['top'].set_color('none')
-
-        # 全省
-        sql = "select count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh = jmx.ksh where jmx.tzh=6 and kmh = 006"
-        self.cursor.execute(sql)
-        num = self.cursor.fetchone()[0]  # 全省人数
-
-        sql = "select jmx.zf,count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh = jmx.ksh where jmx.tzh=6 and kmh = 006  GROUP BY (jmx.zf) ORDER BY jmx.zf desc"
-        self.cursor.execute(sql)
-        items = list(self.cursor.fetchall())
-
-        province = [None] * 101
-        for item in items:
-            province[int(item[0])] = item[1] / num * 100
-        x = list(range(101))
-        plt.plot(x, province, color='springgreen', marker='.', label='全省')
-
-        plt.xlim((0, 100))
-        ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
-        plt.xlabel('得分')
-        plt.ylabel('人数百分比（%）')
-        plt.legend(loc='upper center', bbox_to_anchor=(1.05, 1.05))
-        plt.savefig(path + '\\全省考生单科成绩分布(政治).png', dpi=1200)
-        plt.close()
-
     # 市级报告 单题分析 表
     def DTFX_CITY_TABLE(self,dsh):
         sql = ""
@@ -569,7 +568,8 @@ class DTFX:
 
         writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析单题分析(政治).xlsx")
 
-        sql = r"select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh=006 " \
+        sql = r"select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right " \
+              r"join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=006 " \
               r"and jmx.tzh=6 and jmx.ksh like '"+dsh+r"%'"
         self.cursor.execute(sql)
         total =  self.cursor.fetchone()[0]
@@ -587,14 +587,16 @@ class DTFX:
             else:
                 row.append(str(idx))
 
-            num = 4.00
+            num = 4.000
             row.append(num)
 
-            sql = r"SELECT avg(kgval) FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx where ksh like '"+dsh+r"%' and kmh = 006 and idx = "+str(idx)
+            sql = r"SELECT avg(kgval) FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=amx.ksh where amx.ksh like '"+dsh+r"%' and amx.kmh = 006 and idx = "+str(idx)
             self.cursor.execute(sql)
             row.append(self.cursor.fetchone()[0])
 
-            sql = r"SELECT avg(kgval) FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx where  kmh = 006 and idx = " + str(idx)
+            sql = r"SELECT avg(kgval) FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=amx.ksh where  amx.kmh = 006 and idx = " + str(idx)
             self.cursor.execute(sql)
             row.append(self.cursor.fetchone()[0])
 
@@ -602,7 +604,7 @@ class DTFX:
 
             sql = r"select sum(kgval) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
                   r"right join (select a.*,rownum rn from (select jmx.ksh from " \
-                  r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.ksh like '"+dsh+r"%' and jmx.kmh=006 " \
+                  r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.ksh like '"+dsh+r"%' and jmx.kmh=006 " \
                   r"and jmx.tzh=6 order by jmx.zf desc) a) b on amx.ksh = b.ksh " \
                   r"where b.rn between 1 and "+str(low)+r" and amx.kmh=006 and amx.idx="+str(idx)
             self.cursor.execute(sql)
@@ -610,7 +612,7 @@ class DTFX:
 
             sql = r"select sum(kgval) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
                   r"right join (select a.*,rownum rn from (select jmx.ksh from " \
-                  r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.ksh like '" + dsh + r"%' and jmx.kmh=006 " \
+                  r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.ksh like '" + dsh + r"%' and jmx.kmh=006 " \
                   r"and jmx.tzh=6 order by jmx.zf desc) a) b on amx.ksh = b.ksh " \
                   r"where b.rn between "+str(low+1)+r" and " + str(high) + r" and amx.kmh=006 and amx.idx="+str(idx)
             self.cursor.execute(sql)
@@ -618,7 +620,7 @@ class DTFX:
 
             sql = r"select sum(kgval) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
                   r"right join (select a.*,rownum rn from (select jmx.ksh from " \
-                  r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.ksh like '" + dsh + r"%' and jmx.kmh=006 " \
+                  r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.ksh like '" + dsh + r"%' and jmx.kmh=006 " \
                   r"and jmx.tzh=6 order by jmx.zf desc) a) b on amx.ksh = b.ksh " \
                   r"where b.rn between "+str(high+1)+r" and " + str(total) + " and amx.kmh=006 and amx.idx="+str(idx)
             self.cursor.execute(sql)
@@ -633,43 +635,43 @@ class DTFX:
             row = []
             row.append(str(dth))
             if dth == 38:
-                num = 14.00
+                num = 14.000
             elif dth == 40:
-                num = 26.00
+                num = 24.000
             else:
                 num = 10.00
             row.append(num)
 
             sql = r"select avg(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh=006 and jmx.tzh="+str(dth)+" and ksh like '"+dsh+r"%'"
-            print(sql)
+            
             self.cursor.execute(sql)
             row.append(self.cursor.fetchone()[0])
 
             sql = r"select avg(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh=006 and jmx.tzh="+str(dth)
-            print(sql)
+            
             self.cursor.execute(sql)
             row.append(self.cursor.fetchone()[0])
 
-            print(row)
+            
             row.append(row[2]/num)
 
             sql = r"select avg(c.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX c right join" \
                   r" (select a.*,rownum rn from (select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
-                  r"where jmx.kmh=006 and jmx.ksh like '"+dsh+"%' and jmx.tzh=6 ORDER BY jmx.zf desc) a) b " \
+                  r" right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=006 and jmx.ksh like '"+dsh+"%' and jmx.tzh=6 ORDER BY jmx.zf desc) a) b " \
                   r"on c.ksh=b.ksh where b.rn BETWEEN 1 and "+str(low)+r" and c.kmh=006 and c.tzh = "+str(dth)
             self.cursor.execute(sql)
             row.append(self.cursor.fetchone()[0]/num)
 
             sql = r"select avg(c.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX c right join" \
                   r" (select a.*,rownum rn from (select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
-                  r"where jmx.kmh=006 and jmx.ksh like '" + dsh + "%' and jmx.tzh=6 ORDER BY jmx.zf desc) a) b " \
+                  r" right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=006 and jmx.ksh like '" + dsh + "%' and jmx.tzh=6 ORDER BY jmx.zf desc) a) b " \
                   r"on c.ksh=b.ksh where b.rn BETWEEN "+str(low+1)+" and " + str(high) + r" and c.kmh=006 and c.tzh = " +str(dth)
             self.cursor.execute(sql)
             row.append(self.cursor.fetchone()[0] / num)
 
             sql = r"select avg(c.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX c right join" \
                   r" (select a.*,rownum rn from (select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
-                  r"where jmx.kmh=006 and jmx.ksh like '" + dsh + "%' and jmx.tzh=6 ORDER BY jmx.zf desc) a) b " \
+                  r" right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=006 and jmx.ksh like '" + dsh + "%' and jmx.tzh=6 ORDER BY jmx.zf desc) a) b " \
                 r"on c.ksh=b.ksh where b.rn BETWEEN "+str(high+1)+" and " + str(total) + r" and c.kmh=006 and c.tzh = " + str(dth)
             self.cursor.execute(sql)
             row.append(self.cursor.fetchone()[0] / num)
@@ -696,7 +698,8 @@ class DTFX:
         if not os.path.exists(path):
             os.makedirs(path)
 
-        sql = r"select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh=006 and jmx.tzh=6 and jmx.ksh like '" + dsh + r"%'"
+        sql = r"select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh" \
+              r" where jmx.kmh=006 and jmx.tzh=6 and jmx.ksh like '" + dsh + r"%'"
         self.cursor.execute(sql)
         total = self.cursor.fetchone()[0]
         ph_num = int(total * 0.27)
@@ -709,7 +712,7 @@ class DTFX:
         y = []  # 区分度
 
         for idx in idxs:
-            num = 4.0
+            num = 4.00
             sql = r"select sum(kgval) FROM T_GKPJ2020_TKSKGDAMX amx right join kscj on kscj.ksh = amx.ksh where amx.ksh like '" + dsh + "%' and kmh = 006 and idx = " + str(
                 idx)
             self.cursor.execute(sql)
@@ -717,45 +720,47 @@ class DTFX:
 
             # 前27%得分率
             sql = r"select sum(kgval) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
-                  r"right join (select a.*,rownum rn from (select zf,ksh from T" \
-                  r"YMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh = 006 and jmx.tzh=6 and " \
+                  r"right join (select a.*,rownum rn from (select jmx.zf,jmx.ksh from T" \
+                  r"YMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh = 006 and jmx.tzh=6 and " \
                   r"jmx.ksh like '" + dsh + r"%' ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh w" \
                   r"here b.rn BETWEEN 1 and " + str(ph_num) + r" and amx.idx = " + str(idx) + " and amx.kmh=006"
-            print(sql)
+            
             self.cursor.execute(sql)
             ph = self.cursor.fetchone()[0] / ph_num / num
 
             # 后27%得分率
             sql = r"select sum(kgval) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
-                  r"right join (select a.*,rownum rn from (select zf,ksh from T" \
-                  r"YMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh = 006 and jmx.tzh=6 and " \
+                  r"right join (select a.*,rownum rn from (select jmx.zf,jmx.ksh from T" \
+                  r"YMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh = 006 and jmx.tzh=6 and " \
                   r"jmx.ksh like '" + dsh + r"%' ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh w" \
                   r"here b.rn BETWEEN " + str(total - ph_num) + r" and " + str(total) + " and amx.idx = " + str(idx) + " and amx.kmh=006"
-            print(sql)
+
             self.cursor.execute(sql)
             pl = self.cursor.fetchone()[0] / (total - ph_num) / num
 
             x.append(difficulty)
             y.append(ph - pl)
 
-        print(x, y)
+        
 
         for dth in dths:
             if dth == 38:
-                num = 14.00
+                num = 14.000
             elif dth == 40:
-                num = 26.00
+                num = 24.000
             else:
                 num = 10.00
 
-            sql = r"select avg(zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where  jmx.kmh=006 and jmx.ksh like '" + dsh + r"%' and jmx.tzh=" + str(dth)
+            sql = r"select avg(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh" \
+                  r" where  jmx.kmh=006 and jmx.ksh like '" + dsh + r"%' and jmx.tzh=" + str(dth)
+            
             self.cursor.execute(sql)
-            print(sql)
+            
             difficulty = self.cursor.fetchone()[0] / num  # 难度
             x.append(difficulty)
 
             sql = r"select a.zf,b.zf,b.ksh from TYMHPT.T_GKPJ2020_TKSTZCJMX a right join " \
-                  r"(select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where " \
+                  r"(select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where " \
                   r"jmx.kmh=006 and jmx.tzh=6 and jmx.ksh like '" + dsh + r"%') b on a.ksh=b.ksh where a.kmh=006 and a.tzh=" + str(dth)
             self.cursor.execute(sql)
             result = np.array(self.cursor.fetchall(), dtype="float64")
@@ -773,8 +778,8 @@ class DTFX:
             qfd = (D_a - D_b) / (math.sqrt(D_c) * math.sqrt(D_d))
             y.append(qfd)
 
-        print(x, y)
-        plt.rcParams['figure.figsize'] = (15.0, 6.0)
+        
+        plt.rcParams['figure.figsize'] = (15.0, 4.00)
         plt.scatter(x, y)
         plt.xlim((0, 1))
         plt.ylim((0, 1))
@@ -819,15 +824,16 @@ class DTFX:
         city_total = 0
 
         sql = r"select jmx.zf,count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
-              r"where jmx.kmh=006 and jmx.tzh=6 and zf!=0 GROUP BY jmx.zf ORDER BY jmx.zf desc"
+              r" right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=006 and jmx.tzh=6 and jmx.zf!=0 GROUP BY jmx.zf ORDER BY jmx.zf desc"
         self.cursor.execute(sql)
         items = self.cursor.fetchall()
         for item in items:
             province_num[int(item[0])] = item[1]
             province_total += item[1]  # 人数
 
-        sql = r"select jmx.zf,count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh=006 and jmx.tzh=6 " \
-              r"and jmx.ksh like '"+dsh+r"%' and zf!=0 GROUP BY jmx.zf ORDER BY jmx.zf desc"
+        sql = r"select jmx.zf,count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=006 and jmx.tzh=6 " \
+              r"and jmx.ksh like '"+dsh+r"%' and jmx.zf!=0 GROUP BY jmx.zf ORDER BY jmx.zf desc"
+        
         self.cursor.execute(sql)
         items = self.cursor.fetchall()
         for item in items:
@@ -882,8 +888,9 @@ class DTFX:
         writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析单题分析(政治).xlsx")
 
         rows = []
-        sql = r"select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX where ksh like '"+dsh+r"%' and tzh=6 and kmh=006"
-        print(sql)
+        sql = r"select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh" \
+              r" where jmx.ksh like '"+dsh+r"%' and jmx.tzh=6 and jmx.kmh=006"
+        
         self.cursor.execute(sql)
         total = self.cursor.fetchone()[0]
 
@@ -919,10 +926,10 @@ class DTFX:
             row = []
             # 高分组
             sql = r"select amx.da,count(amx.da) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join " \
-                  r"(select a.*,rownum rn from (select ksh,zf from TYMHPT.T_GKPJ2020_TKSTZCJMX where" \
-                  r" ksh like '"+dsh+r"%' and tzh=6 and kmh=006 ORDER BY zf desc) a) b on amx.ksh=b.ksh " \
+                  r"(select a.*,rownum rn from (select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where" \
+                  r" jmx.ksh like '"+dsh+r"%' and jmx.tzh=6 and jmx.kmh=006 ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh " \
                   r"where b.rn BETWEEN 1 and "+str(low)+r" and amx.kmh=006 and amx.idx="+str(idx)+" GROUP BY amx.da"
-            print(sql)
+            
             self.cursor.execute(sql)
             items = []
             items = self.cursor.fetchall()
@@ -942,10 +949,10 @@ class DTFX:
 
             # 中间组
             sql = r"select amx.da,count(amx.da) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join " \
-                  r"(select a.*,rownum rn from (select ksh,zf from TYMHPT.T_GKPJ2020_TKSTZCJMX where" \
-                  r" ksh like '" + dsh + r"%' and tzh=6 and kmh=006 ORDER BY zf desc) a) b on amx.ksh=b.ksh " \
+                  r"(select a.*,rownum rn from (select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where" \
+                  r" jmx.ksh like '" + dsh + r"%' and jmx.tzh=6 and jmx.kmh=006 ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh " \
                   r"where b.rn BETWEEN "+str(low+1)+r" and " + str(high) + r" and amx.kmh=006 and amx.idx=" + str(idx) + " GROUP BY amx.da"
-            print(sql)
+            
             self.cursor.execute(sql)
             items = []
             items = self.cursor.fetchall()
@@ -965,10 +972,10 @@ class DTFX:
 
             # 低分组
             sql = r"select amx.da,count(amx.da) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join " \
-                  r"(select a.*,rownum rn from (select ksh,zf from TYMHPT.T_GKPJ2020_TKSTZCJMX where" \
-                  r" ksh like '" + dsh + r"%' and tzh=6 and kmh=006 ORDER BY zf desc) a) b on amx.ksh=b.ksh " \
+                  r"(select a.*,rownum rn from (select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj " \
+                  r"on kscj.ksh=jmx.ksh where jmx.ksh like '" + dsh + r"%' and jmx.tzh=6 and jmx.kmh=006 ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh " \
                   r"where b.rn BETWEEN " + str(high+1) + r" and " + str(total) + r" and amx.kmh=006 and amx.idx=" + str(idx) + " GROUP BY amx.da"
-            print(sql)
+            
             self.cursor.execute(sql)
             items = []
             items = self.cursor.fetchall()
@@ -1044,7 +1051,8 @@ class DTFX:
 
         row = []
         # 全省
-        sql = r"select count(zf),avg(zf),STDDEV_SAMP(zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX where kmh=006 and tzh=6 "
+        sql = r"select count(jmx.zf),avg(jmx.zf),STDDEV_SAMP(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+              r"right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=006 and jmx.tzh=6 "
         self.cursor.execute(sql)
         row = list(self.cursor.fetchone())
         total = row[0]
@@ -1056,8 +1064,8 @@ class DTFX:
         df.loc[len(df)] = row
 
         for ds in dss:
-            sql = r"select count(zf),avg(zf),STDDEV_SAMP(zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
-                  r"where kmh=006 and tzh=6 and ksh like '" + ds[0] + r"%'"
+            sql = r"select count(jmx.zf),avg(jmx.zf),STDDEV_SAMP(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=006 and jmx.tzh=6 and jmx.ksh like '" + ds[0] + r"%'"
             self.cursor.execute(sql)
             row = list(self.cursor.fetchone())
             row.append(float(row[2]) / float(row[1]))
@@ -1088,7 +1096,8 @@ class DTFX:
 
         df = pd.DataFrame(data=None, columns=["题号", "分值", "平均分", "标准差", "难度", "区分度"])
 
-        sql = r"select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh=006 and jmx.tzh=6 "
+        sql = r"select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join " \
+              r"gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=006 and jmx.tzh=6 "
         self.cursor.execute(sql)
         total = self.cursor.fetchone()[0]
         ph_num = int(total * 0.27)
@@ -1101,7 +1110,7 @@ class DTFX:
         y = [] # 区分度
 
         for idx in idxs:
-            num = 6.0
+            num = 4.00
             sql = r"select sum(kgval) FROM T_GKPJ2020_TKSKGDAMX amx right join kscj on kscj.ksh = amx.ksh where kmh = 006 and idx = " + str(idx)
             self.cursor.execute(sql)
             difficulty = self.cursor.fetchone()[0] / total / num #难度
@@ -1112,7 +1121,7 @@ class DTFX:
                   r"YMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh = 006 and jmx.tzh=6 " \
                   r" ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh w" \
                   r"here b.rn BETWEEN 1 and "+ str(ph_num) +r" and amx.idx = "+str(idx)+" and amx.kmh=006"
-            print(sql)
+
             self.cursor.execute(sql)
             ph = self.cursor.fetchone()[0] / ph_num / num
 
@@ -1122,7 +1131,7 @@ class DTFX:
                   r"YMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh = 006 and jmx.tzh=6  " \
                   r" ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh w" \
                   r"here b.rn BETWEEN " + str(total-ph_num) + r" and "+str(total)+" and amx.idx = " + str(idx) + " and amx.kmh=006"
-            print(sql)
+
             self.cursor.execute(sql)
             pl = self.cursor.fetchone()[0] / (total-ph_num) / num
 
@@ -1143,20 +1152,22 @@ class DTFX:
 
         for dth in dths:
             if dth == 38:
-                num = 14.00
+                num = 14.000
             elif dth == 40:
-                num = 26.00
+                num = 24.000
             else:
                 num = 10.00
 
-            sql = r"select avg(zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh=006  and jmx.tzh="+str(dth)
+            sql = r"select avg(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on " \
+                  r"kscj.ksh=jmx.ksh where jmx.kmh=006  and jmx.tzh="+str(dth)
+            
             self.cursor.execute(sql)
-            print(sql)
+            
             difficulty = self.cursor.fetchone()[0] / num # 难度
             x.append(difficulty)
 
             sql = r"select a.zf,b.zf,b.ksh from TYMHPT.T_GKPJ2020_TKSTZCJMX a right join " \
-                  r"(select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where " \
+                  r"(select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where " \
                   r"jmx.kmh=006 and jmx.tzh = 6) b on a.ksh=b.ksh where a.kmh=006 and a.tzh="+str(dth)
             self.cursor.execute(sql)
             result = np.array(self.cursor.fetchall(), dtype="float64")
@@ -1175,7 +1186,8 @@ class DTFX:
             y.append(qfd)
 
             row = []
-            sql = r"select avg(zf),STDDEV_SAMP(zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX where kmh=006 and tzh="+str(dth)
+            sql = r"select avg(jmx.zf),STDDEV_SAMP(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj " \
+                  r"on kscj.ksh=jmx.ksh where jmx.kmh=006 and jmx.tzh="+str(dth)
             self.cursor.execute(sql)
             row = list(self.cursor.fetchone())
             row.insert(0, str(num))
@@ -1188,7 +1200,7 @@ class DTFX:
         df.to_excel(writer,index=None,sheet_name="考生单题作答情况(政治)")
         writer.save()
 
-        plt.rcParams['figure.figsize'] = (15.0,6.0)
+        plt.rcParams['figure.figsize'] = (15.0,4.00)
         plt.scatter(x,y)
         plt.xlim((0, 1))
         plt.ylim((0, 1))
@@ -1226,7 +1238,9 @@ class DTFX:
 
         df = pd.DataFrame(data=None, columns=['一分段', '人数', '百分比', '累计百分比'])
 
-        sql = r"select zf,count(zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX where zf!=0 and kmh=006 and tzh=6 group by zf order by zf desc"
+        sql = r"select jmx.zf,count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh" \
+              r" where jmx.zf!=0 and jmx.kmh=006 and jmx.tzh=6 group by jmx.zf order by jmx.zf desc"
+        
         self.cursor.execute(sql)
         results = self.cursor.fetchall()
 
@@ -1263,8 +1277,9 @@ class DTFX:
         writer = pd.ExcelWriter(path + '\\' + "考生答题分析单题分析(政治).xlsx")
 
         rows = []
-        sql = r"select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX where  tzh=6 and kmh=006"
-        print(sql)
+        sql = r"select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join " \
+              r"gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where  jmx.tzh=6 and jmx.kmh=006"
+        
         self.cursor.execute(sql)
         total = self.cursor.fetchone()[0]
 
@@ -1300,10 +1315,11 @@ class DTFX:
             row = []
             # 高分组
             sql = r"select amx.da,count(amx.da) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join " \
-                  r"(select a.*,rownum rn from (select ksh,zf from TYMHPT.T_GKPJ2020_TKSTZCJMX where" \
-                  r"  tzh=6 and kmh=006 ORDER BY zf desc) a) b on amx.ksh=b.ksh " \
+                  r"(select a.*,rownum rn from (select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where" \
+                  r"  jmx.tzh=6 and jmx.kmh=006 ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh " \
                   r"where b.rn BETWEEN 1 and "+str(low)+r" and amx.kmh=006 and amx.idx="+str(idx)+" GROUP BY amx.da"
-            print(sql)
+            
             self.cursor.execute(sql)
             items = []
             items = self.cursor.fetchall()
@@ -1323,10 +1339,10 @@ class DTFX:
 
             # 中间组
             sql = r"select amx.da,count(amx.da) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join " \
-                  r"(select a.*,rownum rn from (select ksh,zf from TYMHPT.T_GKPJ2020_TKSTZCJMX where" \
-                  r"  tzh=6 and kmh=006 ORDER BY zf desc) a) b on amx.ksh=b.ksh " \
+                  r"(select a.*,rownum rn from (select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where" \
+                  r"  jmx.tzh=6 and jmx.kmh=006 ORDER BY zf desc) a) b on amx.ksh=b.ksh " \
                   r"where b.rn BETWEEN "+str(low+1)+r" and " + str(high) + r" and amx.kmh=006 and amx.idx=" + str(idx) + " GROUP BY amx.da"
-            print(sql)
             self.cursor.execute(sql)
             items = []
             items = self.cursor.fetchall()
@@ -1346,10 +1362,10 @@ class DTFX:
 
             # 低分组
             sql = r"select amx.da,count(amx.da) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join " \
-                  r"(select a.*,rownum rn from (select ksh,zf from TYMHPT.T_GKPJ2020_TKSTZCJMX where" \
-                  r"   tzh=6 and kmh=006 ORDER BY zf desc) a) b on amx.ksh=b.ksh " \
+                  r"(select a.*,rownum rn from (select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where" \
+                  r"  jmx.tzh=6 and jmx.kmh=006 ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh " \
                   r"where b.rn BETWEEN " + str(high+1) + r" and " + str(total) + r" and amx.kmh=006 and amx.idx=" + str(idx) + " GROUP BY amx.da"
-            print(sql)
             self.cursor.execute(sql)
             items = []
             items = self.cursor.fetchall()

@@ -597,9 +597,9 @@ class DTFX:
         if not os.path.exists(path):
             os.makedirs(path)
 
-        writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题水平分析原始分概括(理科综合).xlsx")
+        writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题水平分析原始分概括(文科综合).xlsx")
 
-        # 理科生
+        # 文科生
         city_num = [0] * 301
         province_num = [0] * 301
 
@@ -648,7 +648,7 @@ class DTFX:
 
             i = i - 1
 
-        df.to_excel(excel_writer=writer, sheet_name='地市及全省考生一分段概括(理科综合)',index=None)
+        df.to_excel(excel_writer=writer, sheet_name='地市及全省考生一分段概括(文科综合)',index=None)
 
         writer.save()
 

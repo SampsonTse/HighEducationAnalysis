@@ -6,7 +6,7 @@ from KSDTSPFX import likezonghe
 from KSDTSPFX import wenkezonghe
 from KSDTSPFX.LKZHDK import wuli,shengwu,huaxue
 from KSDTSPFX.WKZHDK import lishi,zhengzhi,dili
-
+from KSDTSPFX.WKZHDK import zhengzhi
 
 class city_report:
     def __init__(self,dsh):
@@ -43,7 +43,7 @@ class city_report:
 
     # 总体概括
     def ztgk(self):
-
+        print("总体概括")
         self.zz.ZTGK_CITY_TABLE(self.dsh)
         self.dl.ZTGK_CITY_TABLE(self.dsh)
         self.ls.ZTGK_CITY_TABLE(self.dsh)
@@ -74,6 +74,7 @@ class city_report:
 
     # 单题分析
     def dtfx(self):
+        print("单题分析")
         self.zz.DTFX_CITY_TABLE(self.dsh)
         self.dl.DTFX_CITY_TABLE(self.dsh)
         self.ls.DTFX_CITY_TABLE(self.dsh)
@@ -103,7 +104,11 @@ class city_report:
         pass
 
     def test(self):
-        self.hx.ZTGK_CITY_IMG(self.dsh)
+        # self.yw.MF_LF_CITY_TABLE(self.dsh)
+        # self.lksx.MF_LF_CITY_TABLE(self.dsh)
+        # self.wksx.MF_LF_CITY_TABLE(self.dsh)
+        # self.yy.MF_LF_CITY_TABLE(self.dsh)
+        self.hx.MF_LF_CITY_TABLE(self.dsh)
 
 class city_report_appendix:
     def __init__(self, dsh):
@@ -140,6 +145,7 @@ class city_report_appendix:
 
     # 原始分概括
     def ysfgk(self):
+        print("附录 总体概括")
         self.sw.YSFFX_CITY_TABLE(self.dsh)
         self.hx.YSFFX_CITY_TABLE(self.dsh)
         self.wl.YSFFX_CITY_TABLE(self.dsh)
@@ -150,11 +156,12 @@ class city_report_appendix:
         # self.lksx.YSFFX_CITY_TABLE(self.dsh)
         # self.wksx.YSFFX_CITY_TABLE(self.dsh)
         # self.yy.YSFFX_CITY_TABLE(self.dsh)
-        # self.lkzh.YSFFX_CITY_TABLE(self.dsh)
-        # self.wkzh.YSFFX_CITY_TABLE(self.dsh)
+        self.lkzh.YSFFX_CITY_TABLE(self.dsh)
+        self.wkzh.YSFFX_CITY_TABLE(self.dsh)
 
     # 单题分析
     def dtfx(self):
+        print("附录 单题分析")
         self.sw.DTFX_CITY_APPENDIX(self.dsh)
         self.hx.DTFX_CITY_APPENDIX(self.dsh)
         self.wl.DTFX_CITY_APPENDIX(self.dsh)

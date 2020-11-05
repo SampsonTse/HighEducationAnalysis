@@ -599,11 +599,11 @@ class DTFX:
         writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析单题分析(文科数学).xlsx")
 
 
-        sql = r"select count(*) from kscj where ksh like '"+dsh+r"%' and kl = 2 "
+        sql = r"select count(*) from kscj where ksh like '"+dsh+r"%' and kl=2 "
         self.cursor.execute(sql)
         num_ks = self.cursor.fetchone()[0]
 
-        sql = r"select count(*) from kscj where kl = 2 "
+        sql = r"select count(*) from kscj where kl=2 "
         self.cursor.execute(sql)
         num_t = self.cursor.fetchone()[0]
 
@@ -634,7 +634,7 @@ class DTFX:
             sql = "select sum(c.kgval) mean from T_GKPJ2020_TKSKGDAMX c " \
                   "right join (select a.*,rownum rn from " \
                   "(SELECT KSCJ.KSH from KSCJ RIGHT JOIN JBXX ON KSCJ.KSH = JBXX.KSH " \
-                  "WHERE KSCJ.kl = 2 and jbxx.ds_h="+dsh+" ORDER BY KSCJ.SX DESC) a) b " \
+                  "WHERE KSCJ.kl=2 and jbxx.ds_h="+dsh+" ORDER BY KSCJ.SX DESC) a) b " \
                   "on c.ksh = b.ksh where c.idx = "+str(kgth)+" and c.kmh=003 and b.rn BETWEEN 1 and "+str(low)
             self.cursor.execute(sql)
             sum_h = float(self.cursor.fetchone()[0])
@@ -645,7 +645,7 @@ class DTFX:
             sql = "select sum(c.kgval) mean from T_GKPJ2020_TKSKGDAMX c " \
                   "right join (select a.*,rownum rn from " \
                   "(SELECT KSCJ.KSH from KSCJ RIGHT JOIN JBXX ON KSCJ.KSH = JBXX.KSH " \
-                  "WHERE KSCJ.kl = 2 and jbxx.ds_h=" + dsh + " ORDER BY KSCJ.SX DESC) a) b " \
+                  "WHERE KSCJ.kl=2 and jbxx.ds_h=" + dsh + " ORDER BY KSCJ.SX DESC) a) b " \
                   "on c.ksh = b.ksh where c.idx = " + str(kgth) + " and c.kmh=003 and b.rn BETWEEN "+str(low+1)+" and " + str(high)
             self.cursor.execute(sql)
             sum_m = float(self.cursor.fetchone()[0])
@@ -656,7 +656,7 @@ class DTFX:
             sql = "select sum(c.kgval) mean from T_GKPJ2020_TKSKGDAMX c " \
                   "right join (select a.*,rownum rn from " \
                   "(SELECT KSCJ.KSH from KSCJ RIGHT JOIN JBXX ON KSCJ.KSH = JBXX.KSH " \
-                  "WHERE KSCJ.kl = 2 and jbxx.ds_h=" + dsh + " ORDER BY KSCJ.SX DESC) a) b " \
+                  "WHERE KSCJ.kl=2 and jbxx.ds_h=" + dsh + " ORDER BY KSCJ.SX DESC) a) b " \
                   "on c.ksh = b.ksh where c.idx = " + str(kgth) + " and c.kmh=003 and b.rn BETWEEN "+str(high+1)+" and " + str(num_ks)
             self.cursor.execute(sql)
             sum_l = float(self.cursor.fetchone()[0])
@@ -702,7 +702,7 @@ class DTFX:
             # 高分组得分率
             sql = "select sum(d.sum) as avg from (SELECT sum(xtval) as sum from T_GKPJ2020_TSJBNKSXT sxt " \
                   "right join (select b.* from (SELECT a.*,rownum rn from " \
-                  "(select kscj.ksh,kscj.sx from kscj where ksh like \'"+dsh+"%\' and kl = 2 ORDER BY KSCJ.sx desc) a ) b " \
+                  "(select kscj.ksh,kscj.sx from kscj where ksh like \'"+dsh+"%\' and kl=2 ORDER BY KSCJ.sx desc) a ) b " \
                   "where b.rn BETWEEN 1 and "+str(low)+") c on sxt.ksh = c.ksh where sxt.kmh=003 and sxt.dth="+str(zgth)+" GROUP BY sxt.ksh) d"
             self.cursor.execute(sql)
             sum_h = float(self.cursor.fetchone()[0])
@@ -712,7 +712,7 @@ class DTFX:
             # 中间组组得分率
             sql = "select sum(d.sum) as avg from (SELECT sum(xtval) as sum from T_GKPJ2020_TSJBNKSXT sxt " \
                   "right join (select b.* from (SELECT a.*,rownum rn from " \
-                  "(select kscj.ksh,kscj.sx from kscj where ksh like \'"+dsh+"%\' and kl = 2 ORDER BY KSCJ.sx desc) a ) b " \
+                  "(select kscj.ksh,kscj.sx from kscj where ksh like \'"+dsh+"%\' and kl=2 ORDER BY KSCJ.sx desc) a ) b " \
                   "where b.rn BETWEEN "+str(low+1)+" and " + str(high) + ") c on sxt.ksh = c.ksh where sxt.kmh=003 and sxt.dth=" + str(zgth) + " GROUP BY sxt.ksh) d"
             self.cursor.execute(sql)
             sum_m = float(self.cursor.fetchone()[0])
@@ -722,7 +722,7 @@ class DTFX:
             # 低分组得分率
             sql = "select sum(d.sum) as avg from (SELECT sum(xtval) as sum from T_GKPJ2020_TSJBNKSXT sxt " \
                   "right join (select b.* from (SELECT a.*,rownum rn from " \
-                  "(select kscj.ksh,kscj.sx from kscj where ksh like \'"+dsh+"%\'  and kl = 2 ORDER BY KSCJ.sx desc) a ) b " \
+                  "(select kscj.ksh,kscj.sx from kscj where ksh like \'"+dsh+"%\'  and kl=2 ORDER BY KSCJ.sx desc) a ) b " \
                   "where b.rn BETWEEN " + str(high + 1) + " and " + str(num_ks) + ") c on sxt.ksh = c.ksh where sxt.kmh=003 and sxt.dth=" + str(zgth) + " GROUP BY sxt.ksh) d"
 
             self.cursor.execute(sql)
@@ -760,7 +760,7 @@ class DTFX:
         if not os.path.exists(path):
             os.makedirs(path)
 
-        sql = r"select count(ksh) from (SELECT DISTINCT ksh from kscj where ksh like '"+dsh+r"%' and kl = 2) a"
+        sql = r"select count(ksh) from (SELECT DISTINCT ksh from kscj where ksh like '"+dsh+r"%' and kl=2) a"
         self.cursor.execute(sql)
         total = self.cursor.fetchone()[0]
         ph_num = int(total * 0.27)
@@ -1107,7 +1107,7 @@ class DTFX:
         writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析单题分析(文科数学).xlsx")
 
         rows = []
-        sql = r"select count(*) from kscj where kl = 2 and ksh like '" + dsh + r"%'"
+        sql = r"select count(*) from kscj where kl=2 and ksh like '" + dsh + r"%'"
         print(sql)
         self.cursor.execute(sql)
         total = self.cursor.fetchone()[0]
@@ -1554,3 +1554,160 @@ class DTFX:
         plt.legend(loc='upper center', bbox_to_anchor=(1.05, 1.05))
         plt.savefig(path + '\\' + '全省考生单科成绩分布(文科数学).png', dpi=1200)
         plt.close()
+        
+        
+    # 市级报告 零分率 满分率
+    def MF_LF_CITY_TABLE(self, dsh):
+        sql = "select mc from c_ds where DS_H = " + dsh
+        self.cursor.execute(sql)
+        ds_mc = self.cursor.fetchone()[0]
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + ds_mc
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析单题分析零分率满分率(文科数学).xlsx")
+        df = pd.DataFrame(data=None, columns=['题号', '零分人数', '零分率', '满分人数', '满分率'])
+
+        idxs = list(range(1, 13))
+        xths = list(range(13, 24))
+        txt = idxs + xths
+
+        rows = []
+
+        sql = r"select count(*) from gkeva2020.kscj where kscj.ksh like '" + dsh + r"%' and kscj.sx!=0 and kscj.kl=2"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+        print(total)
+
+        for idx in idxs:
+            row = []
+            num = 3
+            sql = r"select count(case when amx.kgval=0 then 1 else null end) num1," \
+                  r"count(case when amx.kgval=" + str(num) + r" then 1 else null end) num2 " \
+                  r"from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj " \
+                  r"on kscj.ksh=amx.ksh where amx.kmh=002 and amx.idx=" + str(idx) + r" and amx.ksh " \
+                  r"like '" + dsh + "%' and kscj.sx!=0 and kscj.kl=2"
+            self.cursor.execute(sql)
+            row = list(self.cursor.fetchone())
+
+            row.insert(1, row[0] / total)
+            row.append(row[2] / total)
+            self.set_list_precision(row)
+            rows.append(row)
+
+        for xth in xths:
+            score_5 = [13, 14, 15, 16]
+            score_12 = [17, 18, 19, 20, 21]
+            score_10 = [22, 23]
+            num = 0
+            if xth in score_5:
+                num = 5
+            elif xth in score_10:
+                num = 10
+            elif xth in score_12:
+                num = 12
+
+            sql = r"select count(case when a.grade=0 then 1 else null end) num1," \
+                  r"count(case when a.grade=" + str(num) + r" then 1 else null end) num2 from " \
+                  r"(select sxt.ksh,sum(xtval) grade from GKEVA2020.T_GKPJ2020_TSJBNKSXT sxt " \
+                  r"right join GKEVA2020.kscj kscj on kscj.ksh=sxt.ksh where sxt.kmh=002 " \
+                  r"and kscj.kl=2 and sxt.dth=" + str(xth) + r" and " \
+                  r"kscj.sx!=0 and sxt.ksh like '" + dsh + r"%' GROUP BY sxt.ksh) a"
+
+            self.cursor.execute(sql)
+            row = list(self.cursor.fetchone())
+
+            row.insert(1, row[0] / total)
+            row.append(row[2] / total)
+            self.set_list_precision(row)
+            rows.append(row)
+
+
+        for i in range(len(rows)):
+            rows[i].insert(0, txt[i])
+            df.loc[len(df)] = rows[i]
+
+        df.to_excel(writer, sheet_name="各市单题零分率满分率(文科数学)", index=None)
+        writer.save()
+
+    # 省级报告 零分率 满分率
+    def MF_LF_PROVINCE_TABLE(self):
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + "全省"
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + "全省" + "考生答题分析单题分析零分率满分率(文科数学).xlsx")
+        df = pd.DataFrame(data=None, columns=['题号', '零分人数', '零分率', '满分人数', '满分率'])
+
+        idxs = list(range(1, 13))
+        xths = list(range(13,24))
+        txt = idxs+xths
+
+        sql = r"select count(*) from gkeva2020.kscj where  kscj.sx!=0 and kscj.kl=2"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+
+        rows = []
+
+        for idx in idxs:
+            row = []
+            num = 3
+            sql = r"select count(case when amx.kgval=0 then 1 else null end) num1," \
+                  r"count(case when amx.kgval=" + str(num) + r" then 1 else null end) num2 " \
+                  r"from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj " \
+                  r"on kscj.ksh=amx.ksh where amx.kmh=002 and kscj.kl=2 and amx.idx=" + str(idx) + " and kscj.sx!=0"
+            self.cursor.execute(sql)
+            row = list(self.cursor.fetchone())
+            total = row[0] + row[1]
+            row.insert(1, row[0] / total)
+            row.append(row[2] / total)
+            self.set_list_precision(row)
+            rows.append(row)
+
+        for xth in xths:
+            score_5 = [13, 14, 15, 16]
+            score_12 = [17, 18, 19, 20, 21]
+            score_10 = [22, 23]
+            num = 0
+            if xth in score_5:
+                num = 5
+            elif xth in score_10:
+                num = 10
+            elif xth in score_12:
+                num = 12
+
+            sql = r"select count(case when a.grade=0 then 1 else null end) num1," \
+                  r"count(case when a.grade=" + str(num) + r" then 1 else null end) num2 from " \
+                  r"(select sxt.ksh,sum(xtval) grade from GKEVA2020.T_GKPJ2020_TSJBNKSXT sxt " \
+                  r"right join GKEVA2020.kscj kscj on kscj.ksh=sxt.ksh where sxt.kmh=002 and sxt.dth=" + str(xth) + r" and " \
+                  r"kscj.sx!=0 and kscj.kl=2 and GROUP BY sxt.ksh) a"
+
+            self.cursor.execute(sql)
+            row = list(self.cursor.fetchone())
+            total = row[0] + row[1]
+            row.insert(1, row[0] / total)
+            row.append(row[2] / total)
+            self.set_list_precision(row)
+            rows.append(row)
+
+
+        for i in range(len(rows)):
+            rows[i].insert(txt[i])
+            df.loc[len(df)] = rows[i]
+
+        df.to_excel(writer, sheet_name="各市单题零分率满分率(文科数学)", index=None)
+        writer.save()

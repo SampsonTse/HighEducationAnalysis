@@ -2334,3 +2334,159 @@ class DTFX:
                          arrowprops=dict(arrowstyle='->',connectionstyle="arc3,rad = .2"))
         plt.savefig(path + '\\各题难度-区分度分布散点图(英语).png', dpi=1200)
         plt.close()
+        
+
+    # 市级报告 零分率 满分率
+    def MF_LF_CITY_TABLE(self,dsh):
+        sql = "select mc from c_ds where DS_H = " + dsh
+        self.cursor.execute(sql)
+        ds_mc = self.cursor.fetchone()[0]
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + ds_mc
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析单题分析零分率满分率(英语).xlsx")
+        df = pd.DataFrame(data=None,columns=['题号','零分人数','零分率','满分人数','满分率'])
+
+        idxs = list(range(1,41))
+        xths = list(range(61,82))
+        txt = list(range(21,82))
+
+        rows = []
+
+        sql = r"select count(*) from gkeva2020.kscj where kscj.ksh like '"+dsh+r"%' and kscj.wy!=0"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+        print(total)
+
+        for idx in idxs:
+            row = []
+            num = 0
+            if idx in range(1, 21):
+                num = 2
+            else:
+                num = 1.5
+            sql = r"select count(case when amx.kgval=0 then 1 else null end) num1," \
+                  r"count(case when amx.kgval="+str(num)+r" then 1 else null end) num2 " \
+                  r"from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj " \
+                  r"on kscj.ksh=amx.ksh where amx.kmh=101 and amx.idx="+str(idx)+" and amx.ksh like '"+dsh+"%' and kscj.yw!=0"
+            self.cursor.execute(sql)
+            row = list(self.cursor.fetchone())
+
+            row.insert(1,row[0]/total)
+            row.append(row[2]/total)
+            self.set_list_precision(row)
+            rows.append(row)
+
+        for xth in xths:
+            if xth in range(61, 71):
+                num = 1.5
+            elif xth in range(71, 81):
+                num = 1
+            elif xth == 81:
+                num = 25
+
+            sql = r"select count(case when a.grade=0 then 1 else null end) num1," \
+                  r"count(case when a.grade="+str(num)+r" then 1 else null end) num2 from " \
+                  r"(select sxt.ksh,sum(xtval) grade from GKEVA2020.T_GKPJ2020_TSJBNKSXT sxt " \
+                  r"right join GKEVA2020.kscj kscj on kscj.ksh=sxt.ksh where sxt.kmh=101 and sxt.xth="+str(xth)+r" and " \
+                  r"kscj.yw!=0 and sxt.ksh like '"+dsh+r"%' GROUP BY sxt.ksh) a"
+
+            self.cursor.execute(sql)
+            row = list(self.cursor.fetchone())
+
+            row.insert(1, row[0] / total)
+            row.append(row[2] / total)
+            self.set_list_precision(row)
+            rows.append(row)
+
+
+        for i in range(len(rows)):
+            rows[i].insert(0,txt[i])
+            df.loc[len(df)] = rows[i]
+
+        df.to_excel(writer,sheet_name="各市单题零分率满分率(英语)",index=None)
+        writer.save()
+
+    # 省级报告 零分率 满分率
+    def MF_LF_PROVINCE_TABLE(self):
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + "全省"
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + "全省" + "考生答题分析单题分析零分率满分率(英语).xlsx")
+        df = pd.DataFrame(data=None, columns=['题号', '零分人数', '零分率', '满分人数', '满分率'])
+
+        idxs = list(range(1,41))
+        xths = [6, 8, 9, 15, 16, 20, 21, 22]
+        txt = ["01", "02", "03", "04", "05", "07", "10", "11", "12", "14", "17", "18", "19", "06", "08", "09", "15",
+               "16", "20", "21", "22", "13"]
+
+        sql = r"select count(*) from gkeva2020.kscj where  kscj.wy!=0"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+
+        rows = []
+
+        for idx in idxs:
+            row = []
+            num = 0
+            if idx in range(1, 21):
+                num = 2
+            else:
+                num = 1.5
+            sql = r"select count(case when amx.kgval=0 then 1 else null end) num1," \
+                  r"count(case when amx.kgval=" + str(num) + r" then 1 else null end) num2 " \
+                  r"from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj " \
+                  r"on kscj.ksh=amx.ksh where amx.kmh=101 and amx.idx="+str(idx)+" and kscj.yw!=0"
+            self.cursor.execute(sql)
+            row = list(self.cursor.fetchone())
+            total = row[0] + row[1]
+            row.insert(1, row[0] / total)
+            row.append(row[2] / total)
+            self.set_list_precision(row)
+            rows.append(row)
+
+        for xth in xths:
+            if xth in range(61, 71):
+                num = 1.5
+            elif xth in range(71, 81):
+                num = 1
+            elif xth == 81:
+                num = 25
+
+            sql = r"select count(case when a.grade=0 then 1 else null end) num1," \
+                  r"count(case when a.grade=" + str(num) + r" then 1 else null end) num2 from " \
+                  r"(select sxt.ksh,sum(xtval) grade from GKEVA2020.T_GKPJ2020_TSJBNKSXT sxt " \
+                  r"right join GKEVA2020.kscj kscj on kscj.ksh=sxt.ksh where sxt.kmh=101 and sxt.xth=" + str(xth) + r" and " \
+                  r"kscj.yw!=0 and GROUP BY sxt.ksh) a"
+
+            self.cursor.execute(sql)
+            row = list(self.cursor.fetchone())
+            total = row[0] + row[1]
+            row.insert(1, row[0] / total)
+            row.append(row[2] / total)
+            self.set_list_precision(row)
+            rows.append(row)
+
+
+        for i in range(len(rows)):
+            rows[i].insert(0,txt[i])
+            df.loc[len(df)] = rows[i]
+
+        df.to_excel(writer, sheet_name="各市单题零分率满分率(英语)", index=None)
+        writer.save()
