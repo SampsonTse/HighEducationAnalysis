@@ -2407,7 +2407,6 @@ class DTFX:
             self.set_list_precision(row)
             rows.append(row)
 
-
         for i in range(len(rows)):
             rows[i].insert(0,txt[i])
             df.loc[len(df)] = rows[i]

@@ -680,6 +680,7 @@ class DTFX:
             score_10 = [22,23]
             row = []
             num = 0
+
             row.append(str(zgth))
             if zgth in score_5:
                 num = 5.00

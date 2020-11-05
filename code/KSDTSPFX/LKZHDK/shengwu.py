@@ -9,6 +9,7 @@ import cx_Oracle
 import matplotlib.ticker as ticker
 import openpyxl
 
+
 class DTFX:
     def __init__(self):
         self.db = cx_Oracle.connect('gkeva2020/ksy#2020#reta@10.0.200.103/ksydb01std')

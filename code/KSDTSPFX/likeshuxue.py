@@ -1575,6 +1575,7 @@ class DTFX:
         xths = list(range(13, 24))
         txt = idxs + xths
 
+
         rows = []
 
         sql = r"select count(*) from gkeva2020.kscj where kscj.ksh like '" + dsh + r"%' and kscj.sx!=0 and kscj.kl=1"

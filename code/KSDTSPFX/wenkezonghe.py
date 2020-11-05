@@ -649,7 +649,6 @@ class DTFX:
             i = i - 1
 
         df.to_excel(excel_writer=writer, sheet_name='地市及全省考生一分段概括(文科综合)',index=None)
-
         writer.save()
 
     # 省级报告 各市考生成绩比较

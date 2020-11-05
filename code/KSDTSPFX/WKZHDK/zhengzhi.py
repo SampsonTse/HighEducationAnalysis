@@ -769,7 +769,6 @@ class DTFX:
             zf_score = np.array(result[:, 1], dtype="float64")
 
             n = len(xt_score)
-
             D_a = n * np.sum(xt_score * zf_score)
             D_b = np.sum(zf_score) * np.sum(xt_score)
             D_c = n * np.sum(xt_score ** 2) - np.sum(xt_score) ** 2

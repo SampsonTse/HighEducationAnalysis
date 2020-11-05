@@ -2684,11 +2684,8 @@ class DTFX:
         for i in range(len(rows)):
             rows[i].insert(0,txt[i])
             df.loc[len(df)] = rows[i]
-
         df.to_excel(writer, sheet_name="各市单题零分率满分率(语文)", index=None)
         writer.save()
-
-
 
 
 

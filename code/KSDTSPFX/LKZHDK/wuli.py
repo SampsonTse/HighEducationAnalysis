@@ -786,6 +786,7 @@ class DTFX:
             qfd = (D_a - D_b) / (math.sqrt(D_c) * math.sqrt(D_d))
             y.append(qfd)
 
+
         plt.rcParams['figure.figsize'] = (15.0, 4.00)
         plt.scatter(x, y)
         plt.xlim((0, 1))
