@@ -420,12 +420,11 @@ class DTFX:
         self.cursor.execute(sql)
         num = self.cursor.fetchone()[0]
 
-
         # 计算维度为男
         sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
               r"jmx right join (select kscj.ksh from " \
               r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh " \
-              r"where kscj.zh!=0 and xb_h=1) b on jmx.ksh=b.ksh " \
+              r"where kscj.zh!=0 and  xb_h=1) b on jmx.ksh=b.ksh " \
               r"where jmx.kmh = 005 and jmx.tzh=6 and jmx.zf!=0"
 
         result = []
@@ -443,7 +442,7 @@ class DTFX:
         sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
               r"jmx right join (select kscj.ksh from " \
               r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh " \
-              r"where kscj.zh!=0 and xb_h=2) b on jmx.ksh=b.ksh " \
+              r"where kscj.zh!=0 and  xb_h=2) b on jmx.ksh=b.ksh " \
               r"where jmx.kmh = 005 and jmx.tzh=6 and jmx.zf!=0"
 
         result = []
@@ -461,7 +460,7 @@ class DTFX:
         sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
               r"jmx right join (select kscj.ksh from " \
               r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh " \
-              r"where kscj.zh!=0  and (jbxx.kslb_h=1 or jbxx.kslb_h=3)) b on jmx.ksh=b.ksh " \
+              r"where kscj.zh!=0 and  (jbxx.kslb_h=1 or jbxx.kslb_h=3)) b on jmx.ksh=b.ksh " \
               r"where jmx.kmh = 005 and jmx.tzh=6 and jmx.zf!=0"
 
         result = []
@@ -497,7 +496,7 @@ class DTFX:
         sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
               r"jmx right join (select kscj.ksh from " \
               r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh " \
-              r"where kscj.zh!=0  and (jbxx.kslb_h=1 or jbxx.kslb_h=2)) b on jmx.ksh=b.ksh " \
+              r"where kscj.zh!=0 and (jbxx.kslb_h=1 or jbxx.kslb_h=2)) b on jmx.ksh=b.ksh " \
               r"where jmx.kmh = 005 and jmx.tzh=6 and jmx.zf!=0"
 
         result = []
@@ -530,11 +529,10 @@ class DTFX:
         df.loc[len(df)] = result
 
         # 计算维度为总计
-        sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
-              r"jmx right join (select kscj.ksh from " \
-              r"GKEVA2020.kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh " \
-              r") b on jmx.ksh=b.ksh " \
-              r"where jmx.kmh = 005 and jmx.tzh=6 and jmx.zf!=0"
+
+        sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join (select kscj.ksh from " \
+              r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh where kscj.zh!=0 ) b on j" \
+              r"mx.ksh=b.ksh where jmx.kmh = 005 and jmx.tzh=6 and jmx.zf!=0"
 
         result = []
         self.cursor.execute(sql)
@@ -549,7 +547,8 @@ class DTFX:
 
         df.to_excel(writer, sheet_name="各类别考生成绩比较(化学)", index=None)
         writer.save()
-
+        
+        
     # 市级报告 单题分析 表
     def DTFX_CITY_TABLE(self,dsh):
         sql = ""
@@ -580,7 +579,7 @@ class DTFX:
 
         df = pd.DataFrame(data=None,columns=["题号","分值","本市平均分","全省平均分","本市得分率","高分组得分率","中间组得分率","低分组得分率"])
 
-        idxs = list(range(7,12))
+        idxs = list(range(7,14))
         for idx in idxs:
             row = []
             if idx<10:
@@ -702,7 +701,7 @@ class DTFX:
         total = self.cursor.fetchone()[0]
         ph_num = int(total * 0.27)
 
-        idxs = list(range(7,12))
+        idxs = list(range(7,14))
         dths = [26,27,28,35,36]
         txt = idxs + dths
 
@@ -894,7 +893,7 @@ class DTFX:
         # 2/3
         high = int(total / 1.5)
 
-        idxs = range(7,12)
+        idxs = range(7,14)
 
         for idx in idxs:
 
@@ -1097,7 +1096,7 @@ class DTFX:
         total = self.cursor.fetchone()[0]
         ph_num = int(total * 0.27)
 
-        idxs = list(range(7,12))
+        idxs = list(range(7,14))
         dths = [26,27,28,35,36]
         txt = idxs + dths
 
@@ -1270,7 +1269,7 @@ class DTFX:
 
         rows = []
         sql = r"select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join " \
-              r"gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where  jmx.tzh=6 and jmx.kmh=005"
+              r"gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where   jmx.tzh=6 and jmx.kmh=005"
         
         self.cursor.execute(sql)
         total = self.cursor.fetchone()[0]
@@ -1280,7 +1279,7 @@ class DTFX:
         # 2/3
         high = int(total / 1.5)
 
-        idxs = range(7,12)
+        idxs = range(7,14)
 
         for idx in idxs:
 
@@ -1432,7 +1431,7 @@ class DTFX:
 
         rows = []
 
-        idxs = list(range(7, 12))
+        idxs = list(range(7, 14))
         dths = [26, 27, 28, 35, 36]
         txt = idxs+dths
 
@@ -1444,14 +1443,13 @@ class DTFX:
         print(total)
 
         for idx in idxs:
-            sql = r"select count(case when amx.kgval=0 then 1 else null end) num1," \
-                  r"count(case when amx.kgval=6 then 1 else null end) num2  from " \
-                  r"GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj " \
-                  r"on kscj.ksh=amx.ksh where kl=1 and kscj.zh!=0 and amx.kmh=005 and " \
-                  r"amx.idx="+str(idx)+r" and kscj.kl=1 and kscj.zh!=0 and amx.ksh like '"+dsh+r"%'"
+            sql = r"SELECT count(case when amx.kgval=6 then 1 else null end) num2 " \
+                  r"FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join gkeva2020.kscj kscj " \
+                  r"on kscj.ksh=amx.ksh where kscj.zh!=0 and amx.ksh like '"+dsh+"%' and amx.kmh = 005 and idx="+str(idx)
 
             self.cursor.execute(sql)
             row = list(self.cursor.fetchone())
+            row.insert(0,total-row[0])
 
             row.insert(1, row[0] / total)
             row.append(row[2] / total)
@@ -1460,15 +1458,14 @@ class DTFX:
 
         for dth in dths:
             if dth == 26 or dth == 28:
-                num = 14.00
+                num = 14
             elif dth in [27, 35, 36]:
-                num = 15.00
+                num = 15
 
-            sql = r"select count(case when jmx.zf=0 then 1 else null end) num1," \
-                  r"count(case when jmx.zf="+str(num)+r" then 1 else null end) num2  " \
-                  r"from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join GKEVA2020.kscj kscj " \
-                  r"on kscj.ksh=jmx.ksh where kl=1 and kscj.zh!=0 and jmx.kmh=005 and kscj.kl=1 " \
-                  r"and kscj.zh!=0 and jmx.ksh like '"+dsh+r"%' and jmx.tzh="+str(dth)
+            sql = r"select  count(case when jmx.zf=0 then 1 else null end) num1," \
+                  r"count(case when jmx.zf="+str(num)+r" then 1 else null end) num2 " \
+                  r"from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join GKEVA2020.kscj kscj on" \
+                  r" kscj.ksh=jmx.ksh where jmx.kmh=005 and kscj.zh!=0 and jmx.tzh="+str(dth)+r" and jmx.ksh like '"+dsh+r"%'"
             self.cursor.execute(sql)
             row = list(self.cursor.fetchone())
             row.insert(1, row[0] / total)
@@ -1483,7 +1480,6 @@ class DTFX:
         df.to_excel(writer, sheet_name="各市单题零分率满分率(化学)", index=None)
         writer.save()
 
-
     def MF_LF_PROVINCE_TABLE(self):
 
         pwd = os.getcwd()
@@ -1497,13 +1493,13 @@ class DTFX:
             os.makedirs(path)
 
         writer = pd.ExcelWriter(path + '\\' + "全省" + "考生答题分析单题分析零分率满分率(化学).xlsx")
-
         df = pd.DataFrame(data=None, columns=['题号', '零分人数', '零分率', '满分人数', '满分率'])
+
         rows = []
 
-        idxs = list(range(7, 12))
+        idxs = list(range(7, 14))
         dths = [26, 27, 28, 35, 36]
-        txt = idxs+dths
+        txt = idxs + dths
 
         sql = r"select count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join (select kscj.ksh from " \
               r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh where kscj.zh!=0 ) b on j" \
@@ -1513,14 +1509,13 @@ class DTFX:
         print(total)
 
         for idx in idxs:
-            sql = r"select count(case when amx.kgval=0 then 1 else null end) num1," \
-                  r"count(case when amx.kgval=6 then 1 else null end) num2  from " \
-                  r"GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj " \
-                  r"on kscj.ksh=amx.ksh where kl=1 and kscj.zh!=0 and amx.kmh=005 and " \
-                  r"amx.idx="+str(idx)+r" and kscj.kl=1 and kscj.zh!=0 "
+            sql = r"SELECT count(case when amx.kgval=6 then 1 else null end) num2 " \
+                  r"FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join gkeva2020.kscj kscj " \
+                  r"on kscj.ksh=amx.ksh where kscj.zh!=0  and amx.kmh = 005 and idx=" + str(idx)
 
             self.cursor.execute(sql)
             row = list(self.cursor.fetchone())
+            row.insert(0, total - row[0])
 
             row.insert(1, row[0] / total)
             row.append(row[2] / total)
@@ -1529,15 +1524,14 @@ class DTFX:
 
         for dth in dths:
             if dth == 26 or dth == 28:
-                num = 14.00
+                num = 14
             elif dth in [27, 35, 36]:
-                num = 15.00
+                num = 15
 
-            sql = r"select count(case when jmx.zf=0 then 1 else null end) num1," \
-                  r"count(case when jmx.zf="+str(num)+r" then 1 else null end) num2  " \
-                  r"from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join GKEVA2020.kscj kscj " \
-                  r"on kscj.ksh=jmx.ksh where kl=1 and kscj.zh!=0 and jmx.kmh=005 and kscj.kl=1 " \
-                  r"and kscj.zh!=0  and jmx.tzh="+str(dth)
+            sql = r"select  count(case when jmx.zf=0 then 1 else null end) num1," \
+                  r"count(case when jmx.zf=" + str(num) + r" then 1 else null end) num2 " \
+                  r"from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join GKEVA2020.kscj kscj on" \
+                  r" kscj.ksh=jmx.ksh where jmx.kmh=005 and kscj.zh!=0 and jmx.tzh=" + str(dth)
             self.cursor.execute(sql)
             row = list(self.cursor.fetchone())
             row.insert(1, row[0] / total)
@@ -1546,10 +1540,10 @@ class DTFX:
             rows.append(row)
 
         for i in range(len(rows)):
-            rows[i].insert(txt[i])
+            rows[i].insert(0, txt[i])
             df.loc[len(df)] = rows[i]
 
-        df.to_excel(writer, sheet_name="各市单题零分率满分率(化学)", index=None)
+        df.to_excel(writer, sheet_name="全省单题零分率满分率(化学)", index=None)
         writer.save()
 
 

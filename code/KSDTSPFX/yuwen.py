@@ -53,7 +53,7 @@ class DTFX:
 
         sql = r'select count(a.YW) from kscj  a right join JBXX b on a.KSH = b.KSH ' \
               r'WHERE b.DS_H='+dsh+' and a.yw!=0'
-        print(sql)
+        
         self.cursor.execute(sql)
         num = self.cursor.fetchone()[0] # 总人数
 
@@ -226,7 +226,7 @@ class DTFX:
 
         sql = r'select count(a.YW) from kscj   a right join JBXX   b on a.KSH = b.KSH ' \
               r'WHERE b.DS_H='+dsh+r' and a.kl=2 and a.yw!=0'
-        print(sql)
+        
         self.cursor.execute(sql)
         num = self.cursor.fetchone()[0]  # 总人数
 
@@ -257,7 +257,7 @@ class DTFX:
         sql = r"select count(A.YW)  num,AVG(A.YW)  mean,STDDEV_SAMP(A.YW)   std " \
               r"from kscj   a right join JBXX   b on a.KSH = b.KSH" \
               r" where b.DS_H="+dsh+r" and b.XB_H = 2 and a.kl=2 and a.yw!=0"
-        print(sql)
+        
         result = []
         self.cursor.execute(sql)
         result = self.cursor.fetchone()
@@ -396,7 +396,7 @@ class DTFX:
         df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数', '平均分(全省)'])
 
         sql = r'select count(a.YW) from kscj  a right join JBXX  b on a.KSH = b.KSH WHERE b.DS_H='+dsh+r' and a.kl=1 and a.yw!=0'
-        print(sql)
+        
         self.cursor.execute(sql)
         num = self.cursor.fetchone()[0]  # 总人数
 
@@ -564,7 +564,7 @@ class DTFX:
 
         # 各区县考生成绩比较
         sql = r"select xq_h,mc from c_xq where  xq_h like '" + dsh + r"%'"
-        print(sql)
+        
         self.cursor.execute(sql)
         xqhs = list(self.cursor.fetchall())
         xqhs.pop(0)
@@ -597,7 +597,7 @@ class DTFX:
             sql = "select count(YW),AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std FROM kscj   A " \
                   "right join JBXX   B ON A.KSH = B.KSH WHERE  a.yw!=0 and B.XQ_H = " + xqh[0]
             self.cursor.execute(sql)
-            print(sql)
+            
             result = self.cursor.fetchone()
             result = list(result)
             if None in result:
@@ -614,7 +614,7 @@ class DTFX:
 
         df = pd.DataFrame(data=None, columns=['区县', '人数', '平均分', '标准差', '差异系数', '得分率'])
 
-        sql = "select count(YW),AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std FROM kscj   A where A.kl=1"
+        sql = "select count(YW),AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std FROM kscj   A where A.kl=1 and a.yw!=0"
         self.cursor.execute(sql)
         result = self.cursor.fetchone()
         result = list(result)
@@ -873,242 +873,420 @@ class DTFX:
         if not os.path.exists(path):
             os.makedirs(path)
 
-        xbs = [1, 2]
-        hjs = [["1", "3"], ["2", "4"]]
-        ywjs = [["1", "2"], ["3", "4"]]
 
         writer = pd.ExcelWriter(path + '\\' + "全省考生答题分析原始分概括(语文).xlsx")
 
         # 全省考生
         df = pd.DataFrame(data=None,columns=['维度','人数','比率(%)','平均分','标准差','差异系数'])
 
-        sql = "select count(*) from kscj  a right join JBXX  b on a.ksh = b.ksh where a.yw!=0"
+        sql = r'select count(a.YW) from kscj  a right join JBXX b on a.KSH = b.KSH ' \
+              r'WHERE  a.yw!=0'
+
         self.cursor.execute(sql)
-        num = self.cursor.fetchone()[0]
+        num = self.cursor.fetchone()[0]  # 总人数
 
-        # 性别
-        for xb in xbs:
-            sql = "select count(a.YW)   num,AVG(a.YW)   mean,STDDEV_SAMP(a.YW)   std " \
-                  "from kscj   a right join JBXX   b on a.ksh = b.ksh where a.yw!=0 and b.xb_h="+ str(xb)
-            self.cursor.execute(sql)
-            results = self.cursor.fetchone()
-            results = list(results)
-            results.append((float(results[2]) / float(results[1]))*100)  # 差异系数
-            results.insert(1,results[0]/num * 100)  #比率
-            if xb == 1 :
-                results.insert(0,'男')
-            else:
-                results.insert(0,'女')
+        # 计算维度为男
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj  a right join JBXX  b on a.KSH = b.KSH " \
+              r"where  b.XB_H = 1 and a.yw!=0"
 
-            self.set_list_precision(results)
-            df.loc[len(df)] = results
-
-        # 户籍
-        for hj in hjs:
-            sql = "select count(a.YW)   num,AVG(a.YW)   mean,STDDEV_SAMP(a.YW)   std " \
-                  "from kscj   a right join JBXX   b on a.ksh = b.ksh where a.yw!=0 and (b.kslb_h = "+str(hj[0])+" or b.kslb_h = "+hj[1]+")"
-
-            self.cursor.execute(sql)
-            results = self.cursor.fetchone()
-            results = list(results)
-            results.append((float(results[2]) / float(results[1]))*100)  # 差异系数
-            results.insert(1, results[0] / num * 100)  # 比率
-            if "1" in hj:
-                results.insert(0,'城镇')
-            else:
-                results.insert(0,'农村')
-
-            self.set_list_precision(results)
-            df.loc[len(df)] = results
-
-        # 应往届
-        for ywj in ywjs:
-            sql = "select count(a.YW)   num,AVG(a.YW)   mean,STDDEV_SAMP(a.YW)   std " \
-                  "from kscj   a right join JBXX   b on a.ksh = b.ksh where a.yw!=0 and (b.kslb_h = "+ywj[0]+" or b.kslb_h = "+ywj[1]+")"
-
-            self.cursor.execute(sql)
-            results = self.cursor.fetchone()
-            results = list(results)
-            results.append((float(results[2]) / float(results[1]))*100)  # 差异系数
-            results.insert(1, results[0] / num * 100)  # 比率
-            if "1" in ywj:
-                results.insert(0, '应届')
-            else:
-                results.insert(0, '往届')
-
-            self.set_list_precision(results)
-            df.loc[len(df)] = results
-
-        sql = "select count(a.YW)  num,AVG(a.YW)  mean,STDDEV_SAMP(a.YW)  std " \
-              "from kscj a right join JBXX  b on a.ksh = b.ksh where a.yw!=0 and a.yw!=0"
+        result = []
         self.cursor.execute(sql)
-        results = self.cursor.fetchone()
-        results = list(results)
-        results.append((float(results[2]) / float(results[1]))*100)  # 差异系数
-        results.insert(1, results[0] / num * 100)  # 比率
-        results.insert(0,'总计')
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
 
-        self.set_list_precision(results)
-        df.loc[len(df)] = results
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '男')
 
-        df.to_excel(excel_writer=writer,sheet_name="各类别考生成绩比较(语文)",index=None)
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        # 计算维度为女
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH " \
+              r"where  b.XB_H = 2 and a.yw!=0"
+
+        result = []
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
 
 
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '女')
 
-        # 全省文科考生
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        # 计算维度为城镇
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH " \
+              r"where (b.KSLB_H = 1 OR b.KSLB_H = 3) and a.yw!=0"
+
+        result = []
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+
+
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '城镇')
+
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        # 计算维度为农村
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH " \
+              r"where (b.KSLB_H = 2 OR b.KSLB_H = 4) and a.yw!=0"
+
+        result = []
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '农村')
+
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        # 计算维度为应届
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH " \
+              r"where  (b.KSLB_H = 1 OR b.KSLB_H = 2) and a.yw!=0"
+
+        result = []
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+
+
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '应届')
+
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        # 计算维度为往届
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH " \
+              r"where (b.KSLB_H = 3 OR b.KSLB_H = 4) and a.yw!=0"
+
+        result = []
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+
+
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '往届')
+
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        # 计算维度为总计
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX  b on a.KSH = b.KSH " \
+              r"where a.yw!=0"
+
+        result = []
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+
+
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '总计')
+
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        df.to_excel(sheet_name="各类别考生成绩比较(语文)", excel_writer=writer, index=None)
+
+        # 文科
         df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数'])
 
-        sql = "select count(a.YW)  num " \
-              "from kscj  a right join JBXX   b on a.ksh = b.ksh where a.kl=2"
+        sql = r'select count(a.YW) from kscj   a right join JBXX   b on a.KSH = b.KSH ' \
+              r'WHERE  a.kl=2 and a.yw!=0'
+
         self.cursor.execute(sql)
-        num = self.cursor.fetchone()[0]
+        num = self.cursor.fetchone()[0]  # 总人数
 
-        # 性别
-        for xb in xbs:
-            sql = "select count(a.YW)   num,AVG(a.YW)   mean,STDDEV_SAMP(a.YW)   std " \
-                  "from kscj   a right join JBXX   b on a.ksh = b.ksh " \
-                  "where a.kl=2 and b.xb_h=" + str(xb)
-            self.cursor.execute(sql)
-            results = self.cursor.fetchone()
-            results = list(results)
-            results.append((float(results[2]) / float(results[1]))*100)  # 差异系数
-            results.insert(1, results[0] / num * 100)  # 比率
-            if xb == 1:
-                results.insert(0, '男')
-            else:
-                results.insert(0, '女')
+        # 计算维度为男
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH " \
+              r"where  b.XB_H = 1 and a.kl=2 and a.yw!=0"
 
-            self.set_list_precision(results)
-            df.loc[len(df)] = results
-
-        # 户籍
-        for hj in hjs:
-            sql = "select count(a.YW)   num,AVG(a.YW)   mean,STDDEV_SAMP(a.YW)   std " \
-                  "from kscj   a right join JBXX   b on a.ksh = b.ksh " \
-                  "where a.kl=2 and (b.kslb_h = "+hj[0]+" or b.kslb_h = "+hj[1]+")"
-
-            self.cursor.execute(sql)
-            results = self.cursor.fetchone()
-            results = list(results)
-            results.append((float(results[2]) / float(results[1]))*100)  # 差异系数
-            results.insert(1, results[0] / num * 100)  # 比率
-            if "1" in hj:
-                results.insert(0, '城镇')
-            else:
-                results.insert(0, '农村')
-
-            self.set_list_precision(results)
-            df.loc[len(df)] = results
-
-        # 应往届
-        for ywj in ywjs:
-            sql = "select count(a.YW)   num,AVG(a.YW)   mean,STDDEV_SAMP(a.YW)   std " \
-                  "from kscj   a right join JBXX   b on a.ksh = b.ksh " \
-                  "where a.kl=2 and (b.kslb_h = "+ywj[0]+" or b.kslb_h = "+ywj[1]+")"
-
-            self.cursor.execute(sql)
-            results = self.cursor.fetchone()
-            results = list(results)
-            results.append((float(results[2]) / float(results[1]))*100)  # 差异系数
-            results.insert(1, results[0] / num * 100)  # 比率
-            if "1" in ywj:
-                results.insert(0, '应届')
-            else:
-                results.insert(0, '往届')
-
-            self.set_list_precision(results)
-            df.loc[len(df)] = results
-
-        sql = "select count(a.YW)   num,AVG(a.YW)   mean,STDDEV_SAMP(a.YW)   std " \
-              "from kscj   a right join JBXX   b on a.ksh = b.ksh where a.kl=2"
+        result = []
         self.cursor.execute(sql)
-        results = self.cursor.fetchone()
-        results = list(results)
-        results.append((float(results[2]) / float(results[1]))*100)  # 差异系数
-        results.insert(1, results[0] / num * 100)  # 比率
-        results.insert(0, '总计')
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
 
-        self.set_list_precision(results)
-        df.loc[len(df)] = results
 
-        df.to_excel(excel_writer=writer, sheet_name="各类别文科考生成绩比较(语文)", index=None)
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '男')
 
-        # 全省理科考生
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        # 计算维度为女
+        sql = r"select count(A.YW)  num,AVG(A.YW)  mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH" \
+              r" where  b.XB_H = 2 and a.kl=2 and a.yw!=0"
+
+        result = []
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+
+
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '女')
+
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        # 计算维度为城镇
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH " \
+              r"where (b.KSLB_H = 1 OR b.KSLB_H = 3) and a.kl=2 and a.yw!=0"
+
+        result = []
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+
+
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '城镇')
+
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        # 计算维度为农村
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH " \
+              r"where (b.KSLB_H = 2 OR b.KSLB_H = 4) and a.kl=2 and a.yw!=0"
+
+        result = []
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+
+
+
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '农村')
+
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        # 计算维度为应届
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH " \
+              r"where (b.KSLB_H = 1 OR b.KSLB_H = 2) and a.kl=2 and a.yw!=0"
+
+        result = []
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+
+
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '应届')
+
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        # 计算维度为往届
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH " \
+              r"where (b.KSLB_H = 3 OR b.KSLB_H = 4) and a.kl=2 and a.yw!=0"
+
+        result = []
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+
+
+
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '往届')
+
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        # 计算维度为总计
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH " \
+              r"where a.kl=2 and a.yw!=0"
+
+        result = []
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+
+
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '总计')
+
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        df.to_excel(sheet_name="各类别文科考生成绩比较(语文)", excel_writer=writer, index=None)
+
+        # 理科
         df = pd.DataFrame(data=None, columns=['维度', '人数', '比率(%)', '平均分', '标准差', '差异系数'])
 
-        sql = "select count(*) from kscj   a right join JBXX   b on a.ksh = b.ksh where a.kl=1"
+        sql = r'select count(a.YW) from kscj  a right join JBXX  b on a.KSH = b.KSH WHERE  a.kl=1 and a.yw!=0'
+
         self.cursor.execute(sql)
-        num = self.cursor.fetchone()[0]
+        num = self.cursor.fetchone()[0]  # 总人数
 
-        # 性别
-        for xb in xbs:
-            sql = "select count(a.YW)   num,AVG(a.YW)   mean,STDDEV_SAMP(a.YW)   std " \
-                  "from kscj   a right join JBXX   b on a.ksh = b.ksh " \
-                  "where a.kl=1 and b.xb_h=" + str(xb)
-            self.cursor.execute(sql)
-            results = self.cursor.fetchone()
-            results = list(results)
-            results.append((float(results[2]) / float(results[1]))*100)  # 差异系数
-            results.insert(1, results[0] / num * 100)  # 比率
-            if xb == 1:
-                results.insert(0, '男')
-            else:
-                results.insert(0, '女')
+        # 计算维度为男
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH" \
+              r" where  b.XB_H = 1 and a.kl=1 and a.yw!=0"
 
-            self.set_list_precision(results)
-            df.loc[len(df)] = results
-
-        # 户籍
-        for hj in hjs:
-            sql = "select count(a.YW)   num,AVG(a.YW)   mean,STDDEV_SAMP(a.YW)   std " \
-                  "from kscj   a right join JBXX   b on a.ksh = b.ksh " \
-                  "where a.kl=1 and (b.kslb_h = "+hj[0]+" or b.kslb_h = "+hj[1]+")"
-
-            self.cursor.execute(sql)
-            results = self.cursor.fetchone()
-            results = list(results)
-            results.append((float(results[2]) / float(results[1]))*100)  # 差异系数
-            results.insert(1, results[0] / num * 100)  # 比率
-            if "1" in hj:
-                results.insert(0, '城镇')
-            else:
-                results.insert(0, '农村')
-
-            self.set_list_precision(results)
-            df.loc[len(df)] = results
-
-        # 应往届
-        for ywj in ywjs:
-            sql = "select count(a.YW)   num,AVG(a.YW)   mean,STDDEV_SAMP(a.YW)   std " \
-                  "from kscj   a right join JBXX   b on a.ksh = b.ksh " \
-                  "where a.kl=1 and (b.kslb_h = "+ywj[0]+" or b.kslb_h = "+ywj[1]+")"
-
-            self.cursor.execute(sql)
-            results = self.cursor.fetchone()
-            results = list(results)
-            results.append((float(results[2]) / float(results[1]))*100)  # 差异系数
-            results.insert(1, results[0] / num * 100)  # 比率
-            if "1" in ywj:
-                results.insert(0, '应届')
-            else:
-                results.insert(0, '往届')
-
-            self.set_list_precision(results)
-            df.loc[len(df)] = results
-
-        sql = "select count(a.YW)   num,AVG(a.YW)   mean,STDDEV_SAMP(a.YW)   std " \
-              "from kscj   a right join JBXX  b on a.ksh = b.ksh where a.kl=1"
+        result = []
         self.cursor.execute(sql)
-        results = self.cursor.fetchone()
-        results = list(results)
-        results.append((float(results[2]) / float(results[1]))*100)  # 差异系数
-        results.insert(1, results[0] / num * 100)  # 比率
-        results.insert(0, '总计')
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+        self.cursor.execute(sql)
 
-        self.set_list_precision(results)
-        df.loc[len(df)] = results
 
-        df.to_excel(excel_writer=writer, sheet_name="各类别理科考生成绩比较(语文)", index=None)
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '男')
+
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        # 计算维度为女
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH " \
+              r"where  b.XB_H = 2 and a.kl=1 and a.yw!=0"
+
+        result = []
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+
+
+
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '女')
+
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        # 计算维度为城镇
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH " \
+              r"where (b.KSLB_H = 1 OR b.KSLB_H = 3) and a.kl=1 and a.yw!=0"
+
+        result = []
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '城镇')
+
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        # 计算维度为农村
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH " \
+              r"where (b.KSLB_H = 2 OR b.KSLB_H = 4) and a.kl=1 and a.yw!=0"
+
+        result = []
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+
+
+
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '农村')
+
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        # 计算维度为应届
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH " \
+              r"where (b.KSLB_H = 1 OR b.KSLB_H = 2) and a.kl=1 and a.yw!=0"
+
+        result = []
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+
+
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '应届')
+
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        # 计算维度为往届
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH " \
+              r"where  (b.KSLB_H = 3 OR b.KSLB_H = 4) and a.kl=1 and a.yw!=0"
+
+        result = []
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+
+
+
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '往届')
+
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        # 计算维度为总计
+        sql = r"select count(A.YW)   num,AVG(A.YW)   mean,STDDEV_SAMP(A.YW)   std " \
+              r"from kscj   a right join JBXX   b on a.KSH = b.KSH" \
+              r" where  a.kl=1 and a.yw!=0"
+
+        result = []
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        result = list(result)
+        result.append((float(result[2]) / float(result[1])) * 100)  # 差异系数
+
+        result.insert(1, (result[0] / num) * 100)
+        result.insert(0, '总计')
+
+        self.set_list_precision(result)
+        df.loc[len(df)] = result
+
+        df.to_excel(sheet_name="各类别理科考生成绩比较(语文)", excel_writer=writer, index=None)
 
         writer.save()
 
@@ -1253,7 +1431,7 @@ class DTFX:
 
             sql = "select avg(kgval),STDDEV_SAMP(kgval) from T_GKPJ2020_TKSKGDAMX amx right join kscj" \
                   " on kscj.ksh=amx.ksh where amx.kmh=001 and amx.idx = "+str(idx)
-            print(sql)
+            
             self.cursor.execute(sql)
             result = self.cursor.fetchone()
             mean = result[0]
@@ -1264,7 +1442,7 @@ class DTFX:
                   "right join (select b.* from (select a.*,rownum rn from " \
                   "(select ksh,yw from kscj order by yw desc) a) b where rn BETWEEN 1 and "+str(ph_num)+") c " \
                   "on c.ksh = amx.ksh where kmh = 001 and idx = "+str(idx)
-            print(sql)
+            
             self.cursor.execute(sql)
             ph = self.cursor.fetchone()[0] / ph_num / num
 
@@ -1272,7 +1450,7 @@ class DTFX:
                   "right join (select b.* from (select a.*,rownum rn from " \
                   "(select ksh,yw from kscj order by yw desc) a) b where rn BETWEEN "+str(total-ph_num)+" and " + str(total) + ") c on " \
                   "c.ksh = amx.ksh where kmh = 001 and idx = "+str(idx)
-            print(sql)
+            
             self.cursor.execute(sql)
             pl = self.cursor.fetchone()[0] / ph_num / num
 
@@ -1282,7 +1460,7 @@ class DTFX:
             row.append(std)
             row.append(diffculty)
             row.append(qfd)
-            print(row)
+            
             self.set_list_precision(row)
             rows.append(row)
 
@@ -1291,7 +1469,6 @@ class DTFX:
 
         for xth in xths:
             row = []
-            print(xth)
             if xth in [6, 8, 9, 15, 16, 20]:
                 num = 6.0
             elif xth == 21:
@@ -1302,7 +1479,7 @@ class DTFX:
 
             sql = "select avg(xtval),STDDEV_SAMP(xtval) from T_GKPJ2020_TSJBNKSXT sxt " \
                   "right join kscj on sxt.ksh = kscj.ksh where kmh = 001 and dth =" + str(xth)
-            print(sql)
+            
             self.cursor.execute(sql)
             result = self.cursor.fetchone()
             mean = result[0]
@@ -1334,8 +1511,7 @@ class DTFX:
 
             self.set_list_precision(row)
             rows.append(row)
-            print(len(rows))
-            print(row)
+            
             x.append(diffculty)
             y.append(qfd)
 
@@ -1370,7 +1546,6 @@ class DTFX:
         D_d = n * np.sum(zf_score ** 2) - np.sum(zf_score) ** 2
 
         qfd = (D_a - D_b) / (math.sqrt(D_c) * math.sqrt(D_d))
-        print(qfd)
         x.append(diffculty)
         y.append(qfd)
 
@@ -1381,13 +1556,13 @@ class DTFX:
         row.append(qfd)
         self.set_list_precision(row)
         rows.append(row)
-        print(row)
-        print(rows)
+        
+        
 
 
         for i in range(len(rows)):
             rows[i].insert(0,txt[i])
-            print(rows[i])
+
             df.loc[len(df)] = rows[i]
 
         df.to_excel(writer,index=None,sheet_name="考生单题作答情况(语文)")
@@ -1481,7 +1656,7 @@ class DTFX:
                   "(SELECT KSCJ.KSH from KSCJ left JOIN JBXX ON KSCJ.KSH = JBXX.KSH " \
                   "WHERE jbxx.ds_h=" + dsh + " ORDER BY KSCJ.yw DESC) a) b " \
                   "on c.ksh = b.ksh where c.idx = " + str(kgth) + " and c.kmh=001 and b.rn BETWEEN 1 and " + str(low)
-            print(sql)
+            
             self.cursor.execute(sql)
             sum_h = float(self.cursor.fetchone()[0])
             total = total + sum_h
@@ -1517,7 +1692,7 @@ class DTFX:
             row.append(dfl_l)  # 低分组
 
             self.set_list_precision(row)
-            print(row)
+            
             df.loc[len(df)] = row
 
         for zgth in zgths:
@@ -1586,7 +1761,7 @@ class DTFX:
 
             self.set_list_precision(row)
             df.loc[len(df)] = row
-            print(row)
+            
 
         # 13 23
         row = []
@@ -1667,7 +1842,7 @@ class DTFX:
         total = self.cursor.fetchone()[0]
         ph_num = int(total * 0.27)
 
-        idxs = [1,2,3,4,5,7,8,9,10,11,12,13]
+        idxs = [1,2,3,4,5,6,7,8,9,10,11,12,13]
         xths = [6,8,9,15,16,20,21,22]
 
         x = [] # 难度
@@ -1684,7 +1859,7 @@ class DTFX:
                   r"(select ksh,yw from (select ksh,yw,rownum rn from " \
                   r"(select ksh,yw from kscj where ksh like '"+dsh+"%' ORDER BY yw desc) a ) b " \
                   r"where b.rn BETWEEN 1 and "+str(ph_num)+") c on amx.ksh = c.ksh where amx.kmh = 001 and amx.idx = "+str(idx)
-            print(sql)
+            
             self.cursor.execute(sql)
             ph = self.cursor.fetchone()[0] / ph_num / num
 
@@ -1693,7 +1868,7 @@ class DTFX:
                   r"(select ksh,yw from (select ksh,yw,rownum rn from " \
                   r"(select ksh,yw from kscj where ksh like '" + dsh + "%' ORDER BY yw desc) a ) b " \
                   r"where b.rn BETWEEN "+str(total-ph_num)+r" and " + str(total) + r") c on amx.ksh = c.ksh where amx.kmh = 001 and amx.idx = " + str(idx)
-            print(sql)
+            
             self.cursor.execute(sql)
             pl = self.cursor.fetchone()[0] / (total-ph_num) / num
 
@@ -1711,7 +1886,7 @@ class DTFX:
             sql = r"select sum(xtval) from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
                   r"where sxt.ksh like '"+dsh+"%' and kmh=001 and dth="+str(xth)
             self.cursor.execute(sql)
-            print(sql)
+            
             difficulty = self.cursor.fetchone()[0] / total / num # 难度
             x.append(difficulty)
 
@@ -1736,8 +1911,7 @@ class DTFX:
 
             qfd = (D_a-D_b) / (math.sqrt(D_c) * math.sqrt(D_d))
             y.append(qfd)
-            print(x)
-            print(y)
+
 
         num = 10.0
 
@@ -1753,7 +1927,7 @@ class DTFX:
               r"T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
               r"where kmh = 001 and (dth=13 or dth=23) and sxt.ksh " \
               r"like '" + dsh + r"%' GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn "
-        print(sql)
+        
         self.cursor.execute(sql)
         result = np.array(self.cursor.fetchall(), dtype="float64")
         zf_score = np.array(result[:, 0], dtype="float64")
@@ -1772,7 +1946,6 @@ class DTFX:
         txt = ["01","02","03","04","05","07","10","11","12","14","17","18","19","06","08","09","15","16","20","21","22","13"]
 
 
-        print(x,y)
         plt.rcParams['figure.figsize'] = (15.0,6.0)
         plt.scatter(x,y)
         plt.xlim((0, 1))
@@ -1984,7 +2157,7 @@ class DTFX:
 
         rows = []
         sql = r"select count(*) from kscj where ksh like '"+dsh+r"%'"
-        print(sql)
+        
         self.cursor.execute(sql)
         total = self.cursor.fetchone()[0]
 
@@ -2024,7 +2197,7 @@ class DTFX:
                   r"where ksh like '"+dsh+r"%' ORDER BY yw desc) a ) b" \
                   r" where b.rn BETWEEN 1 and "+str(low)+r") c on amx.ksh = c.ksh " \
                   r"where amx.kmh=001 and amx.idx="+str(idx)+r" GROUP BY amx.da"
-            print(sql)
+            
             self.cursor.execute(sql)
             items = []
             items = self.cursor.fetchall()
@@ -2048,7 +2221,7 @@ class DTFX:
                   r"where ksh like '" + dsh + r"%' ORDER BY yw desc) a ) b" \
                   r" where b.rn BETWEEN "+str(low+1)+" and " + str(high) + r") c on amx.ksh = c.ksh " \
                   r"where amx.kmh=001 and amx.idx=" +str(idx) + r" GROUP BY amx.da"
-            print(sql)
+            
             self.cursor.execute(sql)
             items = []
             items = self.cursor.fetchall()
@@ -2072,7 +2245,7 @@ class DTFX:
                   r"where ksh like '" + dsh + r"%' ORDER BY yw desc) a ) b" \
                   r" where b.rn BETWEEN " + str(high+1) + " and " + str(total) + r") c on amx.ksh = c.ksh " \
                   r"where amx.kmh=001 and amx.idx=" + str(idx) + r" GROUP BY amx.da"
-            print(sql)
+            
             self.cursor.execute(sql)
             items = []
             items = self.cursor.fetchall()
@@ -2144,10 +2317,10 @@ class DTFX:
 
         rows = []
         sql = r"select count(*) from kscj "
-        print(sql)
+        
         self.cursor.execute(sql)
         total = self.cursor.fetchone()[0]
-        print(total)
+        
 
         # 1/3
         low = int(total / 3)
@@ -2185,7 +2358,7 @@ class DTFX:
                   r" ORDER BY yw desc) a ) b" \
                   r" where b.rn BETWEEN 1 and " + str(low) + r") c on amx.ksh = c.ksh " \
                   r"where amx.kmh=001 and amx.idx=" + str(idx) + r" GROUP BY amx.da"
-            print(sql)
+            
             self.cursor.execute(sql)
             items = []
             items = self.cursor.fetchall()
@@ -2209,7 +2382,7 @@ class DTFX:
                   r" ORDER BY yw desc) a ) b" \
                   r" where b.rn BETWEEN " + str(low + 1) + " and " + str(high) + r") c on amx.ksh = c.ksh " \
                   r"where amx.kmh=001 and amx.idx=" + str(idx) + r" GROUP BY amx.da"
-            print(sql)
+            
             self.cursor.execute(sql)
             items = []
             items = self.cursor.fetchall()
@@ -2233,7 +2406,7 @@ class DTFX:
                   r" ORDER BY yw desc) a ) b" \
                   r" where b.rn BETWEEN " + str(high + 1) + " and " + str(total) + r") c on amx.ksh = c.ksh " \
                   r"where amx.kmh=001 and amx.idx=" + str(idx) + r" GROUP BY amx.da"
-            print(sql)
+            
             self.cursor.execute(sql)
             items = []
             items = self.cursor.fetchall()
@@ -2466,7 +2639,7 @@ class DTFX:
         sql = "select count(*) from kscj where yw!=0 and kl=1"
         self.cursor.execute(sql)
         total = self.cursor.fetchone()[0]
-        print(total)
+        
 
         df = pd.DataFrame(data=None, columns=['一分段', '人数', '百分比', '累计百分比'])
 
@@ -2533,7 +2706,7 @@ class DTFX:
         writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析单题分析零分率满分率(语文).xlsx")
         df = pd.DataFrame(data=None,columns=['题号','零分人数','零分率','满分人数','满分率'])
 
-        idxs = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13]
+        idxs = [1, 2, 3, 4, 5,6 , 7, 8, 9, 10, 11, 12, 13]
         xths = [6, 8, 9, 15, 16, 20, 21, 22]
         txt = ["01", "02", "03", "04", "05", "07", "10", "11", "12", "14", "17", "18", "19", "06", "08", "09", "15",
                "16", "20", "21", "22", "13"]
@@ -2543,7 +2716,7 @@ class DTFX:
         sql = r"select count(*) from gkeva2020.kscj where kscj.ksh like '"+dsh+r"%' and kscj.yw!=0"
         self.cursor.execute(sql)
         total = self.cursor.fetchone()[0]
-        print(total)
+        
 
         for idx in idxs:
             row = []
@@ -2561,12 +2734,12 @@ class DTFX:
             rows.append(row)
 
         for xth in xths:
-            if xth in [6,8,9,15,16]:
-                num = 6
-            elif xth in [21]:
-                num = 5
-            elif xth in [22]:
-                num = 60
+            if xth in [6, 8, 9, 15, 16, 20]:
+                num = 6.0
+            elif xth == 21:
+                num = 5.0
+            elif xth == 22:
+                num = 60.00
 
             sql = r"select count(case when a.grade=0 then 1 else null end) num1," \
                   r"count(case when a.grade="+str(num)+r" then 1 else null end) num2 from " \
@@ -2619,7 +2792,7 @@ class DTFX:
         writer = pd.ExcelWriter(path + '\\' + "全省" + "考生答题分析单题分析零分率满分率(语文).xlsx")
         df = pd.DataFrame(data=None, columns=['题号', '零分人数', '零分率', '满分人数', '满分率'])
 
-        idxs = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13]
+        idxs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
         xths = [6, 8, 9, 15, 16, 20, 21, 22]
         txt = ["01", "02", "03", "04", "05", "07", "10", "11", "12", "14", "17", "18", "19", "06", "08", "09", "15",
                "16", "20", "21", "22", "13"]
@@ -2684,7 +2857,9 @@ class DTFX:
         for i in range(len(rows)):
             rows[i].insert(0,txt[i])
             df.loc[len(df)] = rows[i]
-        df.to_excel(writer, sheet_name="各市单题零分率满分率(语文)", index=None)
+
+
+        df.to_excel(writer, sheet_name="全省单题零分率满分率(语文)", index=None)
         writer.save()
 
 

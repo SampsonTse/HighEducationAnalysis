@@ -418,13 +418,12 @@ class DTFX:
               r"mx.ksh=b.ksh where jmx.kmh = 005 and jmx.tzh=9 and jmx.zf!=0"
         self.cursor.execute(sql)
         num = self.cursor.fetchone()[0]
-        
 
         # 计算维度为男
         sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
               r"jmx right join (select kscj.ksh from " \
               r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh " \
-              r"where kscj.zh!=0 and xb_h=1) b on jmx.ksh=b.ksh " \
+              r"where kscj.zh!=0 and  xb_h=1) b on jmx.ksh=b.ksh " \
               r"where jmx.kmh = 005 and jmx.tzh=9 and jmx.zf!=0"
 
         result = []
@@ -442,7 +441,7 @@ class DTFX:
         sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
               r"jmx right join (select kscj.ksh from " \
               r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh " \
-              r"where kscj.zh!=0 and xb_h=2) b on jmx.ksh=b.ksh " \
+              r"where kscj.zh!=0 and  xb_h=2) b on jmx.ksh=b.ksh " \
               r"where jmx.kmh = 005 and jmx.tzh=9 and jmx.zf!=0"
 
         result = []
@@ -460,7 +459,7 @@ class DTFX:
         sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
               r"jmx right join (select kscj.ksh from " \
               r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh " \
-              r"where kscj.zh!=0  and (jbxx.kslb_h=1 or jbxx.kslb_h=3)) b on jmx.ksh=b.ksh " \
+              r"where kscj.zh!=0 and  (jbxx.kslb_h=1 or jbxx.kslb_h=3)) b on jmx.ksh=b.ksh " \
               r"where jmx.kmh = 005 and jmx.tzh=9 and jmx.zf!=0"
 
         result = []
@@ -496,7 +495,7 @@ class DTFX:
         sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
               r"jmx right join (select kscj.ksh from " \
               r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh " \
-              r"where kscj.zh!=0  and (jbxx.kslb_h=1 or jbxx.kslb_h=2)) b on jmx.ksh=b.ksh " \
+              r"where kscj.zh!=0 and (jbxx.kslb_h=1 or jbxx.kslb_h=2)) b on jmx.ksh=b.ksh " \
               r"where jmx.kmh = 005 and jmx.tzh=9 and jmx.zf!=0"
 
         result = []
@@ -529,11 +528,10 @@ class DTFX:
         df.loc[len(df)] = result
 
         # 计算维度为总计
-        sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
-              r"jmx right join (select kscj.ksh from " \
-              r"GKEVA2020.kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh " \
-              r") b on jmx.ksh=b.ksh " \
-              r"where jmx.kmh = 005 and jmx.tzh=9 and jmx.zf!=0"
+
+        sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join (select kscj.ksh from " \
+              r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh where kscj.zh!=0 ) b on j" \
+              r"mx.ksh=b.ksh where jmx.kmh = 005 and jmx.tzh=9 and jmx.zf!=0"
 
         result = []
         self.cursor.execute(sql)
@@ -907,7 +905,7 @@ class DTFX:
         # 2/3
         high = int(total / 1.5)
 
-        idxs = range(14, 22)
+        idxs = range(14, 19)
 
         for idx in idxs:
 
@@ -1033,7 +1031,71 @@ class DTFX:
             
             df.loc[len(df)] = rows[i]
 
-        df.to_excel(excel_writer=writer, index=None, sheet_name="地市不同层次考生选择题受选率统计(物理)")
+        df.to_excel(excel_writer=writer, index=None, sheet_name="地市不同层次考生单项选择题受选率统计(物理)")
+
+        idxs = range(19,22)
+        for idx in idxs:
+            df = pd.DataFrame(data=None,columns=['选项','总计','高分组','中间组','低分组'])
+
+            das = ['A','AB','AC','AD','ABC','ABD','ACD','B','BC','BD','BCD','C','CD','D','ABCD','*']
+            count_h = np.array([0] * 16)
+            count_m = np.array([0] * 16)
+            count_l = np.array([0] * 16)
+            count_t = np.array([0] * 16)
+
+            sql = r"select amx.da,count(amx.da) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join " \
+                  r"(select a.*,rownum rn from (select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.ksh like '"+dsh+r"%' and " \
+                  r"jmx.tzh=9 and jmx.kmh=005 ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh where b.rn " \
+                  r"BETWEEN 1 and "+str(low)+r" and amx.kmh=005 and amx.idx="+str(idx)+" GROUP BY amx.da ORDER BY amx.da"
+            self.cursor.execute(sql)
+            result_h = self.cursor.fetchall()
+
+            for item in result_h:
+                index = das.index(item[0])
+                count_h[index] = item[1]
+
+            sql = r"select amx.da,count(amx.da) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join " \
+                  r"(select a.*,rownum rn from (select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.ksh like '"+dsh+r"%' and " \
+                  r"jmx.tzh=9 and jmx.kmh=005 ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh where b.rn " \
+                  r"BETWEEN "+str(low+1)+r" and "+str(high)+r" and amx.kmh=005 and amx.idx="+str(idx)+" GROUP BY amx.da ORDER BY amx.da"
+            self.cursor.execute(sql)
+            result_m = self.cursor.fetchall()
+            for item in result_m:
+                index = das.index(item[0])
+                count_m[index] = item[1]
+
+            sql = r"select amx.da,count(amx.da) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join " \
+                  r"(select a.*,rownum rn from (select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.ksh like '" + dsh + r"%' and " \
+                  r"jmx.tzh=9 and jmx.kmh=005 ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh where b.rn " \
+                  r"BETWEEN "+str(high+1)+r" and " + str(total) + r" and amx.kmh=005 and amx.idx=" + str(idx) + " GROUP BY amx.da ORDER BY amx.da"
+            self.cursor.execute(sql)
+            result_l = self.cursor.fetchall()
+            for item in result_l:
+                index = das.index(item[0])
+                count_l[index] = item[1]
+
+            count_t = count_h+count_l+count_m
+            das[len(das)-1] = "未选"
+            count_t = count_t / np.sum(count_t) * 100
+            count_h = count_h / np.sum(count_h) * 100
+            count_m = count_m / np.sum(count_m) * 100
+            count_l = count_l / np.sum(count_l) * 100
+
+        
+            for i in range(len(das)):
+                row = []
+                row.append(das[i])
+                row.append(count_t[i])
+                row.append(count_h[i])
+                row.append(count_m[i])
+                row.append(count_l[i])
+                self.set_list_precision(row)
+                df.loc[len(df)] = row
+
+            df.to_excel(writer,sheet_name="多选题"+str(idx)+"受选情况",index=None)
 
         writer.save()
 
@@ -1272,7 +1334,6 @@ class DTFX:
 
         writer.save()
 
-
     # 省级报告附录 单题分析
     def DTFX_PROVINCE_APPENDIX(self):
 
@@ -1300,7 +1361,7 @@ class DTFX:
         # 2/3
         high = int(total / 1.5)
 
-        idxs = range(14, 22)
+        idxs = range(14, 19)
 
         for idx in idxs:
 
@@ -1427,6 +1488,216 @@ class DTFX:
             
             df.loc[len(df)] = rows[i]
 
-        df.to_excel(excel_writer=writer, index=None, sheet_name="地市不同层次考生选择题受选率统计(物理)")
+        df.to_excel(excel_writer=writer, index=None, sheet_name="不同层次考生选择题受选率统计(物理)")
 
+        idxs = range(19, 22)
+        for idx in idxs:
+            df = pd.DataFrame(data=None, columns=['选项', '总计', '高分组', '中间组', '低分组'])
+
+            das = ['A', 'AB', 'AC', 'AD', 'ABC', 'ABD', 'ACD', 'B', 'BC', 'BD', 'BCD', 'C', 'CD', 'D', 'ABCD', '*']
+            count_h = np.array([0] * 16)
+            count_m = np.array([0] * 16)
+            count_l = np.array([0] * 16)
+            count_t = np.array([0] * 16)
+
+            sql = r"select amx.da,count(amx.da) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join " \
+                  r"(select a.*,rownum rn from (select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where  " \
+                  r"jmx.tzh=9 and jmx.kmh=005 ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh where b.rn " \
+                  r"BETWEEN 1 and " + str(low) + r" and amx.kmh=005 and amx.idx=" + str(idx) + " GROUP BY amx.da ORDER BY amx.da"
+            self.cursor.execute(sql)
+            result_h = self.cursor.fetchall()
+
+            for item in result_h:
+                index = das.index(item[0])
+                count_h[index] = item[1]
+
+            sql = r"select amx.da,count(amx.da) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join " \
+                  r"(select a.*,rownum rn from (select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where  " \
+                  r"jmx.tzh=9 and jmx.kmh=005 ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh where b.rn " \
+                  r"BETWEEN " + str(low + 1) + r" and " + str(high) + r" and amx.kmh=005 and amx.idx=" + str(idx) + " GROUP BY amx.da ORDER BY amx.da"
+            self.cursor.execute(sql)
+            result_m = self.cursor.fetchall()
+            for item in result_m:
+                index = das.index(item[0])
+                count_m[index] = item[1]
+
+            sql = r"select amx.da,count(amx.da) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join " \
+                  r"(select a.*,rownum rn from (select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where  " \
+                  r"jmx.tzh=9 and jmx.kmh=005 ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh where b.rn " \
+                  r"BETWEEN " + str(high + 1) + r" and " + str(total) + r" and amx.kmh=005 and amx.idx=" + str(idx) + " GROUP BY amx.da ORDER BY amx.da"
+            self.cursor.execute(sql)
+            result_l = self.cursor.fetchall()
+            for item in result_l:
+                index = das.index(item[0])
+                count_l[index] = item[1]
+
+            count_t = count_h + count_l + count_m
+            das[len(das) - 1] = "未选"
+            count_t = count_t / np.sum(count_t) * 100
+            count_h = count_h / np.sum(count_h) * 100
+            count_m = count_m / np.sum(count_m) * 100
+            count_l = count_l / np.sum(count_l) * 100
+
+            for i in range(len(das)):
+                row = []
+                row.append(das[i])
+                row.append(count_t[i])
+                row.append(count_h[i])
+                row.append(count_m[i])
+                row.append(count_l[i])
+                self.set_list_precision(row)
+                df.loc[len(df)] = row
+
+            df.to_excel(writer, sheet_name="多选题" + str(idx) + "受选情况", index=None)
+
+        writer.save()
+
+    def MF_LF_CITY_TABLE(self,dsh):
+        sql = "select mc from c_ds where DS_H = " + dsh
+        self.cursor.execute(sql)
+        ds_mc = self.cursor.fetchone()[0]
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + ds_mc
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + "考生答题分析单题分析零分率满分率(物理).xlsx")
+        df = pd.DataFrame(data=None, columns=['题号', '零分人数', '零分率', '满分人数', '满分率'])
+
+        rows = []
+
+        idxs = list(range(14, 22))
+        dths = [22, 23, 24, 25, 33, 34]
+        txt = idxs + dths
+
+        sql = r"select count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join (select kscj.ksh from " \
+              r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh where kscj.zh!=0 and jbxx.ds_h=" + dsh + r") b on j" \
+              r"mx.ksh=b.ksh where jmx.kmh = 005 and jmx.tzh=9 and jmx.zf!=0"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+
+
+        for idx in idxs:
+            sql = r"SELECT count(case when amx.kgval=6 then 1 else null end) num2 " \
+                  r"FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join gkeva2020.kscj kscj " \
+                  r"on kscj.ksh=amx.ksh where kscj.zh!=0 and amx.ksh like '"+dsh+"%' and amx.kmh = 005 and idx="+str(idx)
+
+            self.cursor.execute(sql)
+            row = list(self.cursor.fetchone())
+            row.insert(0,total-row[0])
+
+            row.insert(1, row[0] / total)
+            row.append(row[2] / total)
+            self.set_list_precision(row)
+            rows.append(row)
+
+        for dth in dths:
+            if dth == 22:
+                num = 6.00
+            elif dth == 23:
+                num = 9.00
+            elif dth == 24:
+                num = 12.00
+            elif dth == 25:
+                num = 20.00
+            elif dth == 33 or dth == 34:
+                num = 15.00
+
+            sql = r"select  count(case when jmx.zf=0 then 1 else null end) num1," \
+                  r"count(case when jmx.zf="+str(num)+r" then 1 else null end) num2 " \
+                  r"from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join GKEVA2020.kscj kscj on" \
+                  r" kscj.ksh=jmx.ksh where jmx.kmh=005 and kscj.zh!=0 and jmx.tzh="+str(dth)+r" and jmx.ksh like '"+dsh+r"%'"
+            self.cursor.execute(sql)
+            row = list(self.cursor.fetchone())
+            row.insert(1, row[0] / total)
+            row.append(row[2] / total)
+            self.set_list_precision(row)
+            rows.append(row)
+
+        for i in range(len(rows)):
+            rows[i].insert(0,txt[i])
+            df.loc[len(df)] = rows[i]
+
+        df.to_excel(writer, sheet_name="各市单题零分率满分率(物理)", index=None)
+        writer.save()
+
+    def MF_LF_PROVINCE_TABLE(self):
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + "全省"
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + "全省" + "考生答题分析单题分析零分率满分率(物理).xlsx")
+        df = pd.DataFrame(data=None, columns=['题号', '零分人数', '零分率', '满分人数', '满分率'])
+
+        rows = []
+
+        idxs = list(range(14, 22))
+        dths = [22, 23, 24, 25, 33, 34]
+        txt = idxs + dths
+
+        sql = r"select count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join (select kscj.ksh from " \
+              r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh where kscj.zh!=0 ) b on j" \
+              r"mx.ksh=b.ksh where jmx.kmh = 005 and jmx.tzh=9 and jmx.zf!=0"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+
+
+        for idx in idxs:
+            sql = r"SELECT count(case when amx.kgval=6 then 1 else null end) num2 " \
+                  r"FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join gkeva2020.kscj kscj " \
+                  r"on kscj.ksh=amx.ksh where kscj.zh!=0  and amx.kmh = 005 and idx=" + str(idx)
+
+            self.cursor.execute(sql)
+            row = list(self.cursor.fetchone())
+            row.insert(0, total - row[0])
+
+            row.insert(1, row[0] / total)
+            row.append(row[2] / total)
+            self.set_list_precision(row)
+            rows.append(row)
+
+        for dth in dths:
+            if dth == 22:
+                num = 6.00
+            elif dth == 23:
+                num = 9.00
+            elif dth == 24:
+                num = 12.00
+            elif dth == 25:
+                num = 20.00
+            elif dth == 33 or dth == 34:
+                num = 15.00
+
+            sql = r"select  count(case when jmx.zf=0 then 1 else null end) num1," \
+                  r"count(case when jmx.zf=" + str(num) + r" then 1 else null end) num2 " \
+                  r"from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join GKEVA2020.kscj kscj on" \
+                  r" kscj.ksh=jmx.ksh where jmx.kmh=005 and kscj.zh!=0 and jmx.tzh=" + str(dth)
+            self.cursor.execute(sql)
+            row = list(self.cursor.fetchone())
+            row.insert(1, row[0] / total)
+            row.append(row[2] / total)
+            self.set_list_precision(row)
+            rows.append(row)
+
+        for i in range(len(rows)):
+            rows[i].insert(0, txt[i])
+            df.loc[len(df)] = rows[i]
+
+        df.to_excel(writer, sheet_name="全省单题零分率满分率(物理)", index=None)
         writer.save()
