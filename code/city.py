@@ -75,17 +75,23 @@ class city_report:
     # 单题分析
     def dtfx(self):
         print("单题分析")
-        # self.zz.DTFX_CITY_TABLE(self.dsh)
-        # self.dl.DTFX_CITY_TABLE(self.dsh)
-        # self.ls.DTFX_CITY_TABLE(self.dsh)
+        print("政治")
+        self.zz.DTFX_CITY_TABLE(self.dsh)
+        print("地理")
+        self.dl.DTFX_CITY_TABLE(self.dsh)
+        print("历史")
+        self.ls.DTFX_CITY_TABLE(self.dsh)
+        print("生物")
         self.sw.DTFX_CITY_TABLE(self.dsh)
-        # self.wl.DTFX_CITY_TABLE(self.dsh)
-        # self.hx.DTFX_CITY_TABLE(self.dsh)
+        print("物理")
+        self.wl.DTFX_CITY_TABLE(self.dsh)
+        print("化学")
+        self.hx.DTFX_CITY_TABLE(self.dsh)
 
         # self.zz.DTFX_CITY_IMG(self.dsh)
         # self.dl.DTFX_CITY_IMG(self.dsh)
         # self.ls.DTFX_CITY_IMG(self.dsh)
-        self.sw.DTFX_CITY_IMG(self.dsh)
+        # self.sw.DTFX_CITY_IMG(self.dsh)
         # self.sw.MF_LF_CITY_TABLE(self.dsh)
         # self.wl.DTFX_CITY_IMG(self.dsh)
         # self.hx.DTFX_CITY_IMG(self.dsh)
@@ -105,7 +111,9 @@ class city_report:
         pass
 
     def test(self):
-        self.sw.MF_LF_CITY_TABLE(self.dsh)
+        self.wl.MF_LF_CITY_TABLE(self.dsh)
+    def test2(self):
+        self.wl.JGFX_CITY_TABLE(self.dsh)
 
 
 class city_report_appendix:

@@ -732,7 +732,7 @@ class DTFX:
         plt.xlabel('得分')
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center',bbox_to_anchor=(1.05, 1.05))
-        plt.savefig(path + '\\地市及全省考生单科成绩分布(英语).png', dpi=1200)
+        plt.savefig(path + '\\地市及全省考生单科成绩分布(英语).png', dpi=600)
         plt.close()
         
 
@@ -778,7 +778,7 @@ class DTFX:
         plt.xlabel('得分')
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center',bbox_to_anchor=(1.05, 1.05))
-        plt.savefig(path + '\\地市及全省文科考生单科成绩分布(英语).png', dpi=1200)
+        plt.savefig(path + '\\地市及全省文科考生单科成绩分布(英语).png', dpi=600)
         plt.close()
         
 
@@ -825,7 +825,7 @@ class DTFX:
         plt.xlabel('得分')
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center',bbox_to_anchor=(1.05, 1.05))
-        plt.savefig(path + '\\地市及全省理科考生单科成绩分布(英语).png', dpi=1200)
+        plt.savefig(path + '\\地市及全省理科考生单科成绩分布(英语).png', dpi=600)
         plt.close()
 
     # 省级报告 原始分概括
@@ -1291,7 +1291,7 @@ class DTFX:
         plt.xlabel('得分')
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center', bbox_to_anchor=(1.05, 1.05))
-        plt.savefig(path + '\\' + '全省考生单科成绩分布(英语).png', dpi=1200)
+        plt.savefig(path + '\\' + '全省考生单科成绩分布(英语).png', dpi=600)
         plt.close()
 
         plt.rcParams['figure.figsize'] = (15.0, 6)
@@ -1319,7 +1319,7 @@ class DTFX:
         plt.xlabel('得分')
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center', bbox_to_anchor=(1.05, 1.05))
-        plt.savefig(path + '\\' + '全省文科考生单科成绩分布(英语).png', dpi=1200)
+        plt.savefig(path + '\\' + '全省文科考生单科成绩分布(英语).png', dpi=600)
         plt.close()
 
         plt.rcParams['figure.figsize'] = (15.0, 6)
@@ -1347,7 +1347,7 @@ class DTFX:
         plt.xlabel('得分')
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center', bbox_to_anchor=(1.05, 1.05))
-        plt.savefig(path + '\\' + '全省理科考生单科成绩分布(英语).png', dpi=1200)
+        plt.savefig(path + '\\' + '全省理科考生单科成绩分布(英语).png', dpi=600)
         plt.close()
 
     # 市级报告 单题分析
@@ -1439,7 +1439,7 @@ class DTFX:
 
             row.append(total/num_ks) # 全市平均分
             row.append(avg_province) # 全省平均分
-            row.append(total/num_ks/5) # 全市得分率
+            row.append(total/num_ks/num) # 全市得分率
             row.append(dfl_h) #高分组
             row.append(dfl_m) #中间组
             row.append(dfl_l) #低分组
@@ -1609,6 +1609,9 @@ class DTFX:
             qfd = (D_a - D_b) / (math.sqrt(D_c) * math.sqrt(D_d))
             y.append(qfd)
 
+        writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析单题区分度难度(英语).xlsx")
+        df = pd.DataFrame(data=None,columns=["题号","难度","区分度"])
+
         plt.rcParams['figure.figsize'] = (15.0,6.0)
         plt.scatter(x, y)
         plt.xlim((0, 1))
@@ -1622,10 +1625,16 @@ class DTFX:
         ax.yaxis.set_major_locator(ticker.MultipleLocator(0.1))
         th = []
         for i in range(len(x)):
-            th.append(str(i+20))
-            plt.annotate(str(i+20), xy=(x[i], y[i]), xytext=(x[i] , y[i] + 0.008),
+            row = []
+            row = [str(i+21),x[i],y[i]]
+            self.set_list_precision(row)
+            df.loc[len(df)] = row
+            th.append(str(i+21))
+            plt.annotate(str(i+21), xy=(x[i], y[i]), xytext=(x[i] , y[i] + 0.008),
                          arrowprops=dict(arrowstyle='-'))
-        plt.savefig(path + '\\各题难度-区分度分布散点图(英语).png', dpi=1200)
+        df.to_excel(writer,sheet_name="英语单题难度区分度",index=False)
+        writer.save()
+        plt.savefig(path + '\\各题难度-区分度分布散点图(英语).png', dpi=600)
         plt.close()
 
     # 市级报告附录 原始分分析
@@ -2502,7 +2511,7 @@ class DTFX:
             th.append(rows[i][0])
             plt.annotate(rows[i][0], xy=(x[i], y[i]), xytext=(x[i] , y[i] + 0.008),
                          arrowprops=dict(arrowstyle='->',connectionstyle="arc3,rad = .2"))
-        plt.savefig(path + '\\各题难度-区分度分布散点图(英语).png', dpi=1200)
+        plt.savefig(path + '\\各题难度-区分度分布散点图(英语).png', dpi=600)
         plt.close()
         
 
