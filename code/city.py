@@ -113,6 +113,7 @@ class city_report:
     def test(self):
         self.wl.MF_LF_CITY_TABLE(self.dsh)
     def test2(self):
+        # self.wl.DTFX_CITY_TABLE(self.dsh)
         self.wl.JGFX_CITY_TABLE(self.dsh)
 
 
