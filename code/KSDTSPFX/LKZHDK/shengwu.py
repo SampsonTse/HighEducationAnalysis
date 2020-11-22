@@ -1559,9 +1559,8 @@ class DTFX:
 
         df.to_excel(writer, sheet_name="全省单题零分率满分率(生物)", index=None)
         writer.save()
-        
-        
-   # 市级报告 各区县占比
+              
+    # 市级报告 各区县占比
     def GQXZB_CITY_TABLE(self,dsh):
         sql = ""
         sql = "select mc from c_ds where DS_H = " + dsh
@@ -1657,3 +1656,118 @@ class DTFX:
         
         df.to_excel(writer,sheet_name="各县区分组分布",index=None)
         writer.save()
+        
+    def JGFX_CITY_TABLE(self, dsh):
+        sql = "select mc from c_ds where DS_H = " + dsh
+        self.cursor.execute(sql)
+        ds_mc = self.cursor.fetchone()[0]
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + ds_mc
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析结构分析(生物).xlsx")
+
+        df1 = pd.read_excel(path + "\\" + ds_mc + "考生答题分析单题分析(生物).xlsx", sheet_name=0)
+
+        print(df1)
+        txts = df1['题号'].tolist()
+        mean_province = df1['全省平均分'].tolist()
+        mean_city = df1['本市平均分'].tolist()
+
+        df2 = pd.DataFrame(data=None,columns=['主客观题','题数','平均分','标准差','难度','区分度','信度'])
+
+        sql = r"select avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join (select kscj.ksh from " \
+              r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh where kscj.zh!=0 and jbxx.ds_h=" + dsh + r") b on j" \
+                                                                                                                                r"mx.ksh=b.ksh where jmx.kmh = 005 and jmx.tzh=3 and jmx.zf!=0"
+        self.cursor.execute(sql)
+        result = list(self.cursor.fetchone())
+
+        row = ['选择题','6.00']
+        num = 36.00
+        mean_xzt = 0
+        for i in range(6):
+            mean_xzt += mean_city[i]
+        row.append(mean_xzt)
+        sql = r"select stddev_samp(a.score) from (SELECT sum(amx.kgval) score from " \
+              r"GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj on amx.ksh=kscj.ksh where" \
+              r" amx.idx in (1,2,3,4,5,6) and amx.ksh like '" + dsh + r"%'and amx.kmh=005 GROUP BY amx.ksh) a"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3]/num)
+
+        sql = r"select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh" \
+              r" where jmx.kmh=005 and jmx.tzh=3 and jmx.ksh like '" + dsh + r"%'"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+        ph_num = int(total * 0.27)
+
+        # 前27%得分率
+        sql = r"select sum(kgval) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+              r"right join (select a.*,rownum rn from (select jmx.zf,jmx.ksh from T" \
+              r"YMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh = 005 and jmx.tzh=3 and " \
+              r"jmx.ksh like '" + dsh + r"%' ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh w" \
+              r"here b.rn BETWEEN 1 and " + str(ph_num) + r" and amx.idx in (1,2,3,4,5,6) and amx.kmh=005"
+
+        self.cursor.execute(sql)
+        ph = self.cursor.fetchone()[0] / ph_num / num
+
+        # 后27%得分率
+        sql = r"select sum(kgval) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+              r"right join (select a.*,rownum rn from (select jmx.zf,jmx.ksh from T" \
+              r"YMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh = 005 and jmx.tzh=3 and " \
+              r"jmx.ksh like '" + dsh + r"%' ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh w" \
+              r"here b.rn BETWEEN " + str(total - ph_num) + r" and " + str(total) + " and amx.idx in (1,2,3,4,5,6) and amx.kmh=005"
+
+        self.cursor.execute(sql)
+        pl = self.cursor.fetchone()[0] / (total - ph_num) / num
+        row.append(ph-pl)
+        row.append(r"/")
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ['非选择题', '6.00',result[0]-mean_xzt,(result[0]-mean_xzt)/54]
+
+        sql = r"select avg(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where " \
+              r"jmx.kmh=005 and jmx.tzh in (29,30,31,32,37,38) and ksh like '" + dsh + r"%'"
+
+        self.cursor.execute(sql)
+        row.insert(4,self.cursor.fetchone()[0])
+
+        sql = r"select a.zf,b.zf,b.ksh from (select sum(zf) zf,ksh from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
+              r"where kmh=005 and tzh in (29,30,31,32,37,38) GROUP BY ksh ) a right join " \
+              r"(select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join " \
+              r"gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=005 and jmx.tzh=3 " \
+              r"and jmx.ksh like '"+dsh+r"%') b on a.ksh=b.ksh "
+        self.cursor.execute(sql)
+        result = np.array(self.cursor.fetchall(), dtype="float64")
+
+        xt_score = np.array(result[:, 0], dtype="float64")
+        zf_score = np.array(result[:, 1], dtype="float64")
+
+        n = len(xt_score)
+
+        D_a = n * np.sum(xt_score * zf_score)
+        D_b = np.sum(zf_score) * np.sum(xt_score)
+        D_c = n * np.sum(xt_score ** 2) - np.sum(xt_score) ** 2
+        D_d = n * np.sum(zf_score ** 2) - np.sum(zf_score) ** 2
+
+        qfd = (D_a - D_b) / (math.sqrt(D_c) * math.sqrt(D_d))
+        row.append(qfd)
+        row.append(r'/')
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        print(df2)
+
+
+
+
+
+

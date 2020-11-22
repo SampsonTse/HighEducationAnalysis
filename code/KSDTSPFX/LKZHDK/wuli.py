@@ -2355,7 +2355,7 @@ class DTFX:
 
         writer.save()
 
-   # 市级报告 各区县占比
+    # 市级报告 各区县占比
     def GQXZB_CITY_TABLE(self,dsh):
         sql = ""
         sql = "select mc from c_ds where DS_H = " + dsh
