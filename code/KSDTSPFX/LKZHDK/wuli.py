@@ -1122,12 +1122,15 @@ class DTFX:
 
         row = []
         # 全省
-        sql = r"select count(jmx.zf),avg(jmx.zf),STDDEV_SAMP(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
-              r"right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=005 and jmx.tzh=9 "
+        sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
+              r"jmx right join (select kscj.ksh from " \
+              r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh " \
+              r"where kscj.zh!=0) b on jmx.ksh=b.ksh " \
+              r"where jmx.kmh = 005 and jmx.tzh=9 and jmx.zf!=0"
         self.cursor.execute(sql)
         row = list(self.cursor.fetchone())
         total = row[0]
-        row.append(float(row[2]) / float(row[1]))
+        row.append(float(row[2]) / float(row[1]) * 100)
         row.insert(1, row[0] / total * 100)
         row.insert(0, "全省")
         row.insert(0, "00")
@@ -1135,11 +1138,12 @@ class DTFX:
         df.loc[len(df)] = row
 
         for ds in dss:
-            sql = r"select count(jmx.zf),avg(jmx.zf),STDDEV_SAMP(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
-                  r"right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=005 and jmx.tzh=9 and jmx.ksh like '" + ds[0] + r"%'"
+            sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join (select kscj.ksh from " \
+                  r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh where kscj.zh!=0 and jbxx.ds_h=" + ds[0] + r") b on j" \
+                  r"mx.ksh=b.ksh where jmx.kmh = 005 and jmx.tzh=9 and jmx.zf!=0"
             self.cursor.execute(sql)
             row = list(self.cursor.fetchone())
-            row.append(float(row[2]) / float(row[1]))
+            row.append(float(row[2]) / float(row[1]) * 100)
             row.insert(1, row[0] / total * 100)
             row.insert(0, ds[1])
             row.insert(0, ds[0])
@@ -1210,7 +1214,8 @@ class DTFX:
             y.append(ph-pl)
 
             row = []
-            sql = r"select avg(kgval),STDDEV_SAMP(kgval) from GKEVA2020.T_GKPJ2020_TKSKGDAMX where kmh=005 and idx="+str(idx)
+            sql = r"SELECT avg(kgval),stddev_samp(amx.kgval) FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=amx.ksh where  amx.kmh = 005 and idx = " + str(idx)
             self.cursor.execute(sql)
             row = list(self.cursor.fetchone())
             row.insert(0,str(num))
@@ -1233,8 +1238,7 @@ class DTFX:
             elif dth == 33 or dth == 34:
                 num = 15.00
 
-            sql = r"select avg(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on " \
-                  r"kscj.ksh=jmx.ksh where jmx.kmh=005  and jmx.tzh="+str(dth)
+            sql = r"select avg(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx  where jmx.kmh=005  and jmx.tzh="+str(dth)
             
             self.cursor.execute(sql)
             
@@ -1261,8 +1265,7 @@ class DTFX:
             y.append(qfd)
 
             row = []
-            sql = r"select avg(jmx.zf),STDDEV_SAMP(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj " \
-                  r"on kscj.ksh=jmx.ksh where jmx.kmh=005 and jmx.tzh="+str(dth)
+            sql = r"select avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx  where jmx.kmh=005 and jmx.tzh=" + str(dth)
             self.cursor.execute(sql)
             row = list(self.cursor.fetchone())
             row.insert(0, str(num))
@@ -1571,7 +1574,7 @@ class DTFX:
         if not os.path.exists(path):
             os.makedirs(path)
 
-        writer = pd.ExcelWriter(path + '\\' + "考生答题分析单题分析零分率满分率(物理).xlsx")
+        writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析单题分析零分率满分率(物理).xlsx")
         df = pd.DataFrame(data=None, columns=['题号', '零分人数', '零分率', '满分人数', '满分率'])
 
         rows = []
@@ -1609,20 +1612,21 @@ class DTFX:
             sql = r"SELECT count(case when amx.kgval=0 then 1 else null end) num2 " \
                   r"FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join gkeva2020.kscj kscj " \
                   r"on kscj.ksh=amx.ksh where kscj.zh!=0 and amx.ksh like '" + dsh + "%' and amx.kmh = 005 and idx=" + str(idx)
-
+            print(sql)
             self.cursor.execute(sql)
             row.append(self.cursor.fetchone()[0])
 
             sql = r"SELECT count(case when amx.kgval=6 then 1 else null end) num2 " \
                   r"FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join gkeva2020.kscj kscj " \
                   r"on kscj.ksh=amx.ksh where kscj.zh!=0 and amx.ksh like '"+dsh+"%' and amx.kmh = 005 and idx="+str(idx)
-
+            print(sql)
             self.cursor.execute(sql)
             row.append(self.cursor.fetchone()[0])
 
             row.insert(1, row[0] / total)
             row.append(row[2] / total)
             self.set_list_precision(row)
+            print(row)
             rows.append(row)
 
         for dth in dths:
@@ -1699,22 +1703,22 @@ class DTFX:
             rows.append(row)
 
         for idx in idxs2:
-
             row = []
 
             sql = r"SELECT count(case when amx.kgval=0 then 1 else null end) num2 " \
                   r"FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join gkeva2020.kscj kscj " \
-                  r"on kscj.ksh=amx.ksh where kscj.zh!=0  and amx.kmh = 005 and idx=" + str(idx)
+                  r"on kscj.ksh=amx.ksh where kscj.zh!=0 and  amx.kmh = 005 and idx=" + str(
+                idx)
 
             self.cursor.execute(sql)
-            row.insert(self.cursor.fetchone()[0])
+            row.append(self.cursor.fetchone()[0])
 
             sql = r"SELECT count(case when amx.kgval=6 then 1 else null end) num2 " \
                   r"FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join gkeva2020.kscj kscj " \
                   r"on kscj.ksh=amx.ksh where kscj.zh!=0  and amx.kmh = 005 and idx=" + str(idx)
 
             self.cursor.execute(sql)
-            row.insert(self.cursor.fetchone()[0])
+            row.append(self.cursor.fetchone()[0])
 
             row.insert(1, row[0] / total)
             row.append(row[2] / total)
@@ -1786,7 +1790,7 @@ class DTFX:
               r" amx.idx in (14,15,16,17,18) and amx.ksh like '"+dsh+r"%'and amx.kmh=005 GROUP BY amx.ksh) a"
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[-1]/row[-2]*100)
+        row.append(round(row[-1],2)/row[-2]*100)
         row.append(row[-3]/num)
         row.append(mean_province[0]+mean_province[1]+mean_province[2]+mean_province[3]+mean_province[4])
         self.set_list_precision(row)
@@ -1801,7 +1805,7 @@ class DTFX:
               r" amx.idx in (19,20,21) and amx.ksh like '" + dsh + r"%'and amx.kmh=005 GROUP BY amx.ksh) a"
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[-1] / row[-2] * 100)
+        row.append(round(row[-1],2) / row[-2] * 100)
         row.append(row[-3] / num)
         row.append(mean_province[5] + mean_province[6] + mean_province[7] )
         self.set_list_precision(row)
@@ -1816,7 +1820,7 @@ class DTFX:
               r" and jmx.ksh like '"+dsh+r"%' and jmx.kmh=005 GROUP BY jmx.ksh) a"
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[-1] / row[-2] * 100)
+        row.append(round(row[-1],2) / row[-2] * 100)
         row.append(row[-3] / num)
         row.append(mean_province[8] + mean_province[9])
         self.set_list_precision(row)
@@ -1831,7 +1835,7 @@ class DTFX:
               r" and jmx.ksh like '" + dsh + r"%' and jmx.kmh=005 GROUP BY jmx.ksh) a"
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[-1] / row[-2] * 100)
+        row.append(round(row[-1],2) / row[-2] * 100)
         row.append(row[-3] / num)
         row.append(mean_province[10] + mean_province[11])
         self.set_list_precision(row)
@@ -1846,7 +1850,7 @@ class DTFX:
               r" and jmx.ksh like '" + dsh + r"%' and jmx.kmh=005 GROUP BY jmx.ksh) a"
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[-1] / row[-2] * 100)
+        row.append(round(row[-1],2) / row[-2] * 100)
         row.append(row[-3] / num)
         row.append(mean_province[12])
         self.set_list_precision(row)
@@ -1861,9 +1865,9 @@ class DTFX:
               r" and jmx.ksh like '" + dsh + r"%' and jmx.kmh=005 GROUP BY jmx.ksh) a"
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[-1] / row[-2] * 100)
+        row.append(round(row[-1],2) / row[-2] * 100)
         row.append(row[-3] / num)
-        row.append(mean_province[13] )
+        row.append(mean_province[13])
         self.set_list_precision(row)
         df2.loc[len(df2)] = row
 
@@ -1881,7 +1885,7 @@ class DTFX:
               r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.ksh like '" + dsh + r"%' and jmx.kmh=005 and jmx.tzh in (23,24) GROUP BY jmx.ksh) b on a.ksh=b.ksh"
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[-1] / row[-2] * 100)
+        row.append(round(row[-1],2) / row[-2] * 100)
         row.append(row[-3] / num)
         row.append(mean_province[0]+mean_province[1]+mean_province[2]+mean_province[6]+mean_province[9]+mean_province[10])
         self.set_list_precision(row)
@@ -1898,9 +1902,9 @@ class DTFX:
               r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.ksh like '" + dsh + r"%' and jmx.kmh=005 and jmx.tzh in (22) GROUP BY jmx.ksh) b on a.ksh=b.ksh"
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[-1] / row[-2] * 100)
+        row.append( round(row[-1],2) / row[-2] * 100)
         row.append(row[-3] / num)
-        row.append(mean_province[3] + mean_province[8] )
+        row.append(mean_province[3] + mean_province[8])
         self.set_list_precision(row)
         df2.loc[len(df2)] = row
 
@@ -1914,7 +1918,7 @@ class DTFX:
               r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.ksh like '" + dsh + r"%' and jmx.kmh=005 and jmx.tzh in (25) GROUP BY jmx.ksh) b on a.ksh=b.ksh"
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[-1] / row[-2] * 100)
+        row.append(round(row[-1],2) / row[-2] * 100)
         row.append(row[-3] / num)
         row.append(mean_province[4] + mean_province[7]+mean_province[11])
         self.set_list_precision(row)
@@ -1929,7 +1933,7 @@ class DTFX:
               r"in (19) "
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[-1] / row[-2] * 100)
+        row.append(round(row[-1],2) / row[-2] * 100)
         row.append(row[-3] / num)
         row.append(mean_province[5])
         self.set_list_precision(row)
@@ -1939,10 +1943,10 @@ class DTFX:
         num = 15.00
         row.append(mean_city[12])
         sql = r"select stddev_samp(jmx.zf) score from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
-              r"jmx where jmx.ksh like '"+dsh+r"%' and jmx.kmh=005 and jmx.tzh=33"
+              r"jmx where jmx.ksh like '"+dsh+r"%' and jmx.kmh=005 and jmx.tzh=93"
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[-1] / row[-2] * 100)
+        row.append(round(row[-1],2) / row[-2] * 100)
         row.append(row[-3] / num)
         row.append(mean_province[12])
         self.set_list_precision(row)
@@ -1952,10 +1956,10 @@ class DTFX:
         num = 15.00
         row.append(mean_city[13])
         sql = r"select stddev_samp(jmx.zf) score from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
-              r"jmx where jmx.ksh like '"+dsh+r"%' and jmx.kmh=005 and jmx.tzh=34"
+              r"jmx where jmx.ksh like '"+dsh+r"%' and jmx.kmh=005 and jmx.tzh=94"
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[-1] / row[-2] * 100)
+        row.append(round(row[-1],2) / row[-2] * 100)
         row.append(row[-3] / num)
         row.append(mean_province[13])
         self.set_list_precision(row)
@@ -1975,7 +1979,7 @@ class DTFX:
               r" amx.idx in (14,19) and amx.ksh like '" + dsh + r"%'and amx.kmh=005 GROUP BY amx.ksh) a"
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[-1] / row[-2] * 100)
+        row.append(round(row[-1],2) / row[-2] * 100)
         row.append(row[-3] / num)
         row.append(mean_province[0] + mean_province[5] )
         self.set_list_precision(row)
@@ -1991,7 +1995,7 @@ class DTFX:
               r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.ksh like '" + dsh + r"%' and jmx.kmh=005 and jmx.tzh in (24) GROUP BY jmx.ksh) b on a.ksh=b.ksh"
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[-1] / row[-2] * 100)
+        row.append(round(row[-1],2) / row[-2] * 100)
         row.append(row[-3] / num)
         row.append(mean_province[1] + mean_province[2] + mean_province[3] + mean_province[4] + mean_province[10])
         self.set_list_precision(row)
@@ -2007,7 +2011,7 @@ class DTFX:
               r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.ksh like '" + dsh + r"%' and jmx.kmh=005 and jmx.tzh in (25) GROUP BY jmx.ksh) b on a.ksh=b.ksh"
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[-1] / row[-2] * 100)
+        row.append(round(row[-1],2) / row[-2] * 100)
         row.append(row[-3] / num)
         row.append(mean_province[6] + mean_province[7] + mean_province[11] )
         self.set_list_precision(row)
@@ -2020,7 +2024,7 @@ class DTFX:
               r"jmx where jmx.ksh like '"+dsh+r"%' and jmx.kmh=005 and jmx.tzh in (22,23) GROUP BY jmx.ksh) a"
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[-1] / row[-2] * 100)
+        row.append(round(row[-1],2) / row[-2] * 100)
         row.append(row[-3] / num)
         row.append(mean_province[8] + mean_province[9] )
         self.set_list_precision(row)
@@ -2030,10 +2034,10 @@ class DTFX:
         num = 15.00
         row.append(mean_city[12])
         sql = r"select stddev_samp(jmx.zf) score from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
-              r"jmx where jmx.ksh like '" + dsh + r"%' and jmx.kmh=005 and jmx.tzh=33"
+              r"jmx where jmx.ksh like '" + dsh + r"%' and jmx.kmh=005 and jmx.tzh=93"
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[-1] / row[-2] * 100)
+        row.append(round(row[-1],2) / row[-2] * 100)
         row.append(row[-3] / num)
         row.append(mean_province[12])
         self.set_list_precision(row)
@@ -2043,10 +2047,10 @@ class DTFX:
         num = 15.00
         row.append(mean_city[13])
         sql = r"select stddev_samp(jmx.zf) score from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
-              r"jmx where jmx.ksh like '" + dsh + r"%' and jmx.kmh=005 and jmx.tzh=34"
+              r"jmx where jmx.ksh like '" + dsh + r"%' and jmx.kmh=005 and jmx.tzh=94"
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[-1] / row[-2] * 100)
+        row.append(round(row[-1],2) / row[-2] * 100)
         row.append(row[-3] / num)
         row.append(mean_province[13])
         self.set_list_precision(row)
@@ -2056,3 +2060,396 @@ class DTFX:
 
 
         writer.save()
+
+    # 省级报告 结构分析
+    def JGFX_PRO_TABLE(self):
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + "全省"
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + "全省" + "考生答题分析结构分析(物理).xlsx")
+
+        df1 = pd.read_excel(path+"\\"+"考生单题分析(物理).xlsx",sheet_name=0)
+
+        txts = df1['题号'].tolist()
+        mean_province = df1['平均分'].tolist()
+
+        df2 = pd.DataFrame(columns=['题型', '题号', '分值', '平均分', '标准差', '差异系数', '得分率'])
+
+        row = ["单选题(必做)","14-18","30.00"]
+        num = 30.00
+        row.append(mean_province[0]+mean_province[1]+mean_province[2]+mean_province[3]+mean_province[4])
+
+        sql = r"select stddev_samp(a.score) from (SELECT sum(amx.kgval) score from " \
+              r"GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj on amx.ksh=kscj.ksh where" \
+              r" amx.idx in (14,15,16,17,18) and  amx.kmh=005 GROUP BY amx.ksh) a"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(round(row[-1],2)/row[-2]*100)
+        row.append(row[-3]/num)
+
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["单选题(多选)", "19-21", "18.00"]
+        num = 18.00
+        row.append(mean_province[5] + mean_province[6] + mean_province[7] )
+
+        sql = r"select stddev_samp(a.score) from (SELECT sum(amx.kgval) score from " \
+              r"GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj on amx.ksh=kscj.ksh where" \
+              r" amx.idx in (19,20,21) and amx.kmh=005 GROUP BY amx.ksh) a"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(round(row[-1],2) / row[-2] * 100)
+        row.append(row[-3] / num)
+
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["填空题(必做)", "22-23", "15.00"]
+        num = 15.00
+        row.append(mean_province[8] + mean_province[9])
+        sql = r"select stddev_samp(a.score) from " \
+              r"(SELECT sum(jmx.zf) score from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+              r"right join GKEVA2020.kscj kscj on jmx.ksh=kscj.ksh where jmx.tzh in (22,23)" \
+              r" and jmx.kmh=005 GROUP BY jmx.ksh) a"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(round(row[-1],2) / row[-2] * 100)
+        row.append(row[-3] / num)
+
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["计算题(必做)", "24-25", "32.00"]
+        num = 32.00
+        row.append(mean_province[10] + mean_province[11])
+        sql = r"select stddev_samp(a.score) from " \
+              r"(SELECT sum(jmx.zf) score from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+              r"right join GKEVA2020.kscj kscj on jmx.ksh=kscj.ksh where jmx.tzh in (24,25)" \
+              r"  and jmx.kmh=005 GROUP BY jmx.ksh) a"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(round(row[-1],2) / row[-2] * 100)
+        row.append(row[-3] / num)
+
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["选做题(选做1)", "33", "15.00"]
+        num = 15.00
+        row.append(mean_province[12])
+        sql = r"select stddev_samp(a.score) from " \
+              r"(SELECT sum(jmx.zf) score from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+              r"right join GKEVA2020.kscj kscj on jmx.ksh=kscj.ksh where jmx.tzh in (35)" \
+              r" and  jmx.kmh=005 GROUP BY jmx.ksh) a"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(round(row[-1],2) / row[-2] * 100)
+        row.append(row[-3] / num)
+
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["选做题(选做2)", "34", "15.00"]
+        num = 15.00
+        row.append(mean_province[13])
+        sql = r"select stddev_samp(a.score) from " \
+              r"(SELECT sum(jmx.zf) score from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+              r"right join GKEVA2020.kscj kscj on jmx.ksh=kscj.ksh where jmx.tzh in (34)" \
+              r"  and jmx.kmh=005 GROUP BY jmx.ksh) a"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(round(row[-1],2) / row[-2] * 100)
+        row.append(row[-3] / num)
+
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        df2.to_excel(writer,sheet_name="地市各题型得分情况(物理)",index=None)
+
+        df2 = pd.DataFrame(columns=['知识板块', '题号', '分值', '平均分', '标准差', '差异系数', '得分率'])
+
+        row = ["力学", "14、15、16、20、23、24", "45.00"]
+        num = 45.00
+        row.append(mean_province[0]+mean_province[1]+mean_province[2]+mean_province[6]+mean_province[9]+mean_province[10])
+        sql = r"select STDDEV_SAMP(a.score+b.score) from (select amx.ksh,sum(amx.kgval) score " \
+              r"from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj " \
+              r"on kscj.ksh=amx.ksh where   amx.kmh=005 and amx.idx " \
+              r"in (14,15,16,20) GROUP BY amx.ksh) a left join (select jmx.ksh,sum(jmx.zf) score from " \
+              r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where  jmx.kmh=005 and jmx.tzh in (23,24) GROUP BY jmx.ksh) b on a.ksh=b.ksh"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(round(row[-1],2) / row[-2] * 100)
+        row.append(row[-3] / num)
+
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+
+        row = ["电学", "17、22", "12.00"]
+        num = 12.00
+        row.append(mean_province[3] + mean_province[8])
+        sql = r"select STDDEV_SAMP(a.score+b.score) from (select amx.ksh,sum(amx.kgval) score " \
+              r"from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj " \
+              r"on kscj.ksh=amx.ksh where   amx.kmh=005 and amx.idx " \
+              r"in (17) GROUP BY amx.ksh) a left join (select jmx.ksh,sum(jmx.zf) score from " \
+              r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh=005 and jmx.tzh in (22) GROUP BY jmx.ksh) b on a.ksh=b.ksh"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append( round(row[-1],2) / row[-2] * 100)
+        row.append(row[-3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["力学+电磁学", "18、21、25", "32.00"]
+        num = 32.00
+        row.append(mean_province[4] + mean_province[7]+mean_province[11])
+        sql = r"select STDDEV_SAMP(a.score+b.score) from (select amx.ksh,sum(amx.kgval) score " \
+              r"from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj " \
+              r"on kscj.ksh=amx.ksh where   amx.kmh=005 and amx.idx " \
+              r"in (18,21) GROUP BY amx.ksh) a left join (select jmx.ksh,sum(jmx.zf) score from " \
+              r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where  jmx.kmh=005 and jmx.tzh in (25) GROUP BY jmx.ksh) b on a.ksh=b.ksh"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(round(row[-1],2) / row[-2] * 100)
+        row.append(row[-3] / num)
+
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["原理电子学", "19", "6.00"]
+        num = 6.00
+        row.append(mean_province[5])
+        sql = r"select stddev_samp(amx.kgval) score " \
+              r"from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj " \
+              r"on kscj.ksh=amx.ksh where amx.kmh=005 and amx.idx " \
+              r"in (19) "
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(round(row[-1],2) / row[-2] * 100)
+        row.append(row[-3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["热学", "33", "15.00"]
+        num = 15.00
+        row.append(mean_province[12])
+        sql = r"select stddev_samp(jmx.zf) score from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
+              r"jmx where  jmx.kmh=005 and jmx.tzh=93"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(round(row[-1],2) / row[-2] * 100)
+        row.append(row[-3] / num)
+
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["光学", "34", "15.00"]
+        num = 15.00
+        row.append(mean_province[13])
+        sql = r"select stddev_samp(jmx.zf) score from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
+              r"jmx where jmx.kmh=005 and jmx.tzh=94"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(round(row[-1],2) / row[-2] * 100)
+        row.append(row[-3] / num)
+
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        df2.to_excel(writer,sheet_name="地市考生各知识板块得分情况(物理)",index=None)
+
+
+        df2 = pd.DataFrame(data=None,columns=['题型','题号','分值','平均分','标准差','差异系数','得分率'])
+
+        row = ["理解能力(必做)", "14、19", "12.00"]
+        num = 12.00
+        row.append(mean_province[0] + mean_province[5])
+        sql = r"select stddev_samp(a.score) from (SELECT sum(amx.kgval) score from " \
+              r"GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj on amx.ksh=kscj.ksh where" \
+              r" amx.idx in (14,19) and amx.kmh=005 GROUP BY amx.ksh) a"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(round(row[-1],2) / row[-2] * 100)
+        row.append(row[-3] / num)
+
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["推理能力(必做)", "15-18，24", "36.00"]
+        num = 36.00
+        row.append(mean_province[1] + mean_province[2] + mean_province[3] + mean_province[4] + mean_province[10])
+        sql = r"select STDDEV_SAMP(a.score+b.score) from (select amx.ksh,sum(amx.kgval) score " \
+              r"from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj " \
+              r"on kscj.ksh=amx.ksh where  amx.kmh=005 and amx.idx " \
+              r"in (15,16,17,18) GROUP BY amx.ksh) a left join (select jmx.ksh,sum(jmx.zf) score from " \
+              r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where  jmx.kmh=005 and jmx.tzh in (24) GROUP BY jmx.ksh) b on a.ksh=b.ksh"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(round(row[-1],2) / row[-2] * 100)
+        row.append(row[-3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["分析综合能力(必做)", "20-21，25", "32.00"]
+        num = 32.00
+        row.append(mean_province[6] + mean_province[7] + mean_province[11])
+        sql = r"select STDDEV_SAMP(a.score+b.score) from (select amx.ksh,sum(amx.kgval) score " \
+              r"from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj " \
+              r"on kscj.ksh=amx.ksh where   amx.kmh=005 and amx.idx " \
+              r"in (20,21) GROUP BY amx.ksh) a left join (select jmx.ksh,sum(jmx.zf) score from " \
+              r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where  jmx.kmh=005 and jmx.tzh in (25) GROUP BY jmx.ksh) b on a.ksh=b.ksh"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(round(row[-1],2) / row[-2] * 100)
+        row.append(row[-3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["实验能力(必做)", "22-23", "32.00"]
+        num = 32.00
+        row.append(mean_province[8] + mean_province[9] )
+        sql = r"select stddev_samp(a.score) from (select sum(jmx.zf) score from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
+              r"jmx where  jmx.kmh=005 and jmx.tzh in (22,23) GROUP BY jmx.ksh) a"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(round(row[-1],2) / row[-2] * 100)
+        row.append(row[-3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["理解能力，推理能力，分析综合能力(选做1)", "33", "15.00"]
+        num = 15.00
+        row.append(mean_province[12])
+        sql = r"select stddev_samp(jmx.zf) score from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
+              r"jmx where jmx.kmh=005 and jmx.tzh=93"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(round(row[-1],2) / row[-2] * 100)
+        row.append(row[-3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["理解能力，推理能力，分析综合能力(选做2)", "34", "15.00"]
+        num = 15.00
+        row.append(mean_province[13])
+        sql = r"select stddev_samp(jmx.zf) score from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
+              r"jmx where  jmx.kmh=005 and jmx.tzh=94"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(round(row[-1],2) / row[-2] * 100)
+        row.append(row[-3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        df2.to_excel(writer,sheet_name="地市考生个考核能力得分情况(物理)",index=None)
+
+
+        writer.save()
+
+   # 市级报告 各区县占比
+    def GQXZB_CITY_TABLE(self,dsh):
+        sql = ""
+        sql = "select mc from c_ds where DS_H = " + dsh
+        self.cursor.execute(sql)
+        ds_mc = self.cursor.fetchone()[0]
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + ds_mc
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + ds_mc + "各区县各分数段分布情况(物理).xlsx")
+
+        # 各区县考生成绩比较
+        sql = r"select xq_h,mc from GKEVA2020.c_xq where xq_h like '" + dsh + r"%'"
+
+        self.cursor.execute(sql)
+        xqhs = list(self.cursor.fetchall())
+        xqhs.pop(0)
+
+        sql = r"select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right " \
+              r"join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=005 " \
+              r"and jmx.tzh=9 and jmx.ksh like '" + dsh + r"%'"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+        mf = 110
+
+        low = int(total / 3)
+        high = int(total / 1.5)
+
+        df = pd.DataFrame(data=None,columns=["区县号","区县名","高分组占比","高分组得分率","中间组占比","中间组得分率","低分组占比","低分组的得分率"])
+        for xqh in xqhs:
+            row = [xqh[0],xqh[1]]
+            sql = "select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.ksh like '"+xqh[0]+r"%'"
+            self.cursor.execute(sql)
+            if self.cursor.fetchone()[0] == 0:
+                continue
+            
+            sql = r"select count(zf),avg(zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join (select a.*,rownum rn from (select jmx.ksh from " \
+                  r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj " \
+                  r"on kscj.ksh=jmx.ksh where jmx.ksh like '" + dsh + r"%' and jmx.kmh=005 " \
+                  r"and jmx.tzh=9 order by jmx.zf desc) a) b on jmx.ksh = b.ksh " \
+                  r"where b.rn between 1 and " + str(low) + r" and jmx.ksh like '"+xqh[0]+"%' and jmx.tzh=9"
+            self.cursor.execute(sql)
+            result = list(self.cursor.fetchone())
+            result[0] = result[0] / low * 100
+            if result[1] != None:
+                result[1] = result[1] / mf
+            else:
+                result[1] = "/"
+            row = row +result
+
+            sql = r"select count(zf),avg(zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join (select a.*,rownum rn from (select jmx.ksh from " \
+                  r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj " \
+                  r"on kscj.ksh=jmx.ksh where jmx.ksh like '" + dsh + r"%' and jmx.kmh=005 " \
+                  r"and jmx.tzh=9 order by jmx.zf desc) a) b on jmx.ksh = b.ksh " \
+                  r"where b.rn between " + str(low+1) + r" and " + str(high) + r" and jmx.ksh like '" + xqh[0] + "%' and jmx.tzh=9"
+            self.cursor.execute(sql)
+            result = list(self.cursor.fetchone())
+
+            result[0] = result[0] / (high-low) * 100
+            if result[1] != None:
+                result[1] = result[1] / mf
+            else:
+                result[1] = "/"
+            row = row + result
+
+            sql = r"select count(zf),avg(zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join (select a.*,rownum rn from (select jmx.ksh from " \
+                  r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj " \
+                  r"on kscj.ksh=jmx.ksh where jmx.ksh like '" + dsh + r"%' and jmx.kmh=005 " \
+                  r"and jmx.tzh=9 order by jmx.zf desc) a) b on jmx.ksh = b.ksh " \
+                  r"where b.rn between " + str(high + 1) + r" and " + str(total) + r" and jmx.ksh like '" + xqh[0] + "%' and jmx.tzh=9"
+            self.cursor.execute(sql)
+            result = list(self.cursor.fetchone())
+
+            result[0] = result[0] / (total - high) * 100
+            if result[1] != None:
+                result[1] = result[1] / mf
+            else:
+                result[1] = "/"
+            row = row + result
+            self.set_list_precision(row)
+            df.loc[len(df)] = row
+
+        
+        df.to_excel(writer,sheet_name="各县区分组分布",index=None)
+        writer.save()
+
+

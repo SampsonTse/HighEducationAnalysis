@@ -630,7 +630,7 @@ class DTFX:
         row.append((item[0] / total) * 100)
         row.append(item[1])
         row.append(item[2])
-        row.append(item[2] / item[1])
+        row.append(item[2] / item[1]*100)
         self.set_list_precision(row)
         df.loc[len(df)] = row
 
@@ -648,7 +648,7 @@ class DTFX:
             row.append((item[0] / total) * 100)
             row.append(item[1])
             row.append(item[2])
-            row.append(item[2] / item[1])
+            row.append(item[2] / item[1]*100)
             self.set_list_precision(row)
             df.loc[len(df)] = row
 

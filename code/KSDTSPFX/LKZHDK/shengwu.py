@@ -1049,12 +1049,15 @@ class DTFX:
 
         row = []
         # 全省
-        sql = r"select count(jmx.zf),avg(jmx.zf),STDDEV_SAMP(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
-              r"right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=005 and jmx.tzh=3 "
+        sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
+              r"jmx right join (select kscj.ksh from " \
+              r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh " \
+              r"where kscj.zh!=0) b on jmx.ksh=b.ksh " \
+              r"where jmx.kmh = 005 and jmx.tzh=3 and jmx.zf!=0"
         self.cursor.execute(sql)
         row = list(self.cursor.fetchone())
         total = row[0]
-        row.append(float(row[2]) / float(row[1]))
+        row.append(float(row[2]) / float(row[1])*100)
         row.insert(1, row[0] / total * 100)
         row.insert(0, "全省")
         row.insert(0, "00")
@@ -1062,11 +1065,13 @@ class DTFX:
         df.loc[len(df)] = row
 
         for ds in dss:
-            sql = r"select count(jmx.zf),avg(jmx.zf),STDDEV_SAMP(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
-                  r"right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=005 and jmx.tzh=3 and jmx.ksh like '" + ds[0] + r"%'"
+            print(ds)
+            sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join (select kscj.ksh from " \
+                  r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh where kscj.zh!=0 and jbxx.ds_h=" + ds[0] + r") b on j" \
+                  r"mx.ksh=b.ksh where jmx.kmh = 005 and jmx.tzh=3 and jmx.zf!=0"
             self.cursor.execute(sql)
             row = list(self.cursor.fetchone())
-            row.append(float(row[2]) / float(row[1]))
+            row.append(float(row[2]) / float(row[1])*100)
             row.insert(1, row[0] / total * 100)
             row.insert(0, ds[1])
             row.insert(0, ds[0])
@@ -1137,7 +1142,8 @@ class DTFX:
             y.append(ph-pl)
 
             row = []
-            sql = r"select avg(kgval),STDDEV_SAMP(kgval) from GKEVA2020.T_GKPJ2020_TKSKGDAMX where kmh=005 and idx="+str(idx)
+            sql = r"SELECT avg(kgval),stddev_samp(amx.kgval) FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=amx.ksh where  amx.kmh = 005 and idx = " + str(idx)
             self.cursor.execute(sql)
             row = list(self.cursor.fetchone())
             row.insert(0,str(num))
@@ -1156,8 +1162,7 @@ class DTFX:
             elif dth in [37, 38]:
                 num = 15.00
 
-            sql = r"select avg(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on " \
-                  r"kscj.ksh=jmx.ksh where jmx.kmh=005  and jmx.tzh="+str(dth)
+            sql = r"select avg(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh=005  and jmx.tzh="+str(dth)
             
             self.cursor.execute(sql)
             
@@ -1184,8 +1189,7 @@ class DTFX:
             y.append(qfd)
 
             row = []
-            sql = r"select avg(jmx.zf),STDDEV_SAMP(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj " \
-                  r"on kscj.ksh=jmx.ksh where jmx.kmh=005 and jmx.tzh="+str(dth)
+            sql = r"select avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx  where jmx.kmh=005 and jmx.tzh=" + str(dth)
             self.cursor.execute(sql)
             row = list(self.cursor.fetchone())
             row.insert(0, str(num))
@@ -1554,4 +1558,102 @@ class DTFX:
             df.loc[len(df)] = rows[i]
 
         df.to_excel(writer, sheet_name="全省单题零分率满分率(生物)", index=None)
+        writer.save()
+        
+        
+   # 市级报告 各区县占比
+    def GQXZB_CITY_TABLE(self,dsh):
+        sql = ""
+        sql = "select mc from c_ds where DS_H = " + dsh
+        self.cursor.execute(sql)
+        ds_mc = self.cursor.fetchone()[0]
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + ds_mc
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + ds_mc + "各区县各分数段分布情况(生物).xlsx")
+
+        # 各区县考生成绩比较
+        sql = r"select xq_h,mc from GKEVA2020.c_xq where xq_h like '" + dsh + r"%'"
+
+        self.cursor.execute(sql)
+        xqhs = list(self.cursor.fetchall())
+        xqhs.pop(0)
+
+        sql = r"select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right " \
+              r"join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=005 " \
+              r"and jmx.tzh=3 and jmx.ksh like '" + dsh + r"%'"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+        mf = 90
+
+        low = int(total / 3)
+        high = int(total / 1.5)
+
+        df = pd.DataFrame(data=None,columns=["区县号","区县名","高分组占比","高分组得分率","中间组占比","中间组得分率","低分组占比","低分组的得分率"])
+        for xqh in xqhs:
+            row = [xqh[0],xqh[1]]
+            sql = "select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.ksh like '"+xqh[0]+r"%'"
+            self.cursor.execute(sql)
+            if self.cursor.fetchone()[0] == 0:
+                continue
+            
+            sql = r"select count(zf),avg(zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join (select a.*,rownum rn from (select jmx.ksh from " \
+                  r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj " \
+                  r"on kscj.ksh=jmx.ksh where jmx.ksh like '" + dsh + r"%' and jmx.kmh=005 " \
+                  r"and jmx.tzh=3 order by jmx.zf desc) a) b on jmx.ksh = b.ksh " \
+                  r"where b.rn between 1 and " + str(low) + r" and jmx.ksh like '"+xqh[0]+"%' and jmx.tzh=3"
+            self.cursor.execute(sql)
+            result = list(self.cursor.fetchone())
+            result[0] = result[0] / low * 100
+            if result[1] != None:
+                result[1] = result[1] / mf
+            else:
+                result[1] = "/"
+            row = row +result
+
+            sql = r"select count(zf),avg(zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join (select a.*,rownum rn from (select jmx.ksh from " \
+                  r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj " \
+                  r"on kscj.ksh=jmx.ksh where jmx.ksh like '" + dsh + r"%' and jmx.kmh=005 " \
+                  r"and jmx.tzh=3 order by jmx.zf desc) a) b on jmx.ksh = b.ksh " \
+                  r"where b.rn between " + str(low+1) + r" and " + str(high) + r" and jmx.ksh like '" + xqh[0] + "%' and jmx.tzh=3"
+            self.cursor.execute(sql)
+            result = list(self.cursor.fetchone())
+
+            result[0] = result[0] / (high-low) * 100
+            if result[1] != None:
+                result[1] = result[1] / mf
+            else:
+                result[1] = "/"
+            row = row + result
+
+            sql = r"select count(zf),avg(zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join (select a.*,rownum rn from (select jmx.ksh from " \
+                  r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj " \
+                  r"on kscj.ksh=jmx.ksh where jmx.ksh like '" + dsh + r"%' and jmx.kmh=005 " \
+                  r"and jmx.tzh=3 order by jmx.zf desc) a) b on jmx.ksh = b.ksh " \
+                  r"where b.rn between " + str(high + 1) + r" and " + str(total) + r" and jmx.ksh like '" + xqh[0] + "%' and jmx.tzh=3"
+            self.cursor.execute(sql)
+            result = list(self.cursor.fetchone())
+
+            result[0] = result[0] / (total - high) * 100
+            if result[1] != None:
+                result[1] = result[1] / mf
+            else:
+                result[1] = "/"
+            row = row + result
+            self.set_list_precision(row)
+            df.loc[len(df)] = row
+
+        
+        df.to_excel(writer,sheet_name="各县区分组分布",index=None)
         writer.save()

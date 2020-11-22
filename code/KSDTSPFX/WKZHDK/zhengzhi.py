@@ -351,7 +351,7 @@ class DTFX:
         plt.xlabel('得分')
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center', bbox_to_anchor=(1.05, 1.05))
-        plt.savefig(path + '\\地市及全省考生单科成绩分布(政治).png', dpi=1200)
+        plt.savefig(path + '\\地市及全省考生单科成绩分布(政治).png', dpi=600)
         plt.close()
 
     # 省级报告 总体概括 图
@@ -393,7 +393,7 @@ class DTFX:
         plt.xlabel('得分')
         plt.ylabel('人数百分比（%）')
         plt.legend(loc='upper center', bbox_to_anchor=(1.05, 1.05))
-        plt.savefig(path + '\\全省考生单科成绩分布(政治).png', dpi=1200)
+        plt.savefig(path + '\\全省考生单科成绩分布(政治).png', dpi=600)
         plt.close()
 
     # 省级报告 原始分概括 表
@@ -704,7 +704,8 @@ class DTFX:
 
         idxs = list(range(12, 24))
         dths = [38,40]
-        txt = idxs + dths
+        dths2 = [39]
+        txt = idxs + dths +dths2
 
         x = []  # 难度
         y = []  # 区分度
@@ -738,8 +739,6 @@ class DTFX:
 
             x.append(difficulty)
             y.append(ph - pl)
-
-        
 
         for dth in dths:
             if dth == 38:
@@ -775,6 +774,33 @@ class DTFX:
             qfd = (D_a - D_b) / (math.sqrt(D_c) * math.sqrt(D_d))
             y.append(qfd)
 
+        for xth in dths2:
+            num = 12.00
+            sql = r"select sum(xtval) from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
+                  r"where sxt.ksh like '" + dsh + "%' and kmh=006 and xth=" + str(xth)
+            self.cursor.execute(sql)
+            difficulty = self.cursor.fetchone()[0] / total / num  # 难度
+            x.append(difficulty)
+
+            sql = r"select zh,b.sum from kscj right join " \
+                  r"(select a.*,rownum rn from (select sum(xtval) sum,sxt.ksh from " \
+                  r"T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
+                  r"where kmh = 006 and xth=" + str(xth) + r" and sxt.ksh " \
+                  r"like '" + dsh + r"%' GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn "
+            self.cursor.execute(sql)
+            result = np.array(self.cursor.fetchall(), dtype="float64")
+            zf_score = np.array(result[:, 0], dtype="float64")
+            xt_score = np.array(result[:, 1], dtype="float64")
+
+            n = len(xt_score)
+
+            D_a = n * np.sum(xt_score * zf_score)
+            D_b = np.sum(zf_score) * np.sum(xt_score)
+            D_c = n * np.sum(xt_score ** 2) - np.sum(xt_score) ** 2
+            D_d = n * np.sum(zf_score ** 2) - np.sum(zf_score) ** 2
+
+            qfd = (D_a - D_b) / (math.sqrt(D_c) * math.sqrt(D_d))
+            y.append(qfd)
         
         plt.rcParams['figure.figsize'] = (15.0, 4.00)
         plt.scatter(x, y)
@@ -791,7 +817,7 @@ class DTFX:
         for i in range(len(x)):
             th.append(txt[i])
             plt.annotate(txt[i], xy=(x[i], y[i]), xytext=(x[i], y[i] + 0.008), arrowprops=dict(arrowstyle='-'))
-        plt.savefig(path + '\\各题难度-区分度分布散点图(政治).png', dpi=1200)
+        plt.savefig(path + '\\各题难度-区分度分布散点图(政治).png', dpi=600)
         plt.close()
 
     # 市级报告附录 原始分概括
@@ -1048,12 +1074,15 @@ class DTFX:
 
         row = []
         # 全省
-        sql = r"select count(jmx.zf),avg(jmx.zf),STDDEV_SAMP(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
-              r"right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=006 and jmx.tzh=6 "
+        sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
+              r"jmx right join (select kscj.ksh from " \
+              r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh " \
+              r"where kscj.zh!=0) b on jmx.ksh=b.ksh " \
+              r"where jmx.kmh = 006 and jmx.tzh=6 and jmx.zf!=0"
         self.cursor.execute(sql)
         row = list(self.cursor.fetchone())
         total = row[0]
-        row.append(float(row[2]) / float(row[1]))
+        row.append(float(row[2]) / float(row[1]) * 100)
         row.insert(1, row[0] / total * 100)
         row.insert(0, "全省")
         row.insert(0, "00")
@@ -1061,11 +1090,12 @@ class DTFX:
         df.loc[len(df)] = row
 
         for ds in dss:
-            sql = r"select count(jmx.zf),avg(jmx.zf),STDDEV_SAMP(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
-                  r"right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=006 and jmx.tzh=6 and jmx.ksh like '" + ds[0] + r"%'"
+            sql = r"select count(jmx.zf),avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join (select kscj.ksh from " \
+                  r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh where kscj.zh!=0 and jbxx.ds_h=" + ds[0] + r") b on j" \
+                   r"mx.ksh=b.ksh where jmx.kmh = 006 and jmx.tzh=6 and jmx.zf!=0"
             self.cursor.execute(sql)
             row = list(self.cursor.fetchone())
-            row.append(float(row[2]) / float(row[1]))
+            row.append(float(row[2]) / float(row[1]) * 100)
             row.insert(1, row[0] / total * 100)
             row.insert(0, ds[1])
             row.insert(0, ds[0])
@@ -1101,7 +1131,8 @@ class DTFX:
 
         idxs = list(range(12, 24))
         dths = [38, 40]
-        txt = idxs + dths
+        dths2 = [39]
+        txt = idxs + dths + dths2
 
         x = [] # 难度
         y = [] # 区分度
@@ -1136,7 +1167,8 @@ class DTFX:
             y.append(ph-pl)
 
             row = []
-            sql = r"select avg(kgval),STDDEV_SAMP(kgval) from GKEVA2020.T_GKPJ2020_TKSKGDAMX where kmh=006 and idx="+str(idx)
+            sql = r"SELECT avg(kgval),stddev_samp(amx.kgval) FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=amx.ksh where  amx.kmh = 006 and idx = " + str(idx)
             self.cursor.execute(sql)
             row = list(self.cursor.fetchone())
             row.insert(0,str(num))
@@ -1146,7 +1178,6 @@ class DTFX:
             self.set_list_precision(row)
             df.loc[len(df)] = row
 
-
         for dth in dths:
             if dth == 38:
                 num = 14.00
@@ -1155,8 +1186,7 @@ class DTFX:
             else:
                 num = 10.00
 
-            sql = r"select avg(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on " \
-                  r"kscj.ksh=jmx.ksh where jmx.kmh=006  and jmx.tzh="+str(dth)
+            sql = r"select avg(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh=006  and jmx.tzh="+str(dth)
             
             self.cursor.execute(sql)
             
@@ -1183,8 +1213,7 @@ class DTFX:
             y.append(qfd)
 
             row = []
-            sql = r"select avg(jmx.zf),STDDEV_SAMP(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj " \
-                  r"on kscj.ksh=jmx.ksh where jmx.kmh=006 and jmx.tzh="+str(dth)
+            sql = r"select avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx  where jmx.kmh=006 and jmx.tzh=" + str(dth)
             self.cursor.execute(sql)
             row = list(self.cursor.fetchone())
             row.insert(0, str(num))
@@ -1192,6 +1221,54 @@ class DTFX:
             row.append(difficulty)
             row.append(qfd)
             self.set_list_precision(row)
+            df.loc[len(df)] = row
+
+        for xth in dths2:
+            row = []
+
+            row.append(str(xth))
+            num = 12.00
+            row.append(str(num))
+
+            sql = r"select sum(xtval) from T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
+                  r"where   kmh=006 and xth=" + str(xth)
+            self.cursor.execute(sql)
+            difficulty = self.cursor.fetchone()[0] / total / num  # 难度
+            x.append(difficulty)
+
+            sql = r"select zh,b.sum from kscj right join " \
+                  r"(select a.*,rownum rn from (select sum(xtval) sum,sxt.ksh from " \
+                  r"T_GKPJ2020_TSJBNKSXT sxt right join kscj on kscj.ksh = sxt.ksh " \
+                  r"where kmh = 006 and xth=" + str(xth) + r"  GROUP BY sxt.ksh) a) b on kscj.ksh = b.ksh ORDER BY b.rn "
+            self.cursor.execute(sql)
+            result = np.array(self.cursor.fetchall(), dtype="float64")
+            zf_score = np.array(result[:, 0], dtype="float64")
+            xt_score = np.array(result[:, 1], dtype="float64")
+
+            n = len(xt_score)
+
+            D_a = n * np.sum(xt_score * zf_score)
+            D_b = np.sum(zf_score) * np.sum(xt_score)
+            D_c = n * np.sum(xt_score ** 2) - np.sum(xt_score) ** 2
+            D_d = n * np.sum(zf_score ** 2) - np.sum(zf_score) ** 2
+
+            qfd = (D_a - D_b) / (math.sqrt(D_c) * math.sqrt(D_d))
+            y.append(qfd)
+
+
+
+            row = []
+            sql = r"SELECT avg(xtval),stddev_samp(xtval) FROM GKEVA2020.T_GKPJ2020_TSJBNKSXT sxt " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=sxt.ksh where  sxt.kmh = 006 and xth = " + str(xth)
+            self.cursor.execute(sql)
+            self.cursor.execute(sql)
+            row = list(self.cursor.fetchone())
+            row.insert(0, str(num))
+            row.insert(0, str(xth))
+            row.append(difficulty)
+            row.append(qfd)
+            self.set_list_precision(row)
+
             df.loc[len(df)] = row
 
         df.to_excel(writer,index=None,sheet_name="考生单题作答情况(政治)")
@@ -1212,7 +1289,7 @@ class DTFX:
         for i in range(len(x)):
             th.append(txt[i])
             plt.annotate(txt[i], xy=(x[i], y[i]), xytext=(x[i] , y[i] + 0.008),arrowprops=dict(arrowstyle='-'))
-        plt.savefig(path + '\\各题难度-区分度分布散点图(政治).png', dpi=1200)
+        plt.savefig(path + '\\各题难度-区分度分布散点图(政治).png', dpi=600)
         plt.close()
 
     # 省级报告(附录) 原始分概括
@@ -1437,14 +1514,14 @@ class DTFX:
 
         idxs = list(range(12, 24))
         dths = [38, 40]
-        txt = idxs + dths
+        dths2 = [39]
+        txt = idxs + dths + dths2
 
         sql = r"select count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join (select kscj.ksh from " \
               r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh where kscj.zh!=0 and jbxx.ds_h=" + dsh + r") b on j" \
               r"mx.ksh=b.ksh where jmx.kmh = 006 and jmx.tzh=6 and jmx.zf!=0"
         self.cursor.execute(sql)
         total = self.cursor.fetchone()[0]
-        print(total)
 
         for idx in idxs:
             sql = r"SELECT count(case when amx.kgval=4 then 1 else null end) num2 " \
@@ -1479,6 +1556,20 @@ class DTFX:
             self.set_list_precision(row)
             rows.append(row)
 
+        for dth in dths2:
+            num = 12
+            sql = r"SELECT count(case when sxt.xtval=0 then 1 else null end) num2," \
+                  r"count(case when sxt.xtval="+str(num)+r" then 1 else null end) num3 FROM " \
+                  r"GKEVA2020.T_GKPJ2020_TSJBNKSXT sxt  right join gkeva2020.kscj kscj" \
+                  r" on kscj.ksh=sxt.ksh where kscj.zh!=0 and sxt.ksh like '"+dsh+r"%' and sxt.kmh = 006 and sxt.xth="+str(dth)
+
+            self.cursor.execute(sql)
+            row = list(self.cursor.fetchone())
+            row.insert(1, row[0] / total)
+            row.append(row[2] / total)
+            self.set_list_precision(row)
+            rows.append(row)
+
         for i in range(len(rows)):
             rows[i].insert(0,txt[i])
             df.loc[len(df)] = rows[i]
@@ -1486,7 +1577,8 @@ class DTFX:
         df.to_excel(writer, sheet_name="各市单题零分率满分率(政治)", index=None)
         writer.save()
 
-    def MF_LF_PROVINCE_TABLE(self):
+    def MF_LF_PRO_TABLE(self):
+
 
         pwd = os.getcwd()
         father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
@@ -1505,19 +1597,20 @@ class DTFX:
 
         idxs = list(range(12, 24))
         dths = [38, 40]
-        txt = idxs + dths
+        dths2 = [39]
+        txt = idxs + dths + dths2
 
         sql = r"select count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join (select kscj.ksh from " \
               r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh where kscj.zh!=0 ) b on j" \
               r"mx.ksh=b.ksh where jmx.kmh = 006 and jmx.tzh=6 and jmx.zf!=0"
         self.cursor.execute(sql)
         total = self.cursor.fetchone()[0]
-        print(total)
 
         for idx in idxs:
-            sql = r"SELECT count(case when amx.kgval=6 then 1 else null end) num2 " \
+            sql = r"SELECT count(case when amx.kgval=4 then 1 else null end) num2 " \
                   r"FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join gkeva2020.kscj kscj " \
-                  r"on kscj.ksh=amx.ksh where kscj.zh!=0  and amx.kmh = 006 and idx=" + str(idx)
+                  r"on kscj.ksh=amx.ksh where kscj.zh!=0 and  amx.kmh = 006 and idx=" + str(
+                idx)
 
             self.cursor.execute(sql)
             row = list(self.cursor.fetchone())
@@ -1529,10 +1622,12 @@ class DTFX:
             rows.append(row)
 
         for dth in dths:
-            if dth == 41:
-                num = 25
-            elif dth in [45, 46, 47]:
-                num = 15
+            if dth == 38:
+                num = 14
+            elif dth == 40:
+                num = 24
+            else:
+                num = 10
 
             sql = r"select  count(case when jmx.zf=0 then 1 else null end) num1," \
                   r"count(case when jmx.zf=" + str(num) + r" then 1 else null end) num2 " \
@@ -1545,9 +1640,201 @@ class DTFX:
             self.set_list_precision(row)
             rows.append(row)
 
+        for dth in dths2:
+            num = 12
+            sql = r"SELECT count(case when sxt.xtval=0 then 1 else null end) num2," \
+                  r"count(case when sxt.xtval=" + str(num) + r" then 1 else null end) num3 FROM " \
+                  r"GKEVA2020.T_GKPJ2020_TSJBNKSXT sxt  right join gkeva2020.kscj kscj" \
+                  r" on kscj.ksh=sxt.ksh where kscj.zh!=0 and  sxt.kmh = 006 and sxt.xth=" + str(dth)
+
+            self.cursor.execute(sql)
+            row = list(self.cursor.fetchone())
+            row.insert(1, row[0] / total)
+            row.append(row[2] / total)
+            self.set_list_precision(row)
+            rows.append(row)
+
         for i in range(len(rows)):
             rows[i].insert(0, txt[i])
             df.loc[len(df)] = rows[i]
 
-        df.to_excel(writer, sheet_name="全省单题零分率满分率(政治)", index=None)
+        df.to_excel(writer, sheet_name="各市单题零分率满分率(政治)", index=None)
+        writer.save()
+
+    def DTFX_CITY_TABLE_39(self,dsh):
+        ql = ""
+        sql = "select mc from c_ds where DS_H = " + dsh
+        self.cursor.execute(sql)
+        ds_mc = self.cursor.fetchone()[0]
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + ds_mc
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        df = pd.read_excel(path + '\\' + ds_mc + "考生答题分析单题分析(政治).xlsx",sheet_name=0)
+        writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析单题分析(政治).xlsx")
+
+        sql = r"select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right " \
+              r"join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=006 " \
+              r"and jmx.tzh=6 and jmx.ksh like '" + dsh + r"%'"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+
+        low = int(total / 3)
+        high = int(total / 1.5)
+
+        xths = [39]
+        for xth in xths:
+            row = []
+
+            row.append(str(xth))
+            num = 12.00
+            row.append(str(num))
+
+            sql = r"SELECT avg(xtval) FROM GKEVA2020.T_GKPJ2020_TSJBNKSXT sxt " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=sxt.ksh where " \
+                  r"sxt.ksh like '" + dsh + r"%' and sxt.kmh = 006 and xth = " + str(xth)
+            self.cursor.execute(sql)
+            row.append(self.cursor.fetchone()[0])
+
+            sql = r"SELECT avg(xtval) FROM GKEVA2020.T_GKPJ2020_TSJBNKSXT sxt " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=sxt.ksh where  sxt.kmh = 006 and xth = " + str(xth)
+            self.cursor.execute(sql)
+            row.append(self.cursor.fetchone()[0])
+            row.append(row[2] / num)
+
+            sql = r"select sum(xtval) from GKEVA2020.T_GKPJ2020_TSJBNKSXT sxt " \
+                  r"right join (select a.*,rownum rn from (select jmx.ksh from " \
+                  r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj " \
+                  r"on kscj.ksh=jmx.ksh where jmx.ksh like '" + dsh + r"%' and jmx.kmh=006 " \
+                  r"and jmx.tzh=6 order by jmx.zf desc) a) b on sxt.ksh = b.ksh " \
+                  r"where b.rn between 1 and " + str(low) + r" and sxt.kmh=006 and sxt.xth=" + str(xth)
+            self.cursor.execute(sql)
+            row.append(self.cursor.fetchone()[0] / low / num)
+
+            sql = r"select sum(xtval) from GKEVA2020.T_GKPJ2020_TSJBNKSXT sxt " \
+                  r"right join (select a.*,rownum rn from (select jmx.ksh from " \
+                  r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.ksh like '" + dsh + r"%' and jmx.kmh=006 " \
+                  r"and jmx.tzh=6 order by jmx.zf desc) a) b on sxt.ksh = b.ksh " \
+                  r"where b.rn between " + str(low + 1) + r" and " + str(high) + r" and sxt.kmh=006 and sxt.xth=" + str(xth)
+            self.cursor.execute(sql)
+            row.append(self.cursor.fetchone()[0] / (high - low) / num)
+
+            sql = r"select sum(xtval) from GKEVA2020.T_GKPJ2020_TSJBNKSXT sxt " \
+                  r"right join (select a.*,rownum rn from (select jmx.ksh from " \
+                  r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj " \
+                  r"on kscj.ksh=jmx.ksh where jmx.ksh like '" + dsh + r"%' and jmx.kmh=006 " \
+                  r"and jmx.tzh=6 order by jmx.zf desc) a) b on sxt.ksh = b.ksh " \
+                  r"where b.rn between " + str(high + 1) + r" and " + str(total) + " and sxt.kmh=006 and sxt.xth=" + str(xth)
+            self.cursor.execute(sql)
+            row.append(self.cursor.fetchone()[0] / (total - high) / num)
+
+            self.set_list_precision(row)
+            df.loc[len(df)] = row
+
+        df.to_excel(writer, sheet_name="地市考生单题作答情况(政治)", index=None)
+        writer.save()
+        
+
+   # 市级报告 各区县占比
+    def GQXZB_CITY_TABLE(self,dsh):
+        sql = ""
+        sql = "select mc from c_ds where DS_H = " + dsh
+        self.cursor.execute(sql)
+        ds_mc = self.cursor.fetchone()[0]
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + ds_mc
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + ds_mc + "各区县各分数段分布情况(政治).xlsx")
+
+        # 各区县考生成绩比较
+        sql = r"select xq_h,mc from GKEVA2020.c_xq where xq_h like '" + dsh + r"%'"
+
+        self.cursor.execute(sql)
+        xqhs = list(self.cursor.fetchall())
+        xqhs.pop(0)
+
+        sql = r"select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right " \
+              r"join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=006 " \
+              r"and jmx.tzh=6 and jmx.ksh like '" + dsh + r"%'"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+        mf = 100
+
+        low = int(total / 3)
+        high = int(total / 1.5)
+
+        df = pd.DataFrame(data=None,columns=["区县号","区县名","高分组占比","高分组得分率","中间组占比","中间组得分率","低分组占比","低分组的得分率"])
+        for xqh in xqhs:
+            row = [xqh[0],xqh[1]]
+            sql = "select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.ksh like '"+xqh[0]+r"%'"
+            self.cursor.execute(sql)
+            if self.cursor.fetchone()[0] == 0:
+                continue
+            
+            sql = r"select count(zf),avg(zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join (select a.*,rownum rn from (select jmx.ksh from " \
+                  r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj " \
+                  r"on kscj.ksh=jmx.ksh where jmx.ksh like '" + dsh + r"%' and jmx.kmh=006 " \
+                  r"and jmx.tzh=6 order by jmx.zf desc) a) b on jmx.ksh = b.ksh " \
+                  r"where b.rn between 1 and " + str(low) + r" and jmx.ksh like '"+xqh[0]+"%' and jmx.tzh=6"
+            self.cursor.execute(sql)
+            result = list(self.cursor.fetchone())
+            result[0] = result[0] / low * 100
+            if result[1] != None:
+                result[1] = result[1] / mf
+            else:
+                result[1] = "/"
+            row = row +result
+
+            sql = r"select count(zf),avg(zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join (select a.*,rownum rn from (select jmx.ksh from " \
+                  r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj " \
+                  r"on kscj.ksh=jmx.ksh where jmx.ksh like '" + dsh + r"%' and jmx.kmh=006 " \
+                  r"and jmx.tzh=6 order by jmx.zf desc) a) b on jmx.ksh = b.ksh " \
+                  r"where b.rn between " + str(low+1) + r" and " + str(high) + r" and jmx.ksh like '" + xqh[0] + "%' and jmx.tzh=6"
+            self.cursor.execute(sql)
+            result = list(self.cursor.fetchone())
+
+            result[0] = result[0] / (high-low) * 100
+            if result[1] != None:
+                result[1] = result[1] / mf
+            else:
+                result[1] = "/"
+            row = row + result
+
+            sql = r"select count(zf),avg(zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx " \
+                  r"right join (select a.*,rownum rn from (select jmx.ksh from " \
+                  r"TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj " \
+                  r"on kscj.ksh=jmx.ksh where jmx.ksh like '" + dsh + r"%' and jmx.kmh=006 " \
+                  r"and jmx.tzh=6 order by jmx.zf desc) a) b on jmx.ksh = b.ksh " \
+                  r"where b.rn between " + str(high + 1) + r" and " + str(total) + r" and jmx.ksh like '" + xqh[0] + "%' and jmx.tzh=6"
+            self.cursor.execute(sql)
+            result = list(self.cursor.fetchone())
+
+            result[0] = result[0] / (total - high) * 100
+            if result[1] != None:
+                result[1] = result[1] / mf
+            else:
+                result[1] = "/"
+            row = row + result
+            self.set_list_precision(row)
+            df.loc[len(df)] = row
+
+        
+        df.to_excel(writer,sheet_name="各县区分组分布",index=None)
         writer.save()
