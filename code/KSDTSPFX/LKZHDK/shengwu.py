@@ -1219,6 +1219,7 @@ class DTFX:
             plt.annotate(txt[i], xy=(x[i], y[i]), xytext=(x[i] , y[i] + 0.008),arrowprops=dict(arrowstyle='-'))
         plt.savefig(path + '\\各题难度-区分度分布散点图(生物).png', dpi=1200)
         plt.close()
+        return y
 
     # 省级报告(附录) 原始分概括
     def YSFGK_PROVINCE_APPENDIX(self):
@@ -1657,10 +1658,7 @@ class DTFX:
         df.to_excel(writer,sheet_name="各县区分组分布",index=None)
         writer.save()
         
-    def JGFX_CITY_TABLE(self, dsh):
-        sql = "select mc from c_ds where DS_H = " + dsh
-        self.cursor.execute(sql)
-        ds_mc = self.cursor.fetchone()[0]
+    def JGFX_PRO_TABLE(self):
 
         pwd = os.getcwd()
         father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
@@ -1668,24 +1666,26 @@ class DTFX:
 
         if not os.path.exists(path):
             os.makedirs(path)
-        path = path + "\\" + ds_mc
+        path = path + "\\" + "全省"
         if not os.path.exists(path):
             os.makedirs(path)
 
-        writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析结构分析(生物).xlsx")
+        writer = pd.ExcelWriter(path + '\\' "考生分析结构分析(生物).xlsx")
 
-        df1 = pd.read_excel(path + "\\" + ds_mc + "考生答题分析单题分析(生物).xlsx", sheet_name=0)
+        df1 = pd.read_excel(path + "\\" +  "考生单题分析(生物).xlsx", sheet_name=0)
 
-        print(df1)
+
+        qfd = self.DTFX_PROVINCE()
+        print(qfd)
+
         txts = df1['题号'].tolist()
-        mean_province = df1['全省平均分'].tolist()
-        mean_city = df1['本市平均分'].tolist()
+        means = df1['平均分'].tolist()
 
         df2 = pd.DataFrame(data=None,columns=['主客观题','题数','平均分','标准差','难度','区分度','信度'])
 
         sql = r"select avg(jmx.zf),stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join (select kscj.ksh from " \
-              r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh where kscj.zh!=0 and jbxx.ds_h=" + dsh + r") b on j" \
-                                                                                                                                r"mx.ksh=b.ksh where jmx.kmh = 005 and jmx.tzh=3 and jmx.zf!=0"
+              r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh where kscj.zh!=0 ) b on j" \
+              r"mx.ksh=b.ksh where jmx.kmh = 005 and jmx.tzh=3 and jmx.zf!=0"
         self.cursor.execute(sql)
         result = list(self.cursor.fetchone())
 
@@ -1693,40 +1693,40 @@ class DTFX:
         num = 36.00
         mean_xzt = 0
         for i in range(6):
-            mean_xzt += mean_city[i]
+            mean_xzt += means[i]
         row.append(mean_xzt)
         sql = r"select stddev_samp(a.score) from (SELECT sum(amx.kgval) score from " \
               r"GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj on amx.ksh=kscj.ksh where" \
-              r" amx.idx in (1,2,3,4,5,6) and amx.ksh like '" + dsh + r"%'and amx.kmh=005 GROUP BY amx.ksh) a"
+              r" amx.idx in (1,2,3,4,5,6) and amx.kmh=005 GROUP BY amx.ksh) a"
         self.cursor.execute(sql)
         row.append(self.cursor.fetchone()[0])
-        row.append(row[3]/num)
+        row.append(row[2]/num)
 
         sql = r"select count(*) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh" \
-              r" where jmx.kmh=005 and jmx.tzh=3 and jmx.ksh like '" + dsh + r"%'"
+              r" where jmx.kmh=005 and jmx.tzh=3 "
         self.cursor.execute(sql)
         total = self.cursor.fetchone()[0]
         ph_num = int(total * 0.27)
 
         # 前27%得分率
-        sql = r"select sum(kgval) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+        sql = r"select avg(kgval) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
               r"right join (select a.*,rownum rn from (select jmx.zf,jmx.ksh from T" \
-              r"YMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh = 005 and jmx.tzh=3 and " \
-              r"jmx.ksh like '" + dsh + r"%' ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh w" \
-              r"here b.rn BETWEEN 1 and " + str(ph_num) + r" and amx.idx in (1,2,3,4,5,6) and amx.kmh=005"
-
+              r"YMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on " \
+              r"kscj.ksh=jmx.ksh where jmx.kmh = 005 and jmx.tzh=3  " \
+              r"ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh where b.rn " \
+              r"BETWEEN 1 and " + str(ph_num) + r" and amx.idx in (1,2,3,4,5,6) and amx.kmh=005 "
         self.cursor.execute(sql)
-        ph = self.cursor.fetchone()[0] / ph_num / num
+        ph = self.cursor.fetchone()[0] / 6
 
         # 后27%得分率
-        sql = r"select sum(kgval) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+        sql = r"select avg(kgval) from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
               r"right join (select a.*,rownum rn from (select jmx.zf,jmx.ksh from T" \
-              r"YMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh = 005 and jmx.tzh=3 and " \
-              r"jmx.ksh like '" + dsh + r"%' ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh w" \
-              r"here b.rn BETWEEN " + str(total - ph_num) + r" and " + str(total) + " and amx.idx in (1,2,3,4,5,6) and amx.kmh=005"
-
+              r"YMHPT.T_GKPJ2020_TKSTZCJMX jmx right join gkeva2020.kscj kscj on " \
+              r"kscj.ksh=jmx.ksh where jmx.kmh = 005 and jmx.tzh=3  " \
+              r"ORDER BY jmx.zf desc) a) b on amx.ksh=b.ksh where b.rn BETWEEN " + str(total - ph_num) + \
+              r" and " + str(total) + " and amx.idx in (1,2,3,4,5,6) and amx.kmh=005"
         self.cursor.execute(sql)
-        pl = self.cursor.fetchone()[0] / (total - ph_num) / num
+        pl = self.cursor.fetchone()[0] / 6
         row.append(ph-pl)
         row.append(r"/")
         self.set_list_precision(row)
@@ -1734,17 +1734,16 @@ class DTFX:
 
         row = ['非选择题', '6.00',result[0]-mean_xzt,(result[0]-mean_xzt)/54]
 
-        sql = r"select avg(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where " \
-              r"jmx.kmh=005 and jmx.tzh in (29,30,31,32,37,38) and ksh like '" + dsh + r"%'"
-
+        sql = r"select stddev_samp(a.zf) from (select sum(jmx.zf) zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where " \
+              r"jmx.kmh=005 and jmx.tzh in (29,30,31,32,37,38)  group by jmx.ksh) a "
         self.cursor.execute(sql)
-        row.insert(4,self.cursor.fetchone()[0])
+        row.insert(3,self.cursor.fetchone()[0])
 
         sql = r"select a.zf,b.zf,b.ksh from (select sum(zf) zf,ksh from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
-              r"where kmh=005 and tzh in (29,30,31,32,37,38) GROUP BY ksh ) a right join " \
+              r"where kmh=005 and tzh in (29,30,31,32,37,38)  GROUP BY ksh ) a right join " \
               r"(select jmx.ksh,jmx.zf from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join " \
               r"gkeva2020.kscj kscj on kscj.ksh=jmx.ksh where jmx.kmh=005 and jmx.tzh=3 " \
-              r"and jmx.ksh like '"+dsh+r"%') b on a.ksh=b.ksh "
+              r") b on a.ksh=b.ksh "
         self.cursor.execute(sql)
         result = np.array(self.cursor.fetchall(), dtype="float64")
 
@@ -1767,6 +1766,199 @@ class DTFX:
         print(df2)
 
 
+        # df2 = pd.DataFrame(data=None,columns=['题型','题号','分值','平均分','标准差','难度'])
+        #
+        # row = ['选择题(必做)','1-6','36.00']
+        # num = 36.00
+        # row.append(mean_xzt)
+        # sql = r"select stddev_samp(a.score) from (SELECT sum(amx.kgval) score from " \
+        #       r"GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj on amx.ksh=kscj.ksh where" \
+        #       r" amx.idx in (1,2,3,4,5,6) and  amx.kmh=005 GROUP BY amx.ksh) a"
+        # self.cursor.execute(sql)
+        # row.append(self.cursor.fetchone()[0])
+        # row.append(row[3]/num)
+        # self.set_list_precision(row)
+        # df2.loc[len(df2)] = row
+        #
+        # row = ['非选择题(必做)','29-32','39.00']
+        # num = 39.00
+        # row.append(means[6]+means[7]+means[8]+means[9])
+        # sql = r"select stddev_samp(a.score) from (SELECT sum(amx.kgval) score from " \
+        #       r"GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj on amx.ksh=kscj.ksh where" \
+        #       r" amx.idx in (29,30,31,32) and amx.kmh=005 GROUP BY amx.ksh) a"
+        # self.cursor.execute(sql)
+        # row.append(self.cursor.fetchone()[0])
+        # row.append(row[3] / num)
+        # self.set_list_precision(row)
+        # df2.loc[len(df2)] = row
+        #
+        # row = ['非选择题(选做1)', '37', '15.00']
+        # num = 15.00
+        # row.append(means[10])
+        # sql = r"select stddev_samp(a.score) from (SELECT sum(amx.kgval) score from " \
+        #       r"GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj on amx.ksh=kscj.ksh where" \
+        #       r" amx.idx in (37) and amx.kmh=005 GROUP BY amx.ksh) a"
+        # self.cursor.execute(sql)
+        # row.append(self.cursor.fetchone()[0])
+        # row.append(row[3] / num)
+        # self.set_list_precision(row)
+        # df2.loc[len(df2)] = row
+        #
+        # row = ['非选择题(选做2)', '38', '15.00']
+        # num = 15.00
+        # row.append(means[11])
+        # sql = r"select stddev_samp(a.score) from (SELECT sum(amx.kgval) score from " \
+        #       r"GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj on amx.ksh=kscj.ksh where" \
+        #       r" amx.idx in (38) and amx.kmh=005 GROUP BY amx.ksh) a"
+        # self.cursor.execute(sql)
+        # row.append(self.cursor.fetchone()[0])
+        # row.append(row[3] / num)
+        # self.set_list_precision(row)
+        # df2.loc[len(df2)] = row
+        #
+        # df2.to_excel(writer,sheet_name='题型',index=None)
+        #
+        # df2 = pd.DataFrame(data=None, columns=['知识板块', '题号', '分值', '平均分', '标准差', '难度'])
+        #
+        # row = ['细胞的结构(必做)','1,29','16.00']
+        # num = 16.00
+        # row.append(means[0]+means[6])
+        # sql = r"select STDDEV_SAMP(a.score+b.score) from (select amx.ksh,sum(amx.kgval) score " \
+        #       r"from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj " \
+        #       r"on kscj.ksh=amx.ksh where   amx.kmh=005 and amx.idx in (1) GROUP BY amx.ksh) a " \
+        #       r"left join (select jmx.ksh,sum(jmx.zf) score from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
+        #       r"jmx where jmx.kmh=005 and jmx.tzh in (29) GROUP BY jmx.ksh) b on a.ksh=b.ksh"
+        # self.cursor.execute(sql)
+        # row.append(self.cursor.fetchone()[0])
+        # row.append(row[3] / num)
+        # self.set_list_precision(row)
+        # df2.loc[len(df2)] = row
+        #
+        # row = ['观察物质跨膜运输、减数分裂、核酸分布(必做)', '4', '6.00']
+        # num = 6.00
+        # row.append(means[3])
+        # sql = r"select stddev_samp(a.score) from (SELECT sum(amx.kgval) score from " \
+        #       r"GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj on amx.ksh=kscj.ksh where" \
+        #       r" amx.idx in (4) and  amx.kmh=005 GROUP BY amx.ksh) a"
+        # self.cursor.execute(sql)
+        # row.append(self.cursor.fetchone()[0])
+        # row.append(row[3] / num)
+        # self.set_list_precision(row)
+        # df2.loc[len(df2)] = row
+        #
+        # row = ['细胞代谢(必做)', '2,30', '16.00']
+        # num = 16.00
+        # row.append(means[1] + means[7])
+        # sql = r"select STDDEV_SAMP(a.score+b.score) from (select amx.ksh,sum(amx.kgval) score " \
+        #       r"from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj " \
+        #       r"on kscj.ksh=amx.ksh where   amx.kmh=005 and amx.idx in (2) GROUP BY amx.ksh) a " \
+        #       r"left join (select jmx.ksh,sum(jmx.zf) score from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
+        #       r"jmx where jmx.kmh=005 and jmx.tzh in (30) GROUP BY jmx.ksh) b on a.ksh=b.ksh"
+        # self.cursor.execute(sql)
+        # row.append(self.cursor.fetchone()[0])
+        # row.append(row[3] / num)
+        # self.set_list_precision(row)
+        # df2.loc[len(df2)] = row
+        #
+        # row = ['动物生命活动的调节(必做)', '3,31', '16.00']
+        # num = 16.00
+        # row.append(means[2] + means[8])
+        # sql = r"select STDDEV_SAMP(a.score+b.score) from (select amx.ksh,sum(amx.kgval) score " \
+        #       r"from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj " \
+        #       r"on kscj.ksh=amx.ksh where   amx.kmh=005 and amx.idx in (3) GROUP BY amx.ksh) a " \
+        #       r"left join (select jmx.ksh,sum(jmx.zf) score from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
+        #       r"jmx where jmx.kmh=005 and jmx.tzh in (31) GROUP BY jmx.ksh) b on a.ksh=b.ksh"
+        # self.cursor.execute(sql)
+        # row.append(self.cursor.fetchone()[0])
+        # row.append(row[3] / num)
+        # self.set_list_precision(row)
+        # df2.loc[len(df2)] = row
+        #
+        # row = ['遗传的基本规律(必做)', '5,32', '15.00']
+        # num = 16.00
+        # row.append(means[4] + means[9])
+        # sql = r"select STDDEV_SAMP(a.score+b.score) from (select amx.ksh,sum(amx.kgval) score " \
+        #       r"from GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj " \
+        #       r"on kscj.ksh=amx.ksh where   amx.kmh=005 and amx.idx in (5) GROUP BY amx.ksh) a " \
+        #       r"left join (select jmx.ksh,sum(jmx.zf) score from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
+        #       r"jmx where jmx.kmh=005 and jmx.tzh in (32) GROUP BY jmx.ksh) b on a.ksh=b.ksh"
+        # self.cursor.execute(sql)
+        # row.append(self.cursor.fetchone()[0])
+        # row.append(row[3] / num)
+        # self.set_list_precision(row)
+        # df2.loc[len(df2)] = row
+        #
+        # row = ['种群和群落，生态系统(必做)', '6', '6.00']
+        # num = 6.00
+        # row.append(means[5])
+        # sql = r"select stddev_samp(a.score) from (SELECT sum(amx.kgval) score from " \
+        #       r"GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj on amx.ksh=kscj.ksh where" \
+        #       r" amx.idx in (6) and  amx.kmh=005 GROUP BY amx.ksh) a"
+        # self.cursor.execute(sql)
+        # row.append(self.cursor.fetchone()[0])
+        # row.append(row[3] / num)
+        # self.set_list_precision(row)
+        # df2.loc[len(df2)] = row
+        #
+        # row = ['微生物的利用(选做1)', '37', '15.00']
+        # num = 15.00
+        # row.append(means[10])
+        # sql = r"select stddev_samp(a.score) from (SELECT sum(amx.kgval) score from " \
+        #       r"GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj on amx.ksh=kscj.ksh where" \
+        #       r" amx.idx in (37) and amx.kmh=005 GROUP BY amx.ksh) a"
+        # self.cursor.execute(sql)
+        # row.append(self.cursor.fetchone()[0])
+        # row.append(row[3] / num)
+        # self.set_list_precision(row)
+        # df2.loc[len(df2)] = row
+        #
+        # row = ['基因工程(选做2)', '38', '15.00']
+        # num = 15.00
+        # row.append(means[11])
+        # sql = r"select stddev_samp(a.score) from (SELECT sum(amx.kgval) score from " \
+        #       r"GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj on amx.ksh=kscj.ksh where" \
+        #       r" amx.idx in (38) and amx.kmh=005 GROUP BY amx.ksh) a"
+        # self.cursor.execute(sql)
+        # row.append(self.cursor.fetchone()[0])
+        # row.append(row[3] / num)
+        # self.set_list_precision(row)
+        # df2.loc[len(df2)] = row
+        #
+        # df2.to_excel(writer, sheet_name='知识板块', index=None)
+        #
+        # df2.save()
+
+    def reliability(self):
+
+        idxs = [1,2,3,4,5,6]
+        tzhs = [29,30,31,32,37,38]
+
+        vars_xt = []
+
+        sql = r"select stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
+              r"jmx right join (select kscj.ksh from " \
+              r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh " \
+              r"where kscj.zh!=0) b on jmx.ksh=b.ksh " \
+              r"where jmx.kmh = 005 and jmx.tzh=3 and jmx.zf!=0"
+        self.cursor.execute(sql)
+        st = self.cursor.fetchone()[0] ** 2
+
+        for idx in idxs:
+            sql = r"SELECT stddev_samp(kgval) FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=amx.ksh where  amx.kmh = 005 and idx = " + str(idx)
+            self.cursor.execute(sql)
+            vars_xt.append(self.cursor.fetchone()[0] ** 2)
+
+        for tzh in tzhs:
+            sql = r"select stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh=005 and jmx.tzh=" + str(tzh)
+            self.cursor.execute(sql)
+            vars_xt.append(self.cursor.fetchone()[0] ** 2)
+
+        vars_xt = np.array(vars_xt)
+
+        result = (12/11) * ( (st-np.sum(vars_xt)) / st)
+
+        print(result)
 
 
 
