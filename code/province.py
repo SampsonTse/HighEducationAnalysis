@@ -41,6 +41,11 @@ class pro_report:
         del self.ls
 
     def test(self):
+        # self.zz.JGFX_PRO_TABLE()
+        # self.wl.JGFX_PRO_TABLE()
+        # self.ls.JGFX_PRO_TABLE()
+        # self.hx.JGFX_PRO_TABLE()
+        # self.sw.JGFX_PRO_TABLE()
         self.lksx.DTFX_PROVINCE()
         self.wksx.DTFX_PROVINCE()
 

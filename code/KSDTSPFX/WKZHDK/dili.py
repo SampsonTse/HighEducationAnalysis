@@ -2204,4 +2204,370 @@ class DTFX:
         df.to_excel(writer,sheet_name="各县区分组分布",index=None)
         writer.save()
 
+    # 市级报告 结构分析
+    def JGFX_PRO_TABLE(self):
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + "全省"
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + "全省" + "考生答题分析结构分析(地理).xlsx")
+
+        df1 = pd.read_excel(path + "\\" + "考生单题分析(地理).xlsx", sheet_name=0)
+
+
+        txts = df1['题号'].tolist()
+        mean_province = df1['平均分'].tolist()
+
+        df2 = pd.DataFrame(columns=['题型', '题号', '分值', '平均分', '标准差', '难度'])
+
+        row = ["单选题(必做)", "1-11", "44.00"]
+        num = 44.00
+        avg_c = 0
+        avg_p = 0
+        for i in range(11):
+            avg_p = avg_p + mean_province[i]
+        row.append(avg_c)
+        sql = r"select stddev_samp(a.score) from (SELECT sum(amx.kgval) score from " \
+              r"GKEVA2020.T_GKPJ2020_TKSKGDAMX amx right join GKEVA2020.kscj kscj on amx.ksh=kscj.ksh where" \
+              r" amx.idx in (1,2,3,4,5,6,7,8,9,10,11) and  amx.kmh=006 GROUP BY amx.ksh) a"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+
+        row = ["必考题(必做)", "36", "22.00"]
+        num = 22.00
+        row.append(mean_province[11])
+        sql = r"select stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh=006 and jmx.tzh=36 "
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["必考题(必做)", "37", "24.00"]
+        num = 24.00
+        row.append(mean_province[12])
+        sql = sql = r"select stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh=006 and jmx.tzh=37 "
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["选做题(选做1)", "43", "10.00"]
+        num = 10.00
+        row.append(mean_province[13])
+        sql = r"select stddev_samp(xtval) from GKEVA2020.T_GKPJ2020_TSJBNKSXT where kmh=006 and xth=43 "
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["选做题(选做2)", "44", "10.00"]
+        num = 10.00
+        row.append(mean_province[14])
+        sql = r"select stddev_samp(xtval) from GKEVA2020.T_GKPJ2020_TSJBNKSXT where kmh=006 and xth=44 "
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        df2.to_excel(writer, sheet_name="地市各题型得分情况(地理)", index=None)
+
+        df2 = pd.DataFrame(columns=['知识板块内容',  '题号', '分值', '平均分', '标准差', '难度'])
+
+        row = ["水循环的过程和主要环节", "7", "4.00"]
+        num = 4.00
+        row.append(mean_province[6])
+        sql = r"SELECT stddev_samp(kgval) FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+              r"right join gkeva2020.kscj kscj on kscj.ksh=amx.ksh where " \
+              r"amx.kmh = 006 and idx = 7"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["水循环的地理意义", "8", "4.00"]
+        num = 4.00
+        row.append(mean_province[7])
+        sql = r"SELECT stddev_samp(kgval) FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+              r"right join gkeva2020.kscj kscj on kscj.ksh=amx.ksh where " \
+              r" amx.kmh = 006 and idx = 8"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+
+        row = ["地理环境和低于分异规律", "9", "4.00"]
+        num = 4.00
+        row.append(mean_province[8])
+        sql = r"SELECT stddev_samp(kgval) FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+              r"right join gkeva2020.kscj kscj on kscj.ksh=amx.ksh where " \
+              r"amx.kmh = 006 and idx = 9"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["全球气候变化对人类活动的影响", "10、11", "8.00"]
+        num = 8.00
+        row.append(mean_province[9]+mean_province[10])
+        sql = r"SELECT stddev_samp(kgval) FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+              r"right join gkeva2020.kscj kscj on kscj.ksh=amx.ksh where " \
+              r" amx.kmh = 006 and idx in (10,11)"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["全球气压带、风带的分布、移动规律及其对气候的影响", "36(1)", "8.00"]
+        num = 8.00
+
+        sql = r"select avg(xtval) from GKEVA2020.T_GKPJ2020_TSJBNKSXT where kmh=006 and xth=361 "
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+
+        sql = r"select stddev_samp(xtval) from GKEVA2020.T_GKPJ2020_TSJBNKSXT where kmh=006 and xth=361"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["地表形态变化的内、外力因素", "37", "24.00"]
+        num = 24.00
+        row.append(mean_province[12])
+        sql = sql = r"select stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh=006 and jmx.tzh=37 "
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["农业生产活动对地理环境的影响", "1、2", "8.00"]
+        num = 8.00
+        row.append(mean_province[0]+mean_province[1])
+        sql = r"SELECT stddev_samp(kgval) FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+              r"right join gkeva2020.kscj kscj on kscj.ksh=amx.ksh where " \
+              r"  amx.kmh = 006 and idx in (1,2)"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["城市的空间结构及其形成原因", "4、5、6", "12.00"]
+        num = 12.00
+        row.append(mean_province[3]+mean_province[4]+mean_province[5])
+        sql = r"SELECT stddev_samp(kgval) FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+              r"right join gkeva2020.kscj kscj on kscj.ksh=amx.ksh where " \
+              r" amx.kmh = 006 and idx in (4,5,6)"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["农业地域类型的特点及其形成条件", "36(2)", "8.00"]
+        num = 8.00
+
+        sql = r"select avg(xtval) from GKEVA2020.T_GKPJ2020_TSJBNKSXT where kmh=006 and xth=362 "
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+
+        sql = r"select stddev_samp(xtval) from GKEVA2020.T_GKPJ2020_TSJBNKSXT where kmh=006 and xth=362 "
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["地理环境对人类生产和生活方式的影响", "3", "4.00"]
+        num = 4.00
+        row.append(mean_province[2])
+        sql = r"SELECT stddev_samp(kgval) FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+              r"right join gkeva2020.kscj kscj on kscj.ksh=amx.ksh where " \
+              r"  amx.kmh = 006 and idx=3"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["不同区域自然环境、人类活动的差异", "36(3)", "6.00"]
+        num = 6.00
+
+        sql = r"select avg(xtval) from GKEVA2020.T_GKPJ2020_TSJBNKSXT where kmh=006 and xth=363 "
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+
+        sql = r"select stddev_samp(xtval) from GKEVA2020.T_GKPJ2020_TSJBNKSXT where kmh=006 and xth=363 "
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["非物质文化遗产的旅游价值", "43", "10.00"]
+        num = 10.00
+        row.append(mean_province[13])
+        sql = r"select stddev_samp(xtval) from GKEVA2020.T_GKPJ2020_TSJBNKSXT where kmh=006 and xth=43"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["生态环境问题与生态环境保护", "44", "10.00"]
+        num = 10.00
+        row.append(mean_province[14])
+        sql = r"select stddev_samp(xtval) from GKEVA2020.T_GKPJ2020_TSJBNKSXT where kmh=006 and xth=44 "
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+
+        df2.to_excel(writer, sheet_name="地市考生各知识板块得分情况(地理)", index=None)
+
+        df2 = pd.DataFrame(data=None, columns=['考核能力', '题号', '分值', '平均分', '标准差', '难度'])
+
+        row = ["获取和解读信息；调动和运用知识", "1、2、4、5、9", "20.00"]
+        num = 20.00
+        row.append(mean_province[0] + mean_province[1] + mean_province[3] + mean_province[4] + mean_province[8])
+        sql = r"SELECT stddev_samp(kgval) FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+              r"right join gkeva2020.kscj kscj on kscj.ksh=amx.ksh where " \
+              r"amx.kmh = 006 and idx in (1,2,4,5,9)"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["获取和解读信息；调动和运用知识；描述和阐释事物", "3、6、7、8、10、11", "24.00"]
+        num = 22.00
+        row.append(mean_province[2] + mean_province[5] + mean_province[6] + mean_province[7] + mean_province[9] + mean_province[10])
+        sql = r"SELECT stddev_samp(kgval) FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+              r"right join gkeva2020.kscj kscj on kscj.ksh=amx.ksh where " \
+              r" amx.kmh = 006 and idx in (3,6,7,8,10,11)"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["获取和解读信息；调动和运用知识；描述和阐释事物；论证和探讨问题(必做)", "36", "22.00"]
+        num = 22.00
+        row.append(mean_province[11])
+        sql = r"select stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh=006 and jmx.tzh=36 "
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["获取和解读信息；调动和运用知识；描述和阐释事物；论证和探讨问题(必做)", "37", "24.00"]
+        num = 24.00
+        row.append(mean_province[12])
+        sql = sql = r"select stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh=006 and jmx.tzh=37 "
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["获取和解读信息；调动和运用知识；描述和阐释事物(选做1)", "43", "10.00"]
+        num = 10.00
+        row.append(mean_province[13])
+        sql = r"select stddev_samp(xtval) from GKEVA2020.T_GKPJ2020_TSJBNKSXT where kmh=006 and xth=43 "
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        row = ["获取和解读信息；调动和运用知识；描述和阐释事物；论证和探讨问题(选做2)", "44", "10.00"]
+        num = 10.00
+        row.append(mean_province[14])
+        sql = r"select stddev_samp(xtval) from GKEVA2020.T_GKPJ2020_TSJBNKSXT where kmh=006 and xth=44"
+        self.cursor.execute(sql)
+        row.append(self.cursor.fetchone()[0])
+        row.append(row[3] / num)
+        self.set_list_precision(row)
+        df2.loc[len(df2)] = row
+
+        df2.to_excel(writer, sheet_name="地市考生个考核能力得分情况(地理)", index=None)
+
+        writer.save()
+
+    def MF_LF_CITY_TABLE_4344(self,dsh):
+        sql = "select mc from c_ds where DS_H = " + dsh
+        self.cursor.execute(sql)
+        ds_mc = self.cursor.fetchone()[0]
+
+        pwd = os.getcwd()
+        father_path = os.path.abspath(os.path.dirname(pwd) + os.path.sep + ".")
+        path = father_path + r"\考生答题分析"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = path + "\\" + ds_mc
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        writer = pd.ExcelWriter(path + '\\' + ds_mc + "考生答题分析单题分析零分率满分率(地理).xlsx")
+        df = pd.read_excel(path + '\\' + ds_mc + "考生答题分析单题分析零分率满分率(地理).xlsx",sheet_name=0)
+
+        rows = []
+
+        dths2 = [43, 44]
+        txt = dths2
+
+        sql = r"select count(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx right join (select kscj.ksh from " \
+              r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh where kscj.zh!=0 and jbxx.ds_h=" + dsh + r") b on j" \
+              r"mx.ksh=b.ksh where jmx.kmh = 006 and jmx.tzh=3 and jmx.zf!=0"
+        self.cursor.execute(sql)
+        total = self.cursor.fetchone()[0]
+
+        for dth in dths2:
+            num = 10
+            sql = r"SELECT count(case when sxt.xtval=0 then 1 else null end) num2," \
+                  r"count(case when sxt.xtval="+str(num)+r" then 1 else null end) num3 FROM " \
+                  r"GKEVA2020.T_GKPJ2020_TSJBNKSXT sxt  right join gkeva2020.kscj kscj" \
+                  r" on kscj.ksh=sxt.ksh where kscj.zh!=0 and sxt.ksh like '"+dsh+r"%' and sxt.kmh = 006 and sxt.xth="+str(dth)
+
+            self.cursor.execute(sql)
+            row = list(self.cursor.fetchone())
+            row.insert(1, row[0] / total)
+            row.append(row[2] / total)
+            self.set_list_precision(row)
+            rows.append(row)
+
+        for i in range(len(rows)):
+            rows[i].insert(0,txt[i])
+            df.loc[len(df)] = rows[i]
+
+        df.to_excel(writer, sheet_name="各市单题零分率满分率(地理)", index=None)
+        writer.save()
+
 

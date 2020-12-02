@@ -2453,3 +2453,36 @@ class DTFX:
         writer.save()
 
 
+    def reliability(self):
+
+        idxs =  list(range(14, 22))
+        tzhs = [22,23,24,25,33,34]
+
+        vars_xt = []
+
+        sql = r"select stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX " \
+              r"jmx right join (select kscj.ksh from " \
+              r"GKEVA2020.kscj kscj left join GKEVA2020.jbxx jbxx on jbxx.ksh=kscj.ksh " \
+              r"where kscj.zh!=0) b on jmx.ksh=b.ksh " \
+              r"where jmx.kmh = 005 and jmx.tzh=9 and jmx.zf!=0"
+        self.cursor.execute(sql)
+        st = self.cursor.fetchone()[0] ** 2
+
+        for idx in idxs:
+            sql = r"SELECT stddev_samp(kgval) FROM GKEVA2020.T_GKPJ2020_TKSKGDAMX amx " \
+                  r"right join gkeva2020.kscj kscj on kscj.ksh=amx.ksh where  amx.kmh = 005 and idx = " + str(idx)
+            self.cursor.execute(sql)
+            vars_xt.append(self.cursor.fetchone()[0] ** 2)
+
+        for tzh in tzhs:
+            sql = r"select stddev_samp(jmx.zf) from TYMHPT.T_GKPJ2020_TKSTZCJMX jmx where jmx.kmh=005 and jmx.tzh=" + str(tzh)
+            self.cursor.execute(sql)
+            vars_xt.append(self.cursor.fetchone()[0] ** 2)
+
+        vars_xt = np.array(vars_xt)
+
+        result = (14/13) * ( (st-np.sum(vars_xt)) / st)
+
+        print(result)
+
+

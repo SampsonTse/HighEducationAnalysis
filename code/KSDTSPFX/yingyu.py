@@ -1445,7 +1445,6 @@ class DTFX:
             row.append(dfl_l) #低分组
 
             self.set_list_precision(row)
-            
             df.loc[len(df)] = row
 
         for zgth in zgths:

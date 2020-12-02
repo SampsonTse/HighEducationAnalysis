@@ -2950,4 +2950,36 @@ class DTFX:
         writer.save()
 
 
+    def reliability(self):
+        sql = r"select stddev_samp(A.YW)  mean from kscj  A right join JBXX   B on A.KSH = B.KSH where a.yw!=0"
+        self.cursor.execute(sql)
+        st = self.cursor.fetchone()[0] ** 2
 
+        vars_xt = []
+
+        idxs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+        xths = [6, 8, 9, 15, 16, 20, 21, 22]
+
+        for idx in idxs:
+            sql = "select stddev_samp(kgval),stddev_samp(kgval) from T_GKPJ2020_TKSKGDAMX a right join jbxx b " \
+                  "on a.ksh = b.ksh where a.idx=" + str(idx) + " and kmh=001"
+            self.cursor.execute(sql)
+            vars_xt.append(self.cursor.fetchone()[0] ** 2)
+        for xth in xths:
+            sql = "select stddev_samp(b.sum),stddev_samp(b.sum) from " \
+                  "(select sum(a.xtval) as sum,a.dth,a.ksh from T_GKPJ2020_TSJBNKSXT a " \
+                  "left join jbxx on jbxx.ksh=a.ksh where a.kmh = 001 and a.dth = " + str(xth) + " GROUP BY a.ksh,a.dth) b"
+            self.cursor.execute(sql)
+            vars_xt.append(self.cursor.fetchone()[0] ** 2)
+
+
+        sql = "select stddev_samp(xtval),STDDEV_SAMP(xtval) from T_GKPJ2020_TSJBNKSXT sxt " \
+              "right join kscj on sxt.ksh = kscj.ksh where kmh = 001 and (dth=13 or dth=23)"
+        self.cursor.execute(sql)
+        vars_xt.append(self.cursor.fetchone()[0] ** 2)
+
+        vars_xt = np.array(vars_xt)
+
+        result = (22 / 21) * ((st - np.sum(vars_xt)) / st)
+
+        print(result)

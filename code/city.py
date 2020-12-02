@@ -41,9 +41,13 @@ class city_report:
         del self.zz
         del self.ls
 
+    def test(self):
+        self.yy.DTFX_CITY_TABLE(self.dsh)
+
     def test2(self):
-        self.sw.JGFX_PRO_TABLE()
-        # self.sw.reliability()
+        # self.ls.JGFX_CITY_TABLE(self.dsh)
+        self.lksx.DTFX_CITY_IMG(self.dsh)
+        self.wksx.DTFX_CITY_IMG(self.dsh)
 
 class city_report_appendix:
     def __init__(self, dsh):
